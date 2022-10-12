@@ -17,5 +17,7 @@ Dependencies:
 Build:
 =============
 ThirdParty:
-Direct build 'conan create . -s build_type=Debug'
-All build 'conan install .' or 'conan install . --build missing'
+
+Direct build: 'conan create . -s build_type=Debug'
+
+All build: 'conan install .' or 'conan install . --build missing'
