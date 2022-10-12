@@ -721,7 +721,6 @@ auto rf::RenderCore::CreateTexture(
 }
 
 void rf::RenderCore::SetTextureData(rf::TextureId texture, void* data, uint32 dataSize, uint32 offset /*= 0*/) {
-	const uint32 threadIndex = 0;
 	rf::CommandBuffer& rcb = m_TransferCommandBuffer;
 
 	VkBuffer tmpBuffer = vk::CreateBuffer(m_APIData.m_VkDevice, VkDeviceSize(dataSize), VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_SHARING_MODE_EXCLUSIVE);
@@ -1866,7 +1865,14 @@ void rf::RenderCore::ReleaseCommandBuffers(rf::FrameData& frameData) {
 rf::api::RenderCore::RenderCore() 
 	: m_VkInstance(VK_NULL_HANDLE)
 	, m_VkPhysicalDevice(VK_NULL_HANDLE)
-	, m_VkDevice(VK_NULL_HANDLE) {
+	, m_VkDevice(VK_NULL_HANDLE) 
+	, m_GraphicsQueue(VK_NULL_HANDLE)
+	, m_PresentQueue(VK_NULL_HANDLE)
+	, m_TransferQueue(VK_NULL_HANDLE)
+	, m_GraphicsFamilyIndex(0)
+	, m_PresentFamilyIndex(0)
+	, m_TransferFamilyIndex(0)
+{
 }
 
 rf::api::RenderCore::~RenderCore() {
