@@ -13,6 +13,7 @@ Dependencies:
 =============
 - [Vulkan SDK](https://vulkan.lunarg.com)
 - [Conan](https://conan.io)
+- [Python](https://www.python.org)
 
 Build:
 =============
