@@ -2,12 +2,17 @@
 
 Modules:
 =============
-- [DvarvenCore](https://github.com/Caostick/DwarvenFramework/DwarvenCore)
+- [DvarvenCore](https://github.com/Caostick/DwarvenFramework/tree/main/DwarvenCore)
 
-- [DwarfResources](https://github.com/Caostick/DwarvenFramework/DwarfResources)
-- [DwarfWindow](https://github.com/Caostick/DwarvenFramework/DwarfWindow)
-- [DwarfRenderer](https://github.com/Caostick/DwarvenFramework/DwarfRenderer)
-- [DwarfInput](https://github.com/Caostick/DwarvenFramework/DwarfInput)
+- [DwarfResources](https://github.com/Caostick/DwarvenFramework/tree/main/DwarfResources)
+- [DwarfWindow](https://github.com/Caostick/DwarvenFramework/tree/main/DwarfWindow)
+- [DwarfRenderer](https://github.com/Caostick/DwarvenFramework/tree/main/DwarfRenderer)
+- [DwarfInput](https://github.com/Caostick/DwarvenFramework/tree/main/DwarfInput)
+
+Dependencies:
+=============
+- [Vulkan SDK](https://vulkan.lunarg.com)
+- [Conan](https://conan.io)
 
 Build:
 =============
