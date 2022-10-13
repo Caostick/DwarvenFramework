@@ -154,124 +154,124 @@ bool rf::ParamSet::Update(uint32 frameIndex) {
 	return true;
 }
 
-void rf::ParamSet::SetFloat(uint32 constOffset, float value) {
+void rf::ParamSet::SetFloatByOffset(uint32 constOffset, float value) {
 	float* ptr = reinterpret_cast<float*>(m_ConstantBuffer->m_Data + constOffset);
 	*ptr = value;
 }
 
-bool rf::ParamSet::SetFloat(const df::StringView& name, float value) {
+bool rf::ParamSet::SetFloatByName(const df::StringView& name, float value) {
 	for (auto& c : m_Definition.GetFloatConstants()) {
 		if (c.m_Name == name) {
-			SetFloat(c.m_Offset, value);
+			SetFloatByOffset(c.m_Offset, value);
 			return true;
 		}
 	}
 	return false;
 }
 
-auto rf::ParamSet::GetFloat(uint32 constOffset) const -> float {
+auto rf::ParamSet::GetFloatByOffset(uint32 constOffset) const -> float {
 	const float* ptr = reinterpret_cast<float*>(m_ConstantBuffer->m_Data + constOffset);
 	return *ptr;
 }
 
-auto rf::ParamSet::GetFloat(const df::StringView& name) const -> float {
+auto rf::ParamSet::GetFloatByName(const df::StringView& name) const -> float {
 	for (auto& c : m_Definition.GetFloatConstants()) {
 		if (c.m_Name == name) {
-			return GetFloat(c.m_Offset);
+			return GetFloatByOffset(c.m_Offset);
 		}
 	}
 
 	return 0.0f;
 }
 
-void rf::ParamSet::SetVec2(uint32 constOffset, const Vec2& value) {
+void rf::ParamSet::SetVec2ByOffset(uint32 constOffset, const Vec2& value) {
 	Vec2* ptr = reinterpret_cast<Vec2*>(m_ConstantBuffer->m_Data + constOffset);
 	*ptr = value;
 }
 
-bool rf::ParamSet::SetVec2(const df::StringView& name, const Vec2& value) {
+bool rf::ParamSet::SetVec2ByName(const df::StringView& name, const Vec2& value) {
 	for (auto& c : m_Definition.GetVec2Constants()) {
 		if (c.m_Name == name) {
-			SetVec2(c.m_Offset, value);
+			SetVec2ByOffset(c.m_Offset, value);
 			return true;
 		}
 	}
 	return false;
 }
 
-auto rf::ParamSet::GetVec2(uint32 constOffset) const -> const Vec2& {
+auto rf::ParamSet::GetVec2ByOffset(uint32 constOffset) const -> const Vec2& {
 	const Vec2* ptr = reinterpret_cast<Vec2*>(m_ConstantBuffer->m_Data + constOffset);
 	return *ptr;
 }
 
-auto rf::ParamSet::GetVec2(const df::StringView& name) const -> Vec2 {
+auto rf::ParamSet::GetVec2ByName(const df::StringView& name) const -> Vec2 {
 	for (auto& c : m_Definition.GetVec2Constants()) {
 		if (c.m_Name == name) {
-			return GetVec2(c.m_Offset);
+			return GetVec2ByOffset(c.m_Offset);
 		}
 	}
 	return Vec2();
 }
 
-void rf::ParamSet::SetVec3(uint32 constOffset, const Vec3& value) {
+void rf::ParamSet::SetVec3ByOffset(uint32 constOffset, const Vec3& value) {
 	Vec3* ptr = reinterpret_cast<Vec3*>(m_ConstantBuffer->m_Data + constOffset);
 	*ptr = value;
 }
 
-bool rf::ParamSet::SetVec3(const df::StringView& name, const Vec3& value) {
+bool rf::ParamSet::SetVec3ByName(const df::StringView& name, const Vec3& value) {
 	for (auto& c : m_Definition.GetVec3Constants()) {
 		if (c.m_Name == name) {
-			SetVec3(c.m_Offset, value);
+			SetVec3ByOffset(c.m_Offset, value);
 			return true;
 		}
 	}
 	return false;
 }
 
-auto rf::ParamSet::GetVec3(uint32 constOffset) const -> const Vec3& {
+auto rf::ParamSet::GetVec3ByOffset(uint32 constOffset) const -> const Vec3& {
 	const Vec3* ptr = reinterpret_cast<Vec3*>(m_ConstantBuffer->m_Data + constOffset);
 	return *ptr;
 }
 
-auto rf::ParamSet::GetVec3(const df::StringView& name) const -> Vec3 {
+auto rf::ParamSet::GetVec3ByName(const df::StringView& name) const -> Vec3 {
 	for (auto& c : m_Definition.GetVec3Constants()) {
 		if (c.m_Name == name) {
-			return GetVec3(c.m_Offset);
+			return GetVec3ByOffset(c.m_Offset);
 		}
 	}
 	return Vec3();
 }
 
-void rf::ParamSet::SetVec4(uint32 constOffset, const Vec4& value) {
+void rf::ParamSet::SetVec4ByOffset(uint32 constOffset, const Vec4& value) {
 	Vec4* ptr = reinterpret_cast<Vec4*>(m_ConstantBuffer->m_Data + constOffset);
 	*ptr = value;
 }
 
-bool rf::ParamSet::SetVec4(const df::StringView& name, const Vec4& value) {
+bool rf::ParamSet::SetVec4ByName(const df::StringView& name, const Vec4& value) {
 	for (auto& c : m_Definition.GetVec4Constants()) {
 		if (c.m_Name == name) {
-			SetVec4(c.m_Offset, value);
+			SetVec4ByOffset(c.m_Offset, value);
 			return true;
 		}
 	}
 	return false;
 }
 
-auto rf::ParamSet::GetVec4(uint32 constOffset) const -> const Vec4& {
+auto rf::ParamSet::GetVec4ByOffset(uint32 constOffset) const -> const Vec4& {
 	const Vec4* ptr = reinterpret_cast<Vec4*>(m_ConstantBuffer->m_Data + constOffset);
 	return *ptr;
 }
 
-auto rf::ParamSet::GetVec4(const df::StringView& name) const -> Vec4 {
+auto rf::ParamSet::GetVec4ByName(const df::StringView& name) const -> Vec4 {
 	for (auto& c : m_Definition.GetVec4Constants()) {
 		if (c.m_Name == name) {
-			return GetVec4(c.m_Offset);
+			return GetVec4ByOffset(c.m_Offset);
 		}
 	}
 	return Vec4();
 }
 
-void rf::ParamSet::SetMat3(uint32 constOffset, const Mat3& value) {
+void rf::ParamSet::SetMat3ByOffset(uint32 constOffset, const Mat3& value) {
 	Vec4* ptr = reinterpret_cast<Vec4*>(m_ConstantBuffer->m_Data + constOffset);
 
 	ptr[0].X = value.M[0];
@@ -285,17 +285,17 @@ void rf::ParamSet::SetMat3(uint32 constOffset, const Mat3& value) {
 	ptr[2].Z = value.M[8];
 }
 
-bool rf::ParamSet::SetMat3(const df::StringView& name, const Mat3& value) {
+bool rf::ParamSet::SetMat3ByName(const df::StringView& name, const Mat3& value) {
 	for (auto& c : m_Definition.GetMat3Constants()) {
 		if (c.m_Name == name) {
-			SetMat3(c.m_Offset, value);
+			SetMat3ByOffset(c.m_Offset, value);
 			return true;
 		}
 	}
 	return false;
 }
 
-auto rf::ParamSet::GetMat3(uint32 constOffset) const->Mat3 {
+auto rf::ParamSet::GetMat3ByOffset(uint32 constOffset) const->Mat3 {
 	const Vec4* ptr = reinterpret_cast<Vec4*>(m_ConstantBuffer->m_Data + constOffset);
 
 	Mat3 result;
@@ -312,45 +312,45 @@ auto rf::ParamSet::GetMat3(uint32 constOffset) const->Mat3 {
 	return result;
 }
 
-auto rf::ParamSet::GetMat3(const df::StringView& name) const -> Mat3 {
+auto rf::ParamSet::GetMat3ByName(const df::StringView& name) const -> Mat3 {
 	for (auto& c : m_Definition.GetMat3Constants()) {
 		if (c.m_Name == name) {
-			return GetMat3(c.m_Offset);
+			return GetMat3ByOffset(c.m_Offset);
 		}
 	}
 	return Mat3();
 }
 
-void rf::ParamSet::SetMat4(uint32 constOffset, const Mat4& value) {
+void rf::ParamSet::SetMat4ByOffset(uint32 constOffset, const Mat4& value) {
 	Mat4* ptr = reinterpret_cast<Mat4*>(m_ConstantBuffer->m_Data + constOffset);
 	*ptr = value;
 }
 
-bool rf::ParamSet::SetMat4(const df::StringView& name, const Mat4& value) {
+bool rf::ParamSet::SetMat4ByName(const df::StringView& name, const Mat4& value) {
 	for (auto& c : m_Definition.GetMat4Constants()) {
 		if (c.m_Name == name) {
-			SetMat4(c.m_Offset, value);
+			SetMat4ByOffset(c.m_Offset, value);
 			return true;
 		}
 	}
 	return false;
 }
 
-auto rf::ParamSet::GetMat4(uint32 constOffset) const -> const Mat4& {
+auto rf::ParamSet::GetMat4ByOffset(uint32 constOffset) const -> const Mat4& {
 	const Mat4* ptr = reinterpret_cast<Mat4*>(m_ConstantBuffer->m_Data + constOffset);
 	return *ptr;
 }
 
-auto rf::ParamSet::GetMat4(const df::StringView& name) const -> Mat4 {
+auto rf::ParamSet::GetMat4ByName(const df::StringView& name) const -> Mat4 {
 	for (auto& c : m_Definition.GetMat4Constants()) {
 		if (c.m_Name == name) {
-			return GetMat4(c.m_Offset);
+			return GetMat4ByOffset(c.m_Offset);
 		}
 	}
 	return Mat4();
 }
 
-void rf::ParamSet::SetBuffer(uint32 index, rf::BufferId buffer, bool isHistory /*= false*/) {
+void rf::ParamSet::SetBufferByIndex(uint32 index, rf::BufferId buffer, bool isHistory /*= false*/) {
 	if (!isHistory) {
 		m_Buffers[index] = buffer;
 	} else {
@@ -358,12 +358,12 @@ void rf::ParamSet::SetBuffer(uint32 index, rf::BufferId buffer, bool isHistory /
 	}
 }
 
-bool rf::ParamSet::SetBuffer(const df::StringView& name, rf::BufferId buffer, bool isHistory /*= false*/) {
+bool rf::ParamSet::SetBufferByName(const df::StringView& name, rf::BufferId buffer, bool isHistory /*= false*/) {
 	auto buffers = m_Definition.GetBuffers();
 
 	for (size_t i = 0; i < buffers.size(); ++i) {
 		if (buffers[i].m_Name == name) {
-			SetBuffer(uint32(i), buffer, isHistory);
+			SetBufferByIndex(uint32(i), buffer, isHistory);
 			return true;
 		}
 	}
@@ -371,7 +371,7 @@ bool rf::ParamSet::SetBuffer(const df::StringView& name, rf::BufferId buffer, bo
 	return false;
 }
 
-auto rf::ParamSet::GetBuffer(uint32 index, bool isHistory /*= false*/) const->rf::BufferId {
+auto rf::ParamSet::GetBufferByIndex(uint32 index, bool isHistory /*= false*/) const->rf::BufferId {
 	if (!isHistory) {
 		return m_Buffers[index];
 	} else {
@@ -379,28 +379,28 @@ auto rf::ParamSet::GetBuffer(uint32 index, bool isHistory /*= false*/) const->rf
 	}
 }
 
-auto rf::ParamSet::GetBuffer(const df::StringView& name, bool isHistory /*= false*/) const->rf::BufferId {
+auto rf::ParamSet::GetBufferByName(const df::StringView& name, bool isHistory /*= false*/) const->rf::BufferId {
 	auto buffers = m_Definition.GetBuffers();
 
 	for (size_t i = 0; i < buffers.size(); ++i) {
 		if (buffers[i].m_Name == name) {
-			return GetBuffer(uint32(i), isHistory);
+			return GetBufferByIndex(uint32(i), isHistory);
 		}
 	}
 
 	return nullptr;
 }
 
-void rf::ParamSet::SetTexture(uint32 index, rf::TextureId texture) {
+void rf::ParamSet::SetTextureByIndex(uint32 index, rf::TextureId texture) {
 	m_Textures[index] = texture;
 }
 
-bool rf::ParamSet::SetTexture(const df::StringView& name, rf::TextureId texture) {
+bool rf::ParamSet::SetTextureByName(const df::StringView& name, rf::TextureId texture) {
 	auto textures = m_Definition.GetTextures();
 
 	for (size_t i = 0; i < textures.size(); ++i) {
 		if (textures[i].m_Name == name) {
-			SetTexture(uint32(i), texture);
+			SetTextureByIndex(uint32(i), texture);
 			return true;
 		}
 	}
@@ -408,32 +408,32 @@ bool rf::ParamSet::SetTexture(const df::StringView& name, rf::TextureId texture)
 	return false;
 }
 
-auto rf::ParamSet::GetTexture(uint32 index) const->rf::TextureId {
+auto rf::ParamSet::GetTextureByIndex(uint32 index) const->rf::TextureId {
 	return m_Textures[index];
 }
 
-auto rf::ParamSet::GetTexture(const df::StringView& name) const->rf::TextureId {
+auto rf::ParamSet::GetTextureByName(const df::StringView& name) const->rf::TextureId {
 	auto textures = m_Definition.GetTextures();
 
 	for (size_t i = 0; i < textures.size(); ++i) {
 		if (textures[i].m_Name == name) {
-			return GetTexture(uint32(i));
+			return GetTextureByIndex(uint32(i));
 		}
 	}
 
 	return nullptr;
 }
 
-void rf::ParamSet::SetSampler(uint32 index, rf::SamplerId sampler) {
+void rf::ParamSet::SetSamplerByIndex(uint32 index, rf::SamplerId sampler) {
 	m_Samplers[index] = sampler;
 }
 
-bool rf::ParamSet::SetSampler(const df::StringView& name, rf::SamplerId sampler) {
+bool rf::ParamSet::SetSamplerByName(const df::StringView& name, rf::SamplerId sampler) {
 	auto textures = m_Definition.GetTextures();
 
 	for (size_t i = 0; i < textures.size(); ++i) {
 		if (textures[i].m_Name == name) {
-			SetSampler(uint32(i), sampler);
+			SetSamplerByIndex(uint32(i), sampler);
 			return true;
 		}
 	}
@@ -441,16 +441,16 @@ bool rf::ParamSet::SetSampler(const df::StringView& name, rf::SamplerId sampler)
 	return false;
 }
 
-auto rf::ParamSet::GetSampler(uint32 index) const->rf::SamplerId {
+auto rf::ParamSet::GetSamplerByIndex(uint32 index) const->rf::SamplerId {
 	return m_Samplers[index];
 }
 
-auto rf::ParamSet::GetSampler(const df::StringView& name) const->rf::SamplerId {
+auto rf::ParamSet::GetSamplerByName(const df::StringView& name) const->rf::SamplerId {
 	auto textures = m_Definition.GetTextures();
 
 	for (size_t i = 0; i < textures.size(); ++i) {
 		if (textures[i].m_Name == name) {
-			return GetSampler(uint32(i));
+			return GetSamplerByIndex(uint32(i));
 		}
 	}
 

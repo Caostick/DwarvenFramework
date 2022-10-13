@@ -23,50 +23,50 @@ namespace rf {
 
 		bool Update(uint32 frameIndex);
 
-		void SetFloat(uint32 constOffset, float value);
-		bool SetFloat(const df::StringView& name, float value);
-		auto GetFloat(uint32 constOffset) const -> float;
-		auto GetFloat(const df::StringView& name) const -> float;
+		void SetFloatByOffset(uint32 constOffset, float value);
+		bool SetFloatByName(const df::StringView& name, float value);
+		auto GetFloatByOffset(uint32 constOffset) const -> float;
+		auto GetFloatByName(const df::StringView& name) const -> float;
 
-		void SetVec2(uint32 constOffset, const Vec2& value);
-		bool SetVec2(const df::StringView& name, const Vec2& value);
-		auto GetVec2(uint32 constOffset) const -> const Vec2&;
-		auto GetVec2(const df::StringView& name) const -> Vec2;
+		void SetVec2ByOffset(uint32 constOffset, const Vec2& value);
+		bool SetVec2ByName(const df::StringView& name, const Vec2& value);
+		auto GetVec2ByOffset(uint32 constOffset) const -> const Vec2&;
+		auto GetVec2ByName(const df::StringView& name) const -> Vec2;
 
-		void SetVec3(uint32 constOffset, const Vec3& value);
-		bool SetVec3(const df::StringView& name, const Vec3& value);
-		auto GetVec3(uint32 constOffset) const -> const Vec3&;
-		auto GetVec3(const df::StringView& name) const -> Vec3;
+		void SetVec3ByOffset(uint32 constOffset, const Vec3& value);
+		bool SetVec3ByName(const df::StringView& name, const Vec3& value);
+		auto GetVec3ByOffset(uint32 constOffset) const -> const Vec3&;
+		auto GetVec3ByName(const df::StringView& name) const -> Vec3;
 
-		void SetVec4(uint32 constOffset, const Vec4& value);
-		bool SetVec4(const df::StringView& name, const Vec4& value);
-		auto GetVec4(uint32 constOffset) const -> const Vec4&;
-		auto GetVec4(const df::StringView& name) const -> Vec4;
+		void SetVec4ByOffset(uint32 constOffset, const Vec4& value);
+		bool SetVec4ByName(const df::StringView& name, const Vec4& value);
+		auto GetVec4ByOffset(uint32 constOffset) const -> const Vec4&;
+		auto GetVec4ByName(const df::StringView& name) const -> Vec4;
 
-		void SetMat3(uint32 constOffset, const Mat3& value);
-		bool SetMat3(const df::StringView& name, const Mat3& value);
-		auto GetMat3(uint32 constOffset) const -> Mat3;
-		auto GetMat3(const df::StringView& name) const->Mat3;
+		void SetMat3ByOffset(uint32 constOffset, const Mat3& value);
+		bool SetMat3ByName(const df::StringView& name, const Mat3& value);
+		auto GetMat3ByOffset(uint32 constOffset) const -> Mat3;
+		auto GetMat3ByName(const df::StringView& name) const->Mat3;
 
-		void SetMat4(uint32 constOffset, const Mat4& value);
-		bool SetMat4(const df::StringView& name, const Mat4& value);
-		auto GetMat4(uint32 constOffset) const -> const Mat4&;
-		auto GetMat4(const df::StringView& name) const -> Mat4;
+		void SetMat4ByOffset(uint32 constOffset, const Mat4& value);
+		bool SetMat4ByName(const df::StringView& name, const Mat4& value);
+		auto GetMat4ByOffset(uint32 constOffset) const -> const Mat4&;
+		auto GetMat4ByName(const df::StringView& name) const -> Mat4;
 
-		void SetBuffer(uint32 index, rf::BufferId buffer, bool isHistory = false);
-		bool SetBuffer(const df::StringView& name, rf::BufferId buffer, bool isHistory = false);
-		auto GetBuffer(uint32 index, bool isHistory = false) const->rf::BufferId;
-		auto GetBuffer(const df::StringView& name, bool isHistory = false) const->rf::BufferId;
+		void SetBufferByIndex(uint32 index, rf::BufferId buffer, bool isHistory = false);
+		bool SetBufferByName(const df::StringView& name, rf::BufferId buffer, bool isHistory = false);
+		auto GetBufferByIndex(uint32 index, bool isHistory = false) const->rf::BufferId;
+		auto GetBufferByName(const df::StringView& name, bool isHistory = false) const->rf::BufferId;
 
-		void SetTexture(uint32 index, rf::TextureId texture);
-		bool SetTexture(const df::StringView& name, rf::TextureId texture);
-		auto GetTexture(uint32 index) const->rf::TextureId;
-		auto GetTexture(const df::StringView& name) const->rf::TextureId;
+		void SetTextureByIndex(uint32 index, rf::TextureId texture);
+		bool SetTextureByName(const df::StringView& name, rf::TextureId texture);
+		auto GetTextureByIndex(uint32 index) const->rf::TextureId;
+		auto GetTextureByName(const df::StringView& name) const->rf::TextureId;
 
-		void SetSampler(uint32 index, rf::SamplerId sampler);
-		bool SetSampler(const df::StringView& name, rf::SamplerId sampler);
-		auto GetSampler(uint32 index) const->rf::SamplerId;
-		auto GetSampler(const df::StringView& name) const->rf::SamplerId;
+		void SetSamplerByIndex(uint32 index, rf::SamplerId sampler);
+		bool SetSamplerByName(const df::StringView& name, rf::SamplerId sampler);
+		auto GetSamplerByIndex(uint32 index) const->rf::SamplerId;
+		auto GetSamplerByName(const df::StringView& name) const->rf::SamplerId;
 
 	private:
 		void InitDefaultValues();

@@ -12,27 +12,27 @@ void rf::TParamSet<ParamList>::SetConstant(const DataType& value) {
 	static_assert(df::Contains<ParamType, ParamList>::value, "Parameter is not declared in parameter set definition!");
 
 	if constexpr (std::is_base_of<rf::FloatParameter, ParamType>::value) {
-		SetFloat(ParamType::Name, value);
+		SetFloatByName(ParamType::Name, value);
 	}
 
 	if constexpr (std::is_base_of<rf::Vec2Parameter, ParamType>::value) {
-		SetVec2(ParamType::Name, value);
+		SetVec2ByName(ParamType::Name, value);
 	}
 
 	if constexpr (std::is_base_of<rf::Vec3Parameter, ParamType>::value) {
-		SetVec3(ParamType::Name, value);
+		SetVec3ByName(ParamType::Name, value);
 	}
 
 	if constexpr (std::is_base_of<rf::Vec4Parameter, ParamType>::value) {
-		SetVec4(ParamType::Name, value);
+		SetVec4ByName(ParamType::Name, value);
 	}
 
 	if constexpr (std::is_base_of<rf::Mat3Parameter, ParamType>::value) {
-		SetMat3(ParamType::Name, value);
+		SetMat3ByName(ParamType::Name, value);
 	}
 
 	if constexpr (std::is_base_of<rf::Mat4Parameter, ParamType>::value) {
-		SetMat4(ParamType::Name, value);
+		SetMat4ByName(ParamType::Name, value);
 	}
 }
 
@@ -43,27 +43,27 @@ auto rf::TParamSet<ParamList>::GetConstant() const->DataType {
 	static_assert(df::Contains<ParamType, ParamList>::value, "Parameter is not declared in parameter set definition!");
 
 	if constexpr (std::is_base_of<rf::FloatParameter, ParamType>::value) {
-		return GetFloat(ParamType::Name);
+		return GetFloatByName(ParamType::Name);
 	}
 
 	if constexpr (std::is_base_of<rf::Vec2Parameter, ParamType>::value) {
-		return GetVec2(ParamType::Name);
+		return GetVec2ByName(ParamType::Name);
 	}
 
 	if constexpr (std::is_base_of<rf::Vec3Parameter, ParamType>::value) {
-		return GetVec3(ParamType::Name);
+		return GetVec3ByName(ParamType::Name);
 	}
 
 	if constexpr (std::is_base_of<rf::Vec4Parameter, ParamType>::value) {
-		return GetVec4(ParamType::Name);
+		return GetVec4ByName(ParamType::Name);
 	}
 
 	if constexpr (std::is_base_of<rf::Mat3Parameter, ParamType>::value) {
-		return GetMat3(ParamType::Name);
+		return GetMat3ByName(ParamType::Name);
 	}
 
 	if constexpr (std::is_base_of<rf::Mat4Parameter, ParamType>::value) {
-		return GetMat4(ParamType::Name);
+		return GetMat4ByName(ParamType::Name);
 	}
 }
 
@@ -73,7 +73,7 @@ void rf::TParamSet<ParamList>::SetBuffer(rf::BufferId buffer, bool isHistory /*=
 	static_assert(std::is_base_of<rf::BufferParameter, ParamType>::value, "Type should be a child of BufferParameter!");
 	static_assert(df::Contains<ParamType, ParamList>::value, "Parameter is not declared in parameter set definition!");
 
-	SetBuffer(ParamType::Name, buffer, isHistory);
+	SetBufferByName(ParamType::Name, buffer, isHistory);
 }
 
 template<typename ParamList>
@@ -82,7 +82,7 @@ auto rf::TParamSet<ParamList>::GetBuffer(bool isHistory /*= false*/) const->rf::
 	static_assert(std::is_base_of<rf::BufferParameter, ParamType>::value, "Type should be a child of BufferParameter!");
 	static_assert(df::Contains<ParamType, ParamList>::value, "Parameter is not declared in parameter set definition!");
 
-	return GetBuffer(ParamType::Name, isHistory);
+	return GetBufferByName(ParamType::Name, isHistory);
 }
 
 template<typename ParamList>

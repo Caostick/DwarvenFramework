@@ -258,19 +258,19 @@ bool rf::CommandLine_ParamSet::Execute() {
 		}
 
 		if (compCount == 1) {
-			if (!m_ParamSet.SetFloat(m_Left.Name, float(values[0]))) {
+			if (!m_ParamSet.SetFloatByName(m_Left.Name, float(values[0]))) {
 				return Error("Float property doesn't exist");
 			}
 		} else if (compCount == 2) {
-			if (!m_ParamSet.SetVec2(m_Left.Name, Vec2(values[0], values[1]))) {
+			if (!m_ParamSet.SetVec2ByName(m_Left.Name, Vec2(values[0], values[1]))) {
 				return Error("Vec2 property doesn't exist");
 			}
 		} else if (compCount == 3) {
-			if (!m_ParamSet.SetVec3(m_Left.Name, Vec3(values[0], values[1], values[2]))) {
+			if (!m_ParamSet.SetVec3ByName(m_Left.Name, Vec3(values[0], values[1], values[2]))) {
 				return Error("Vec3 property doesn't exist");
 			}
 		} else if (compCount == 4) {
-			if (!m_ParamSet.SetVec4(m_Left.Name, Vec4(values[0], values[1], values[2], values[3]))) {
+			if (!m_ParamSet.SetVec4ByName(m_Left.Name, Vec4(values[0], values[1], values[2], values[3]))) {
 				return Error("Vec4 property doesn't exist");
 			}
 		}
