@@ -88,7 +88,7 @@ void rf::VertexShaderCodeLoader::UnloadResource(df::IResource* resource) const {
 }
 
 auto rf::VertexShaderCodeLoader::GetResourceExtension() const->df::String {
-	return "vsh";
+	return "vert";
 }
 
 auto rf::VertexShaderCodeLoader::GetShaderType() const -> rf::EShaderType {
@@ -119,7 +119,7 @@ void rf::FragmentShaderCodeLoader::UnloadResource(df::IResource* resource) const
 }
 
 auto rf::FragmentShaderCodeLoader::GetResourceExtension() const->df::String {
-	return "fsh";
+	return "frag";
 }
 
 auto rf::FragmentShaderCodeLoader::GetShaderType() const -> rf::EShaderType {
@@ -148,7 +148,7 @@ void rf::ComputeShaderCodeLoader::UnloadResource(df::IResource* resource) const 
 }
 
 auto rf::ComputeShaderCodeLoader::GetResourceExtension() const->df::String {
-	return "csh";
+	return "comp";
 }
 
 auto rf::ComputeShaderCodeLoader::GetShaderType() const -> rf::EShaderType {

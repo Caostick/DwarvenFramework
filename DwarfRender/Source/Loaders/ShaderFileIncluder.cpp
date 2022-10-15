@@ -26,6 +26,7 @@ namespace {
 	using CullModeResult = df::ResultNoError<rf::ECullMode>;
 	using BlendOpResult = df::ResultNoError<rf::EBlendOp>;
 	using BlendFactorResult = df::ResultNoError<rf::EBlendFactor>;
+	using BlendStateResult = df::ResultNoError<rf::EBlendState>;
 	
 	auto GetTrueFalse(const df::StringView& valueString)->SimpleResult {
 		if (valueString == "1"
@@ -163,6 +164,17 @@ namespace {
 		return BlendFactorResult();
 	}
 
+	auto GetBlendState(const df::StringView& valueString)->BlendStateResult {
+		if (valueString == "None") {
+			return BlendStateResult(rf::EBlendState::None);
+		}
+		else if (valueString == "Alpha") {
+			return BlendStateResult(rf::EBlendState::Alpha);
+		}
+
+		return BlendStateResult();
+	}
+
 	auto FetchDepthTest(const df::StringView& include) -> SimpleResult {
 		constexpr df::StringView token = "DepthTest:";
 		if (!df::EqualPart(include, token)) {
@@ -257,6 +269,14 @@ namespace {
 			return BlendFactorResult();
 		}
 		return GetBlendFactor(df::DropLeft(include, token.length()));
+	}
+
+	auto FetchBlendState(const df::StringView& include) -> BlendStateResult {
+		constexpr df::StringView token = "BlendState:";
+		if (!df::EqualPart(include, token)) {
+			return BlendStateResult();
+		}
+		return GetBlendState(df::DropLeft(include, token.length()));
 	}
 
 	auto FetchDstColorBlendFactor(const df::StringView& include) -> BlendFactorResult {
@@ -414,6 +434,9 @@ glslang::TShader::Includer::IncludeResult* rf::ShaderFileIncluder::includeLocal(
 
 	} else if (const auto dstAlphaBlendFactor = FetchDstAlphaBlendFactor(includeName)) {
 		m_ShaderCompileInfo.m_BlendState.m_DstAlphaBlendFactor = dstAlphaBlendFactor.Get();
+
+	} else if (const auto blendState = FetchBlendState(includeName)) {
+		m_ShaderCompileInfo.m_BlendState = blendState.Get();
 
 	} else {
 		auto resource = m_ResourceManager.GetResource<rf::ShaderIncludeResource>(headerName);

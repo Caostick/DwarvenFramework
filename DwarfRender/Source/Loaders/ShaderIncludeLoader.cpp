@@ -23,5 +23,5 @@ auto rf::ShaderIncludeLoader::SaveResource(const df::IResource* /*resource*/) co
 }
 
 auto rf::ShaderIncludeLoader::GetResourceExtension() const->df::String {
-	return "shi";
+	return "glsl";
 }

@@ -15,8 +15,6 @@ namespace rf {
 	class RenderCore;
 	class RenderPass;
 	class ParamSet;
-	class FramedDataBuffer;
-	class ParamSetUpdater;
 	class ParamSetDefinition;
 	class RenderPassInstance;
 	class ModelStream;
