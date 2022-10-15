@@ -113,7 +113,8 @@ namespace rf {
 		auto CreateMaterial(rf::MaterialRuleId materialRule)->rf::MaterialId;
 		void DestroyMaterial(rf::MaterialId material);
 
-		void InitPipeline(rf::GraphicsPipelineId pipeline, rf::PassId renderPass);
+		auto RequestPipelineInstance(rf::GraphicsPipelineId pipeline, rf::PassId renderPass) -> uint32;
+		auto InitPipelineInstance(rf::GraphicsPipelineId pipeline, rf::PassId renderPass) -> uint32;
 
 	private:
 		bool InitInstance();

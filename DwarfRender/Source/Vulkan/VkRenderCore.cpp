@@ -1244,7 +1244,9 @@ auto rf::RenderCore::CreateGraphicsPipeline()->rf::GraphicsPipelineId {
 }
 
 void rf::RenderCore::DestroyGraphicsPipeline(rf::GraphicsPipelineId pipeline) {
-	m_APIData.m_VulkanObjectManager.RemovePipeline(m_APIData.m_VkDevice, pipeline->m_APIData.m_Pipeline);
+	for (auto&& instance : pipeline->m_APIData.m_Instances) {
+		m_APIData.m_VulkanObjectManager.RemovePipeline(m_APIData.m_VkDevice, instance.m_Pipeline);
+	}
 	m_APIData.m_VulkanObjectManager.RemovePipelineLayout(m_APIData.m_VkDevice, pipeline->m_APIData.m_Layout);
 	m_APIData.m_VulkanObjectManager.RemoveShaderModule(m_APIData.m_VkDevice, pipeline->m_APIData.m_VSModule);
 	m_APIData.m_VulkanObjectManager.RemoveShaderModule(m_APIData.m_VkDevice, pipeline->m_APIData.m_FSModule);
@@ -1285,7 +1287,17 @@ void rf::RenderCore::DestroyMaterial(rf::MaterialId material) {
 	m_Materials.Destroy(material);
 }
 
-void rf::RenderCore::InitPipeline(rf::GraphicsPipelineId pipeline, rf::PassId renderPass) {
+auto rf::RenderCore::RequestPipelineInstance(rf::GraphicsPipelineId pipeline, rf::PassId renderPass)->uint32 {
+	for (uint32 i = 0; i < pipeline->m_APIData.m_Instances.size(); ++i) {
+		const auto& instance = pipeline->m_APIData.m_Instances[i];
+		if (instance.m_RenderPass == renderPass->m_APIData.m_RenderPass) {
+			return i;
+		}
+	}
+	return InitPipelineInstance(pipeline, renderPass);
+}
+
+auto rf::RenderCore::InitPipelineInstance(rf::GraphicsPipelineId pipeline, rf::PassId renderPass) -> uint32 {
 	// Create shader modules
 	{
 		// VS
@@ -1469,13 +1481,20 @@ void rf::RenderCore::InitPipeline(rf::GraphicsPipelineId pipeline, rf::PassId re
 		graphicsPipelineCreateInfo.subpass = 0;
 		graphicsPipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
 
-		auto& handle = pipeline->m_APIData.m_Pipeline;
+		rf::api::GraphicsPipeline::PipelineInstance instance = {};
+		instance.m_RenderPass = renderPass->m_APIData.m_RenderPass;
+
+		auto& handle = instance.m_Pipeline;
 		if (vk::API::CreateGraphicsPipelines(m_APIData.m_VkDevice, VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, vk::Allocator(), &handle) != VK_SUCCESS) {
 			DFAssert(false, "Can't create GraphicsPipeline!");
 		}
 
 		DFVkDebugName(m_APIData.m_VkDevice, handle, pipeline->m_Name);
+
+		pipeline->m_APIData.m_Instances.emplace_back(instance);
 	}
+
+	return static_cast<uint32>(pipeline->m_APIData.m_Instances.size() - 1);
 }
 
 
