@@ -58,6 +58,7 @@ namespace rf {
 
 		auto CreateMesh(uint32 vertexCount, uint32 indexCount)->MeshId;
 		void SetMeshAttributeBuffer(MeshId mesh, uint32 attributeId, const void* data);
+		void SetMeshIndexBuffer(MeshId mesh, const uint32* data);
 		void DestroyMesh(MeshId mesh);
 
 		auto CreateVertexShaderModule(const df::StringView& name, const df::Vector<uint32>& code)->rf::VertexShaderModuleId;
@@ -72,7 +73,7 @@ namespace rf {
 		auto CreateComputeShaderModule(const df::StringView& name, const uint32* codeData, uint32 codeLength)->rf::ComputeShaderModuleId;
 		void DestroyComputeShaderModule(rf::ComputeShaderModuleId shaderModule);
 
-		auto CreateGraphicsPipeline()->rf::GraphicsPipelineId;
+		auto CreateGraphicsPipeline(const df::StringView& name, rf::VertexShaderModuleId vertexShader, rf::FragmentShaderModuleId fragmentShader)->rf::GraphicsPipelineId;
 		void DestroyGraphicsPipeline(rf::GraphicsPipelineId pipeline);
 
 		auto CreateMaterialRule(const df::StringView& name)->rf::MaterialRuleId;

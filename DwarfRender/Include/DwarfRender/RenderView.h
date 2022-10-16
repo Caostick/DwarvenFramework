@@ -6,6 +6,7 @@
 
 #include <DwarvenCore/Types.h>
 #include <DwarvenCore/Vector.h>
+#include <DwarvenCore/HashMap.h>
 #include <DwarvenCore/String.h>
 #include <DwarvenCore/StringView.h>
 #include <DwarvenCore/Math/Math.h>
@@ -17,7 +18,7 @@ namespace rf {
 	class ParamSet;
 	class ParamSetDefinition;
 	class RenderPassInstance;
-	class ModelStream;
+	class RenderObjectStream;
 	class ParamSetDefinitionManager;
 
 	struct RenderContext;
@@ -42,12 +43,11 @@ namespace rf {
 		template<typename DataBufferType>
 		auto GetDataBuffer()->rf::BufferId;
 
-		auto CreateModelStream()->rf::ModelStream*;
-		void DestroyModelStream(rf::ModelStream* modelStream);
-
-		bool RenderFrame(const rf::RenderContext& renderContext);
+		bool RenderFrame(rf::RenderCore& renderCore, const rf::RenderContext& renderContext);
 
 		auto GetOutput() const->rf::TextureId;
+
+		auto CreateObjectStream()->rf::RenderObjectStream*;
 
 	protected:
 		virtual void UpdateParams(uint32 frameIdx) = 0;
@@ -63,7 +63,7 @@ namespace rf {
 
 	private:
 		df::Vector<RenderPassInstance*> m_RenderPasses;
-		df::Vector<rf::ModelStream*> m_ModelStreams;
+		df::Vector<rf::RenderObjectStream*> m_RenderObjectStreams;
 		df::Vector<rf::BufferId> m_DataBuffers;
 		df::Vector<rf::TextureId> m_RenderTargets;
 

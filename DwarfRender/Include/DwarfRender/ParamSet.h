@@ -83,6 +83,8 @@ namespace rf {
 		df::Vector<BufferId> m_SecondaryBuffers;
 
 		BufferId m_ConstantBuffer;
+		uint8* m_ConstandBufferData;
+		uint8* m_ConstandBufferDataPtr;
 	};
 
 	template<typename ParamList>

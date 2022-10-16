@@ -227,6 +227,10 @@ void rf::CommandBuffer::BindPipeline(rf::PipelineId pipeline) {
 	vk::API::CmdBindPipeline(m_APIData.m_VkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->m_Handle);
 }
 
+void rf::CommandBuffer::BindPipeline(rf::GraphicsPipelineId pipeline, uint32 instanceIdx) {
+	vk::API::CmdBindPipeline(m_APIData.m_VkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->m_APIData.m_Instances[instanceIdx].m_Pipeline);
+}
+
 void rf::CommandBuffer::BindDescriptorSet(rf::PipelineLayoutId pipelineLayout, rf::DescriptorSetId descriptorSet) {
 	vk::API::CmdBindDescriptorSets(m_APIData.m_VkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout->m_Handle, descriptorSet->m_Id, 1, &descriptorSet->m_APIData.m_Handle, 0, nullptr);
 }

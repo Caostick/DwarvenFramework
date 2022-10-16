@@ -25,6 +25,7 @@ namespace rf {
 		void EndRenderPass();
 		void SetLineWidth(float width);
 		void BindPipeline(rf::PipelineId pipeline);
+		void BindPipeline(rf::GraphicsPipelineId pipeline, uint32 instanceIdx);
 		void BindDescriptorSet(rf::PipelineLayoutId pipelineLayout, rf::DescriptorSetId descriptorSet);
 		void BindVertexBuffer(rf::BufferId buffer, uint32 binding, uint32 offset = 0);
 		void BindIndexBuffer(rf::BufferId buffer);

@@ -2,7 +2,7 @@
 #include <DwarfRender/GlobalObjects.h>
 #include <DwarfRender/RenderPass.h>
 #include <DwarfRender/ParamSet.h>
-#include <DwarfRender/ModelStream.h>
+#include <DwarfRender/RenderObjectStream.h>
 
 #include "RenderPassInstance.h"
 #include "RenderCore.h"
@@ -40,11 +40,17 @@ void rf::RenderView::Init(rf::RenderCore& renderCore) {
 }
 
 void rf::RenderView::Release(rf::RenderCore& renderCore) {
+	for (auto objectStream : m_RenderObjectStreams) {
+		DFDelete objectStream;
+	}
+	m_RenderObjectStreams.clear();
+
 	for (auto renderPass : m_RenderPasses) {
 		renderCore.DestroyFramebuffer(renderPass->m_Framebuffer);
 		renderPass->Release(renderCore);
 		DFDelete renderPass;
 	}
+	m_RenderPasses.clear();
 
 	for (auto tex : m_RenderTargets) {
 		if (tex) {
@@ -56,21 +62,7 @@ void rf::RenderView::Release(rf::RenderCore& renderCore) {
 	ReleaseParams(renderCore);
 }
 
-auto rf::RenderView::CreateModelStream()->rf::ModelStream* {
-	rf::ModelStream* modelStream = DFNew rf::ModelStream;
-	m_ModelStreams.push_back(modelStream);
-
-	return modelStream;
-}
-
-void rf::RenderView::DestroyModelStream(rf::ModelStream* modelStream) {
-	// @TODO: remove references from RenderPasses
-
-	df::RemoveOrdered(m_ModelStreams, modelStream);
-	DFDelete modelStream;
-}
-
-bool rf::RenderView::RenderFrame(const rf::RenderContext& renderContext) {
+bool rf::RenderView::RenderFrame(rf::RenderCore& /*renderCore*/, const rf::RenderContext& renderContext) {
 	for (rf::TextureId texture : m_RenderTargetsToInit) {
 		const bool isDepth = (texture->m_Format == rf::ETextureFormat::D32_Float || texture->m_Format == rf::ETextureFormat::D24_Float_S8_UInt);
 		if (isDepth) {
@@ -93,12 +85,27 @@ bool rf::RenderView::RenderFrame(const rf::RenderContext& renderContext) {
 		DFScopedRenderEvent((*renderContext.m_CommandBuffer), entry.m_Name);
 
 		renderContext.m_CommandBuffer->BeginRenderPass(entry.m_RenderPass, renderPass->m_Framebuffer);
+
+		/*for (const auto& renderObjectStream : m_RenderObjectStreams) {
+			for (const auto& renderBatch : renderObjectStream->GetStates()) {
+				if (renderBatch.m_Count == 0) {
+					continue;
+				}
+
+				const auto idx = renderCore.RequestPipelineInstance(renderBatch.m_Pipeline, entry.m_RenderPass);
+
+				renderContext.m_CommandBuffer->BindPipeline(renderBatch.m_Pipeline, idx);
+				renderContext.m_CommandBuffer->BindDescriptorSet(renderBatch.m_Pipeline->m_APIData.m_Layout, )
+
+			}
+		}*/
+
 		renderContext.m_CommandBuffer->EndRenderPass();
 	}
 
 	// After rendering
-	for (auto modelStream : m_ModelStreams) {
-		modelStream->Reset();
+	for (auto renderObjectStream : m_RenderObjectStreams) {
+		renderObjectStream->Reset();
 	}
 
 	return true;
@@ -106,6 +113,12 @@ bool rf::RenderView::RenderFrame(const rf::RenderContext& renderContext) {
 
 auto rf::RenderView::GetOutput() const->rf::TextureId {
 	return rf::GlobalObjects::Get(ETexture::Null);
+}
+
+auto rf::RenderView::CreateObjectStream()->rf::RenderObjectStream* {
+	rf::RenderObjectStream* objectStream = DFNew rf::RenderObjectStream;
+	m_RenderObjectStreams.push_back(objectStream);
+	return objectStream;
 }
 
 auto rf::RenderView::RequestRenderTarget(rf::RenderCore& renderCore, uint32 renderTargetId)->rf::TextureId {

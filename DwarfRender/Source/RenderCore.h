@@ -103,7 +103,7 @@ namespace rf {
 		auto CreatePipelineStateObject(const df::StringView& name, const rf::PipelineDescriptor& pipelineDescriptor)->rf::PipelineId;
 		void DestroyPipelineStateObject(rf::PipelineId pipeline);
 
-		auto CreateGraphicsPipeline()->rf::GraphicsPipelineId;
+		auto CreateGraphicsPipeline(const df::StringView& name, rf::VertexShaderModuleId vertexShader, rf::FragmentShaderModuleId fragmentShader)->rf::GraphicsPipelineId;
 		void DestroyGraphicsPipeline(rf::GraphicsPipelineId pipeline);
 
 		auto CreateMaterialRule(const df::StringView& name)->rf::MaterialRuleId;

@@ -11,7 +11,9 @@ rf::ParamSet::ParamSet(const ParamSetDefinition& definition)
 	: m_Definition(definition) 
 	, m_PrevFrameIndex(-1) 
 	, m_IsStatic(true)
-	, m_ConstantBuffer(nullptr) {
+	, m_ConstantBuffer(nullptr) 
+	, m_ConstandBufferData(nullptr)
+	, m_ConstandBufferDataPtr(nullptr) {
 }
 
 void rf::ParamSet::Init(rf::RenderCore& renderCore, bool isStatic) {
@@ -25,6 +27,13 @@ void rf::ParamSet::Init(rf::RenderCore& renderCore, bool isStatic) {
 			rf::EBufferUsageFlag::Uniform, EBufferAccessType::Transfer, 
 			m_IsStatic
 		);
+
+		if (m_IsStatic) {
+			m_ConstandBufferData = DFNew uint8[constantBufferSize];
+			m_ConstandBufferDataPtr = m_ConstandBufferData;
+		} else {
+			m_ConstandBufferDataPtr = m_ConstantBuffer->m_Data;
+		}
 	}
 
 	m_Buffers.resize(m_Definition.GetBuffers().size());
@@ -38,6 +47,9 @@ void rf::ParamSet::Init(rf::RenderCore& renderCore, bool isStatic) {
 	}
 
 	InitDefaultValues();
+	if (m_IsStatic) {
+		renderCore.SetBufferData(m_ConstantBuffer, m_ConstandBufferDataPtr, constantBufferSize);
+	}
 }
 
 void rf::ParamSet::Release(rf::RenderCore& renderCore) {
@@ -55,6 +67,10 @@ void rf::ParamSet::Release(rf::RenderCore& renderCore) {
 		renderCore.DestroyBuffer(m_ConstantBuffer);
 		m_ConstantBuffer = nullptr;
 	}
+
+	DFDelete[] m_ConstandBufferData;
+	m_ConstandBufferData = nullptr;
+	m_ConstandBufferDataPtr = nullptr;
 }
 
 bool rf::ParamSet::Update(uint32 frameIndex) {
@@ -155,7 +171,7 @@ bool rf::ParamSet::Update(uint32 frameIndex) {
 }
 
 void rf::ParamSet::SetFloatByOffset(uint32 constOffset, float value) {
-	float* ptr = reinterpret_cast<float*>(m_ConstantBuffer->m_Data + constOffset);
+	float* ptr = reinterpret_cast<float*>(m_ConstandBufferDataPtr + constOffset);
 	*ptr = value;
 }
 
@@ -170,7 +186,7 @@ bool rf::ParamSet::SetFloatByName(const df::StringView& name, float value) {
 }
 
 auto rf::ParamSet::GetFloatByOffset(uint32 constOffset) const -> float {
-	const float* ptr = reinterpret_cast<float*>(m_ConstantBuffer->m_Data + constOffset);
+	const float* ptr = reinterpret_cast<float*>(m_ConstandBufferDataPtr + constOffset);
 	return *ptr;
 }
 
@@ -185,7 +201,7 @@ auto rf::ParamSet::GetFloatByName(const df::StringView& name) const -> float {
 }
 
 void rf::ParamSet::SetVec2ByOffset(uint32 constOffset, const Vec2& value) {
-	Vec2* ptr = reinterpret_cast<Vec2*>(m_ConstantBuffer->m_Data + constOffset);
+	Vec2* ptr = reinterpret_cast<Vec2*>(m_ConstandBufferDataPtr + constOffset);
 	*ptr = value;
 }
 
@@ -200,7 +216,7 @@ bool rf::ParamSet::SetVec2ByName(const df::StringView& name, const Vec2& value) 
 }
 
 auto rf::ParamSet::GetVec2ByOffset(uint32 constOffset) const -> const Vec2& {
-	const Vec2* ptr = reinterpret_cast<Vec2*>(m_ConstantBuffer->m_Data + constOffset);
+	const Vec2* ptr = reinterpret_cast<Vec2*>(m_ConstandBufferDataPtr + constOffset);
 	return *ptr;
 }
 
@@ -214,7 +230,7 @@ auto rf::ParamSet::GetVec2ByName(const df::StringView& name) const -> Vec2 {
 }
 
 void rf::ParamSet::SetVec3ByOffset(uint32 constOffset, const Vec3& value) {
-	Vec3* ptr = reinterpret_cast<Vec3*>(m_ConstantBuffer->m_Data + constOffset);
+	Vec3* ptr = reinterpret_cast<Vec3*>(m_ConstandBufferDataPtr + constOffset);
 	*ptr = value;
 }
 
@@ -229,7 +245,7 @@ bool rf::ParamSet::SetVec3ByName(const df::StringView& name, const Vec3& value) 
 }
 
 auto rf::ParamSet::GetVec3ByOffset(uint32 constOffset) const -> const Vec3& {
-	const Vec3* ptr = reinterpret_cast<Vec3*>(m_ConstantBuffer->m_Data + constOffset);
+	const Vec3* ptr = reinterpret_cast<Vec3*>(m_ConstandBufferDataPtr + constOffset);
 	return *ptr;
 }
 
@@ -243,7 +259,7 @@ auto rf::ParamSet::GetVec3ByName(const df::StringView& name) const -> Vec3 {
 }
 
 void rf::ParamSet::SetVec4ByOffset(uint32 constOffset, const Vec4& value) {
-	Vec4* ptr = reinterpret_cast<Vec4*>(m_ConstantBuffer->m_Data + constOffset);
+	Vec4* ptr = reinterpret_cast<Vec4*>(m_ConstandBufferDataPtr + constOffset);
 	*ptr = value;
 }
 
@@ -258,7 +274,7 @@ bool rf::ParamSet::SetVec4ByName(const df::StringView& name, const Vec4& value) 
 }
 
 auto rf::ParamSet::GetVec4ByOffset(uint32 constOffset) const -> const Vec4& {
-	const Vec4* ptr = reinterpret_cast<Vec4*>(m_ConstantBuffer->m_Data + constOffset);
+	const Vec4* ptr = reinterpret_cast<Vec4*>(m_ConstandBufferDataPtr + constOffset);
 	return *ptr;
 }
 
@@ -272,7 +288,7 @@ auto rf::ParamSet::GetVec4ByName(const df::StringView& name) const -> Vec4 {
 }
 
 void rf::ParamSet::SetMat3ByOffset(uint32 constOffset, const Mat3& value) {
-	Vec4* ptr = reinterpret_cast<Vec4*>(m_ConstantBuffer->m_Data + constOffset);
+	Vec4* ptr = reinterpret_cast<Vec4*>(m_ConstandBufferDataPtr + constOffset);
 
 	ptr[0].X = value.M[0];
 	ptr[0].Y = value.M[1];
@@ -296,7 +312,7 @@ bool rf::ParamSet::SetMat3ByName(const df::StringView& name, const Mat3& value) 
 }
 
 auto rf::ParamSet::GetMat3ByOffset(uint32 constOffset) const->Mat3 {
-	const Vec4* ptr = reinterpret_cast<Vec4*>(m_ConstantBuffer->m_Data + constOffset);
+	const Vec4* ptr = reinterpret_cast<Vec4*>(m_ConstandBufferDataPtr + constOffset);
 
 	Mat3 result;
 	result.M[0] = ptr[0].X;
@@ -322,7 +338,7 @@ auto rf::ParamSet::GetMat3ByName(const df::StringView& name) const -> Mat3 {
 }
 
 void rf::ParamSet::SetMat4ByOffset(uint32 constOffset, const Mat4& value) {
-	Mat4* ptr = reinterpret_cast<Mat4*>(m_ConstantBuffer->m_Data + constOffset);
+	Mat4* ptr = reinterpret_cast<Mat4*>(m_ConstandBufferDataPtr + constOffset);
 	*ptr = value;
 }
 
@@ -337,7 +353,7 @@ bool rf::ParamSet::SetMat4ByName(const df::StringView& name, const Mat4& value) 
 }
 
 auto rf::ParamSet::GetMat4ByOffset(uint32 constOffset) const -> const Mat4& {
-	const Mat4* ptr = reinterpret_cast<Mat4*>(m_ConstantBuffer->m_Data + constOffset);
+	const Mat4* ptr = reinterpret_cast<Mat4*>(m_ConstandBufferDataPtr + constOffset);
 	return *ptr;
 }
 
@@ -459,32 +475,32 @@ auto rf::ParamSet::GetSamplerByName(const df::StringView& name) const->rf::Sampl
 
 void rf::ParamSet::InitDefaultValues() {
 	for (auto c : m_Definition.GetFloatConstants()) {
-		auto data = reinterpret_cast<float*>(m_ConstantBuffer->m_Data + c.m_Offset);
+		auto data = reinterpret_cast<float*>(m_ConstandBufferDataPtr + c.m_Offset);
 		*data = c.m_DefaultValue;
 	}
 
 	for (auto c : m_Definition.GetVec2Constants()) {
-		auto data = reinterpret_cast<Vec2*>(m_ConstantBuffer->m_Data + c.m_Offset);
+		auto data = reinterpret_cast<Vec2*>(m_ConstandBufferDataPtr + c.m_Offset);
 		*data = c.m_DefaultValue;
 	}
 
 	for (auto c : m_Definition.GetVec3Constants()) {
-		auto data = reinterpret_cast<Vec3*>(m_ConstantBuffer->m_Data + c.m_Offset);
+		auto data = reinterpret_cast<Vec3*>(m_ConstandBufferDataPtr + c.m_Offset);
 		*data = c.m_DefaultValue;
 	}
 
 	for (auto c : m_Definition.GetVec4Constants()) {
-		auto data = reinterpret_cast<Vec4*>(m_ConstantBuffer->m_Data + c.m_Offset);
+		auto data = reinterpret_cast<Vec4*>(m_ConstandBufferDataPtr + c.m_Offset);
 		*data = c.m_DefaultValue;
 	}
 
 	for (auto c : m_Definition.GetMat3Constants()) {
-		auto data = reinterpret_cast<Mat3*>(m_ConstantBuffer->m_Data + c.m_Offset);
+		auto data = reinterpret_cast<Mat3*>(m_ConstandBufferDataPtr + c.m_Offset);
 		*data = c.m_DefaultValue;
 	}
 
 	for (auto c : m_Definition.GetMat4Constants()) {
-		auto data = reinterpret_cast<Mat4*>(m_ConstantBuffer->m_Data + c.m_Offset);
+		auto data = reinterpret_cast<Mat4*>(m_ConstandBufferDataPtr + c.m_Offset);
 		*data = c.m_DefaultValue;
 	}
 }

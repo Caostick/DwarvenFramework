@@ -18,6 +18,7 @@
 
 #include <DwarvenCore/Assert.h>
 #include <DwarvenCore/Memory.h>
+#include <DwarvenCore/Math/Math.h>
 #include <DwarvenCore/New.h>
 
 namespace {
@@ -591,7 +592,9 @@ auto rf::RenderCore::CreateBuffer(
 	buffer->m_UpdateSize = size;
 	buffer->m_UsageFlags = usageFlags;
 	buffer->m_IsStatic = isStatic;
-	buffer->m_Data = DFNew uint8[size];
+	buffer->m_Data = isStatic 
+		? (nullptr)
+		: (DFNew uint8[size]);
 
 	buffer->m_APIData.m_BufferSize = dataStride * (isStatic ? 1 : m_NumFramesInFlight);
 	buffer->m_APIData.m_BufferUsageFlags = bufferUsageFlags;
@@ -755,17 +758,32 @@ auto rf::RenderCore::CreateMesh(uint32 vertexCount, uint32 indexCount)->MeshId {
 	return mesh;
 }
 
-void rf::RenderCore::SetMeshAttributeBuffer(MeshId mesh, uint32 attributeId, const void* /*data*/) {
-	[[maybe_unused]] const uint32 attrSize = rf::VertexAttributeRegistry::Entries[attributeId].SizeOf;
-	[[maybe_unused]] const uint32 dataSize = mesh->GetVertexCount() * attrSize;
+void rf::RenderCore::SetMeshAttributeBuffer(MeshId mesh, uint32 attributeId, const void* data) {
+	const uint32 attrSize = rf::VertexAttributeRegistry::Entries[attributeId].SizeOf;
+	const uint32 dataSize = mesh->m_VertexCount * attrSize;
+
+	mesh->m_VertexAttributeBuffers[attributeId] = CreateBuffer("Attribute Buffer", dataSize, rf::EBufferUsageFlag::Vertex, rf::EBufferAccessType::Transfer, true);
+	SetBufferData(mesh->m_VertexAttributeBuffers[attributeId], data, dataSize);
 }
 
-void rf::RenderCore::SetMeshIndexBuffer(MeshId /*mesh*/, const uint32* /*data*/) {
-	
+void rf::RenderCore::SetMeshIndexBuffer(MeshId mesh, const uint32* data) {
+	const uint32 dataSize = mesh->m_IndexCount * sizeof(uint32);
+
+	mesh->m_IndexBuffer = CreateBuffer("Index Buffer", dataSize, rf::EBufferUsageFlag::Index, rf::EBufferAccessType::Transfer, true);
+	SetBufferData(mesh->m_IndexBuffer, data, dataSize);
 }
 
 void rf::RenderCore::DestroyMesh(MeshId mesh) {
 
+	for (auto id : mesh->m_VertexAttributeBuffers) {
+		if (id) {
+			DestroyBuffer(id);
+		}
+	}
+
+	if (mesh->m_IndexBuffer) {
+		DestroyBuffer(mesh->m_IndexBuffer);
+	}
 
 	m_Meshes.Destroy(mesh);
 }
@@ -1239,8 +1257,14 @@ void rf::RenderCore::DestroyPipelineStateObject(rf::PipelineId pipeline) {
 	m_Pipelines.Destroy(pipeline);
 }
 
-auto rf::RenderCore::CreateGraphicsPipeline()->rf::GraphicsPipelineId {
-	return m_GraphicsPipelines.Create();
+auto rf::RenderCore::CreateGraphicsPipeline(const df::StringView& name, rf::VertexShaderModuleId vertexShader, rf::FragmentShaderModuleId fragmentShader)->rf::GraphicsPipelineId {
+	rf::GraphicsPipelineId pipeline = m_GraphicsPipelines.Create();
+
+	pipeline->m_Name = name;
+	pipeline->m_VertexShader = vertexShader;
+	pipeline->m_FragmentShader = fragmentShader;
+
+	return pipeline;
 }
 
 void rf::RenderCore::DestroyGraphicsPipeline(rf::GraphicsPipelineId pipeline) {
@@ -1248,8 +1272,8 @@ void rf::RenderCore::DestroyGraphicsPipeline(rf::GraphicsPipelineId pipeline) {
 		m_APIData.m_VulkanObjectManager.RemovePipeline(m_APIData.m_VkDevice, instance.m_Pipeline);
 	}
 	m_APIData.m_VulkanObjectManager.RemovePipelineLayout(m_APIData.m_VkDevice, pipeline->m_APIData.m_Layout);
-	m_APIData.m_VulkanObjectManager.RemoveShaderModule(m_APIData.m_VkDevice, pipeline->m_APIData.m_VSModule);
-	m_APIData.m_VulkanObjectManager.RemoveShaderModule(m_APIData.m_VkDevice, pipeline->m_APIData.m_FSModule);
+	//m_APIData.m_VulkanObjectManager.RemoveShaderModule(m_APIData.m_VkDevice, pipeline->m_APIData.m_VSModule);
+	//m_APIData.m_VulkanObjectManager.RemoveShaderModule(m_APIData.m_VkDevice, pipeline->m_APIData.m_FSModule);
 
 	m_GraphicsPipelines.Destroy(pipeline);
 }
@@ -1298,69 +1322,45 @@ auto rf::RenderCore::RequestPipelineInstance(rf::GraphicsPipelineId pipeline, rf
 }
 
 auto rf::RenderCore::InitPipelineInstance(rf::GraphicsPipelineId pipeline, rf::PassId renderPass) -> uint32 {
-	// Create shader modules
-	{
-		// VS
-		{
-			const auto& code = pipeline->m_VSCode;
-			auto& handle = pipeline->m_APIData.m_VSModule;
-
-			VkShaderModuleCreateInfo shaderModuleCreateInfo = {};
-			shaderModuleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-			shaderModuleCreateInfo.codeSize = code.size() * sizeof(uint32);
-			shaderModuleCreateInfo.pCode = code.data();
-
-			if (vk::API::CreateShaderModule(m_APIData.m_VkDevice, &shaderModuleCreateInfo, vk::Allocator(), &handle) != VK_SUCCESS) {
-				DFAssert(false, "Can't create ShaderModule!");
-			}
-
-			DFVkDebugName(m_APIData.m_VkDevice, handle, pipeline->m_Name);
-		}
-
-		// FS
-		{
-			const auto& code = pipeline->m_FSCode;
-			auto& handle = pipeline->m_APIData.m_FSModule;
-
-			VkShaderModuleCreateInfo shaderModuleCreateInfo = {};
-			shaderModuleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-			shaderModuleCreateInfo.codeSize = code.size() * sizeof(uint32);
-			shaderModuleCreateInfo.pCode = code.data();
-
-			if (vk::API::CreateShaderModule(m_APIData.m_VkDevice, &shaderModuleCreateInfo, vk::Allocator(), &handle) != VK_SUCCESS) {
-				DFAssert(false, "Can't create ShaderModule!");
-			}
-
-			DFVkDebugName(m_APIData.m_VkDevice, handle, pipeline->m_Name);
-		}
-	}
+	const auto vs = pipeline->m_VertexShader;
+	const auto fs = pipeline->m_FragmentShader;
 
 	// Create Vertex Description
-	{
+	if(vs) {
 		vk::VertexDescription& description = pipeline->m_APIData.m_VertexDescription;
+		if (description.GetAttributeDescriptionCount() == 0 &&
+			description.GetBindingDescriptionCount() == 0) {
 
-		for (const auto& attrib : pipeline->m_VertexAttributes) {
-			const auto binding = attrib.m_AttributeIndex;
-			const auto location = attrib.m_ShaderLocation;
-			const auto attribFmt = rf::VertexAttributeRegistry::Entries[attrib.m_AttributeIndex].Format;
-			const auto fmt = rf::api::ToVk(attribFmt);
+			for (const auto& attrib : vs->m_Attributes) {
+				const auto binding = attrib.m_AttributeIndex;
+				const auto location = attrib.m_ShaderLocation;
+				const auto attribFmt = rf::VertexAttributeRegistry::Entries[attrib.m_AttributeIndex].Format;
+				const auto fmt = rf::api::ToVk(attribFmt);
 
-			description.AddBindingDescription(binding, GetStride(attribFmt), VK_VERTEX_INPUT_RATE_VERTEX);
-			description.AddAttributeDescription(location, binding, fmt, 0);
+				description.AddBindingDescription(binding, GetStride(attribFmt), VK_VERTEX_INPUT_RATE_VERTEX);
+				description.AddAttributeDescription(location, binding, fmt, 0);
+			}
 		}
 	}
 
 	// Create Layout
-	{
-		const auto& paramSets = pipeline->m_ParameterSets;
+	if(pipeline->m_APIData.m_Layout == nullptr) {
+
+		// Merge parameter sets
+		df::Vector<const rf::ParamSetDefinition*> paramSets;
+		for (auto paramSet : vs->m_ParameterSets) {
+			df::AddUnique<const rf::ParamSetDefinition*>(paramSets, paramSet);
+		}
+		for (auto paramSet : fs->m_ParameterSets) {
+			df::AddUnique<const rf::ParamSetDefinition*>(paramSets, paramSet);
+		}
+
 		const uint32 descriptorSetLayoutCount = uint32(paramSets.size());
-
-		df::Vector<VkDescriptorSetLayout> descriptorSetLayouts;
+		df::Vector<VkDescriptorSetLayout> descriptorSetLayouts(descriptorSetLayoutCount);
 		descriptorSetLayouts.resize(descriptorSetLayoutCount);
-
-		for (uint32 i = 0; i < descriptorSetLayoutCount; ++i) {
+		for (uint32 i = 0; i < paramSets.size(); ++i) {
 			const auto dsLayout = paramSets[i]->GetDescriptorSetLayout();
-			descriptorSetLayouts[i] = dsLayout->m_Handle;
+			descriptorSetLayouts[paramSets[i]->GetIndex()] = dsLayout->m_Handle;
 		}
 
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
@@ -1382,20 +1382,20 @@ auto rf::RenderCore::InitPipelineInstance(rf::GraphicsPipelineId pipeline, rf::P
 		const char* shaderEntryPoint = "main";
 
 		df::Vector<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos;
-		if (pipeline->m_APIData.m_VSModule != nullptr) {
+		if (vs) {
 			VkPipelineShaderStageCreateInfo pipelineShaderStageCreateInfo = {};
 			pipelineShaderStageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 			pipelineShaderStageCreateInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-			pipelineShaderStageCreateInfo.module = pipeline->m_APIData.m_VSModule;
+			pipelineShaderStageCreateInfo.module = vs->m_APIData.m_Handle;
 			pipelineShaderStageCreateInfo.pName = shaderEntryPoint;
 
 			shaderStageCreateInfos.emplace_back(pipelineShaderStageCreateInfo);
 		}
-		if (pipeline->m_APIData.m_FSModule != nullptr) {
+		if (fs) {
 			VkPipelineShaderStageCreateInfo pipelineShaderStageCreateInfo = {};
 			pipelineShaderStageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 			pipelineShaderStageCreateInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-			pipelineShaderStageCreateInfo.module = pipeline->m_APIData.m_FSModule;
+			pipelineShaderStageCreateInfo.module = fs->m_APIData.m_Handle;
 			pipelineShaderStageCreateInfo.pName = shaderEntryPoint;
 
 			shaderStageCreateInfos.emplace_back(pipelineShaderStageCreateInfo);
@@ -1410,14 +1410,14 @@ auto rf::RenderCore::InitPipelineInstance(rf::GraphicsPipelineId pipeline, rf::P
 
 		VkPipelineColorBlendStateCreateInfo blendStateCreateInfo;
 		df::Vector<VkPipelineColorBlendAttachmentState> blendAttachmentStates;
-		ToVkPipelineColorBlendStateCreateInfo(blendStateCreateInfo, blendAttachmentStates, &pipeline->m_BlendState, colorAttachmentCount);
+		ToVkPipelineColorBlendStateCreateInfo(blendStateCreateInfo, blendAttachmentStates, &fs->m_BlendState, colorAttachmentCount);
 
 		const auto& vertexDescription = pipeline->m_APIData.m_VertexDescription;
 		const auto& vertexInputBindingDescriptions = vertexDescription.GetBindingDescriptions();
 		const auto& vertexInputAttributeDescriptions = vertexDescription.GetAttributeDescriptions();
 
-		const VkPipelineDepthStencilStateCreateInfo depthStencilStateCreateInfo = ToVkPipelineDepthStencilStateCreateInfo(&pipeline->m_DepthState);
-		const VkPipelineRasterizationStateCreateInfo rasterizationStateCreateInfo = ToVkPipelineRasterizationStateCreateInfo(&pipeline->m_RasterizationState);
+		const VkPipelineDepthStencilStateCreateInfo depthStencilStateCreateInfo = ToVkPipelineDepthStencilStateCreateInfo(&vs->m_DepthState);
+		const VkPipelineRasterizationStateCreateInfo rasterizationStateCreateInfo = ToVkPipelineRasterizationStateCreateInfo(&vs->m_RasterizationState);
 
 		const uint32 defaultWidth = 4;
 		const uint32 defaultHidth = 4;

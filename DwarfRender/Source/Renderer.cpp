@@ -82,7 +82,7 @@ void rf::Renderer::RenderFrame() {
 
 	UpdateParams(context.m_FrameIndex);
 
-	if (m_PresentRenderView && m_PresentRenderView->RenderFrame(context)) {
+	if (m_PresentRenderView && m_PresentRenderView->RenderFrame(*m_RenderCore, context)) {
 		m_RenderCore->Present(m_PresentRenderView->GetOutput());
 	} else {
 		m_RenderCore->Present(rf::GlobalObjects::Get(ETexture::Black));
@@ -151,6 +151,10 @@ void rf::Renderer::SetMeshAttributeBuffer(MeshId mesh, uint32 attributeId, const
 	m_RenderCore->SetMeshAttributeBuffer(mesh, attributeId, data);
 }
 
+void rf::Renderer::SetMeshIndexBuffer(MeshId mesh, const uint32* data) {
+	m_RenderCore->SetMeshIndexBuffer(mesh, data);
+}
+
 void rf::Renderer::DestroyMesh(MeshId mesh) {
 	m_RenderCore->DestroyMesh(mesh);
 }
@@ -191,8 +195,8 @@ void rf::Renderer::DestroyComputeShaderModule(rf::ComputeShaderModuleId shaderMo
 	m_RenderCore->DestroyComputeShaderModule(shaderModule);
 }
 
-auto rf::Renderer::CreateGraphicsPipeline()->rf::GraphicsPipelineId {
-	return m_RenderCore->CreateGraphicsPipeline();
+auto rf::Renderer::CreateGraphicsPipeline(const df::StringView& name, rf::VertexShaderModuleId vertexShader, rf::FragmentShaderModuleId fragmentShader)->rf::GraphicsPipelineId {
+	return m_RenderCore->CreateGraphicsPipeline(name, vertexShader, fragmentShader);
 }
 
 void rf::Renderer::DestroyGraphicsPipeline(rf::GraphicsPipelineId pipeline) {

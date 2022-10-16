@@ -13,8 +13,8 @@ namespace rf {
 				VkRenderPass m_RenderPass = 0;
 			};
 
-			VkShaderModule m_VSModule = 0;
-			VkShaderModule m_FSModule = 0;
+			//VkShaderModule m_VSModule = 0;
+			//VkShaderModule m_FSModule = 0;
 			VkPipelineLayout m_Layout = 0;
 			df::Vector<PipelineInstance> m_Instances;
 
