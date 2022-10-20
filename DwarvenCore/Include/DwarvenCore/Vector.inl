@@ -1,14 +1,16 @@
 #pragma once
 
 template<typename T>
-void df::AddUnique(Vector<T>& vector, const T& element) {
+bool df::AddUnique(Vector<T>& vector, const T& element) {
 	for (const auto& el : vector) {
 		if (el == element) {
-			return;
+			return false;
 		}
 	}
 
 	vector.push_back(element);
+
+	return true;
 }
 
 template<typename T>

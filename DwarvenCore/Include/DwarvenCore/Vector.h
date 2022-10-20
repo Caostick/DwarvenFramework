@@ -7,7 +7,7 @@ namespace df {
 	using Vector = std::vector<T>;
 
 	template<typename T>
-	void AddUnique(Vector<T>& vector, const T& element);
+	bool AddUnique(Vector<T>& vector, const T& element);
 
 	template<typename T>
 	auto FindElement(Vector<T>& vector, const T& element) -> int;
