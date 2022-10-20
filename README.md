@@ -22,3 +22,4 @@ ThirdParty:
 Direct build: 'conan create . -s build_type=Debug'
 
 All build: 'conan install .' or 'conan install . --build missing'
+Example for Debug: 'conan install . -s build_type=Debug --build missing'
