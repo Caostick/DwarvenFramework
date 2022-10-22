@@ -18,11 +18,15 @@ namespace vk {
 			const vk::RenderCore& renderCore,
 			vk::ShaderCompileInfo& info);
 
+		~ShaderFileIncluder();
+
 		auto includeLocal(const char* headerName, const char* includerName, size_t inclusionDepth) -> IncludeResult* override;
 		void releaseInclude(IncludeResult* result) override;
 
 	private:
 		const vk::RenderCore& m_RenderCore;
 		vk::ShaderCompileInfo& m_CompileInfo;
+
+		df::Vector<df::String*> m_TempStrings;
 	};
 }

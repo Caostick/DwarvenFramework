@@ -24,6 +24,7 @@ namespace vk {
 	class Pipeline;
 	class ParameterSetDefinition;
 	class ParameterSet;
+	class ShaderCompiler;
 }
 
 namespace vk {
@@ -55,6 +56,8 @@ namespace vk {
 		auto CreatePipeline()->vk::Pipeline*;
 		void DestroyPipeline(vk::Pipeline* pipeline);
 
+		auto CreateParameterSetDefinition(const df::StringView& name)->vk::ParameterSetDefinition*;
+		void DestroyParameterSetDefinition(vk::ParameterSetDefinition* parameterSetDefinition);
 		auto FindParameterSetDefinition(const df::StringView& name) const -> const vk::ParameterSetDefinition*;
 
 		auto CreateParameterSet(const df::StringView& name)->vk::ParameterSet*;
@@ -66,6 +69,8 @@ namespace vk {
 
 		void AddShaderInclude(const df::StringView& name, const df::StringView& content);
 		auto GetShaderInclude(const df::StringView& name) const -> const df::String&;
+
+		auto GetShaderCompiler()->vk::ShaderCompiler*;
 
 	public:
 		void RemoveImage(VkImage image);
@@ -83,10 +88,6 @@ namespace vk {
 		void RemovePipeline(VkPipeline pipeline);
 		void RemoveDescriptorPool(VkDescriptorPool descriptorPool);
 		void RemoveCommandPool(VkCommandPool commandPool);
-
-	private:
-		auto CreateParameterSetDefinition(const df::StringView& name)->vk::ParameterSetDefinition*;
-		void DestroyParameterSetDefinition(vk::ParameterSetDefinition* parameterSetDefinition);
 
 	private:
 		bool InitInstance();
@@ -118,6 +119,7 @@ namespace vk {
 		df::Vector<vk::FrameData> m_FrameData;
 
 		vk::CommandBuffer m_TransferCommandBuffer;
+		vk::ShaderCompiler* m_ShaderCompiler;
 
 		df::ObjectPool<vk::RenderPass> m_RenderPasses;
 		df::ObjectPool<vk::Pipeline> m_Pipelines;

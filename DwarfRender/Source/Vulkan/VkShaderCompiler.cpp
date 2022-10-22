@@ -1,13 +1,9 @@
-#if 0
-
-#include <DwarfRender/Loaders/ShaderCompiler.h>
-
-#include <DwarfResources/ResourceManager.h>
+#include "VkShaderCompiler.h"
+#include "VkShaderFileIncluder.h"
 
 #include <glslang/Public/ShaderLang.h>
 #include <SPIRV/GlslangToSpv.h>
-
-#include "ShaderFileIncluder.h"
+#include <iostream>
 
 namespace {
 	auto GetResources() -> TBuiltInResource {
@@ -124,20 +120,19 @@ namespace {
 		"#extension GL_GOOGLE_include_directive : enable\n";
 }
 
-rf::ShaderCompiler::ShaderCompiler() {
+vk::ShaderCompiler::ShaderCompiler(vk::RenderCore& renderCore) 
+	: m_RenderCore(renderCore) {
 	glslang::InitializeProcess();
 }
 
-rf::ShaderCompiler::~ShaderCompiler() {
+vk::ShaderCompiler::~ShaderCompiler() {
 	glslang::FinalizeProcess();
 }
 
-auto rf::ShaderCompiler::CompileShader(
-	const df::String& shaderName, 
-	const char* code, 
-	EShaderType shaderType, 
-	const df::ResourceManager& resourceManager,
-	const rf::ParamSetDefinitionManager& paramSetDefinitionManager)->ShaderCompileInfo {
+auto vk::ShaderCompiler::CompileShader(
+	const df::String& shaderName,
+	const char* code,
+	EShaderType shaderType)->ShaderCompileInfo {
 
 	ShaderCompileInfo info;
 
@@ -179,7 +174,7 @@ auto rf::ShaderCompiler::CompileShader(
 	shader.setEnvClient(glslang::EShClientVulkan, vulkanClientVersion);
 	shader.setEnvTarget(glslang::EShTargetSpv, targetVersion);
 
-	ShaderFileIncluder includer = ShaderFileIncluder(resourceManager, paramSetDefinitionManager, info);
+	ShaderFileIncluder includer = vk::ShaderFileIncluder(m_RenderCore, info);
 
 	df::String preprocessedCode;
 	if (!shader.preprocess(&resources, defaultVersion, ENoProfile, false, false, messages, &preprocessedCode, includer)) {
@@ -191,6 +186,8 @@ auto rf::ShaderCompiler::CompileShader(
 	}
 
 	const char* preprocessedInputData = preprocessedCode.c_str();
+
+	std::cout << "\n" << preprocessedInputData << "\n\n";
 
 	shader.setStrings(&preprocessedInputData, 1);
 
@@ -233,21 +230,20 @@ auto rf::ShaderCompiler::CompileShader(
 	return info;
 }
 
-auto rf::ShaderCompiler::GetLog() const ->const df::String& {
+auto vk::ShaderCompiler::GetLog() const ->const df::String& {
 	return m_Log;
 }
-void rf::ShaderCompiler::ClearLog() {
+void vk::ShaderCompiler::ClearLog() {
 	m_Log.clear();
 }
 
-void rf::ShaderCompiler::AddLogLine(const df::StringView& line) {
+void vk::ShaderCompiler::AddLogLine(const df::StringView& line) {
 	m_Log += line;
 	m_Log += "\n";
 }
 
-void rf::ShaderCompiler::AddLogLine(const df::StringView& line, const df::StringView& arg) {
+void vk::ShaderCompiler::AddLogLine(const df::StringView& line, const df::StringView& arg) {
 	m_Log += line;
 	m_Log += arg;
 	m_Log += "\n";
 }
-#endif

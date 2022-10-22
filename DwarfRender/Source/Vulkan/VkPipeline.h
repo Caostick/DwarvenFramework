@@ -67,8 +67,7 @@ namespace vk {
 		virtual void SetParameterSet(uint32 index, df::ParameterSet* parameterSet) override;
 
 	public:
-		void SetVertexShaderSpirV(const uint32* data, uint32 length);
-		void SetFragmentShaderSpirV(const uint32* data, uint32 length);
+		void BuildTest();
 
 	private:
 		void CreateShaderModule(const uint32* data, uint32 length, VkShaderModule& shaderModule);

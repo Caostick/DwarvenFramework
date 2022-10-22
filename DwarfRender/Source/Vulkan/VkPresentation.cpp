@@ -259,39 +259,32 @@ bool vk::Presentation::Load(vk::RenderCore& renderCore) {
 	// Shaders
 	{
 		const char* vsCode =
-			"#version 450\n"
-			"#extension GL_ARB_separate_shader_objects : enable\n"
-
 			"layout(location = 0) out vec2 outTexcoord;\n"
-
-			"vec3 positions[3] = vec3[](\n"
-			"	vec3(0.0, 0.0),\n"
-			"	vec3(0.0, 2.0),\n"
-			"	vec3(2.0, 0.0),\n"
+			"\n"
+			"vec2 positions[3] = vec2[](\n"
+			"	vec2(0.0, 0.0),\n"
+			"	vec2(0.0, 2.0),\n"
+			"	vec2(2.0, 0.0)\n"
 			");\n"
-
-			"vec3 tcs[3] = vec3[](\n"
-			"	vec3(0.0, 0.0),\n"
-			"	vec3(0.0, 2.0),\n"
-			"	vec3(2.0, 0.0),\n"
+			"\n"
+			"vec2 tcs[3] = vec2[](\n"
+			"	vec2(0.0, 0.0),\n"
+			"	vec2(0.0, 2.0),\n"
+			"	vec2(2.0, 0.0)\n"
 			");\n"
-
+			"\n"
 			"void main() {\n"
 			"	gl_Position = vec4(positions[gl_VertexIndex], 0.0, 1.0);\n"
 			"	outTexcoord = tcs[gl_VertexIndex];\n"
 			"}";
 
 		const char* fsCode =
-			"#version 450\n"
-			"#extension GL_ARB_separate_shader_objects : enable\n"
-			"#extension GL_GOOGLE_include_directive : enable\n"
-
 			"#include \"ParameterSet:Present\"\n"
-
+			"\n"
 			"layout(location = 0) in vec2 inTexcoord;\n"
-
+			"\n"
 			"layout(location = 0) out vec4 outColor;\n"
-
+			"\n"
 			"void main() {\n"
 			"	outColor = texture(texSampler, inTexcoord);\n"
 			"}";
@@ -302,6 +295,8 @@ bool vk::Presentation::Load(vk::RenderCore& renderCore) {
 		m_Pipeline = renderCore.CreatePipeline();
 		m_Pipeline->SetVertexShader(vsCode);
 		m_Pipeline->SetFragmentShader(fsCode);
+
+		m_Pipeline->BuildTest();
 	}
 
 #if 0

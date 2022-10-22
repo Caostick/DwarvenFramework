@@ -4,12 +4,12 @@
 #include "VkDefinitions.h"
 #include "VkDebug.h"
 #include "VkHelper.h"
-//#include "VkTypeConversions.h"
 #include "VkRenderContext.h"
 #include "VkRenderPass.h"
 #include "VkPipeline.h"
 #include "VkParameterSetDefinition.h"
 #include "VkParameterSet.h"
+#include "VkShaderCompiler.h"
 
 #include <DwarfWindow/Window.h>
 
@@ -18,7 +18,8 @@
 #include <DwarvenCore/Memory.h>
 
 vk::RenderCore::RenderCore(const df::Window& window) 
-	: m_Window(window) {
+	: m_Window(window) 
+	, m_ShaderCompiler(nullptr) {
 
 	m_NumFramesInFlight = 0;
 	m_FrameIndex = 0;
@@ -61,6 +62,8 @@ auto vk::RenderCore::GetVkDevice() const->VkDevice {
 
 bool vk::RenderCore::Init() {
 	AddShaderInclude("", "");
+
+	m_ShaderCompiler = DFNew vk::ShaderCompiler(*this);
 
 	m_NumFramesInFlight = 3;
 
@@ -161,6 +164,9 @@ void vk::RenderCore::Release() {
 	vk::DestroyDebugCallback(m_VkInstance);
 	vk::API::DestroyInstance(m_VkInstance, vk::Allocator());
 	m_VkInstance = VK_NULL_HANDLE;
+
+	DFDelete m_ShaderCompiler;
+	m_ShaderCompiler = nullptr;
 }
 
 bool vk::RenderCore::Load() {
@@ -301,6 +307,31 @@ void vk::RenderCore::DestroyPipeline(vk::Pipeline* pipeline) {
 	m_Pipelines.Destroy(pipeline);
 }
 
+auto vk::RenderCore::CreateParameterSetDefinition(const df::StringView& name)->vk::ParameterSetDefinition* {
+	const df::String strName = df::String(name);
+	auto it = m_ParameterSetDefinitionRegistry.find(strName);
+	if (it != m_ParameterSetDefinitionRegistry.end()) {
+		DFAssert(false, "Definition with given name already exists!");
+		return it->second;
+	}
+
+	auto def = m_ParameterSetDefinitions.Create(*this, name);
+
+	m_ParameterSetDefinitionRegistry[strName] = def;
+
+	return def;
+}
+
+void vk::RenderCore::DestroyParameterSetDefinition(vk::ParameterSetDefinition* parameterSetDefinition) {
+	const df::String& strName = parameterSetDefinition->GetName();
+	auto it = m_ParameterSetDefinitionRegistry.find(strName);
+	if (it != m_ParameterSetDefinitionRegistry.end() && it->second == parameterSetDefinition) {
+		m_ParameterSetDefinitionRegistry.erase(it);
+	}
+
+	m_ParameterSetDefinitions.Destroy(parameterSetDefinition);
+}
+
 auto vk::RenderCore::FindParameterSetDefinition(const df::StringView& name) const -> const vk::ParameterSetDefinition* {
 	const df::String strName = df::String(name);
 	auto it = m_ParameterSetDefinitionRegistry.find(strName);
@@ -317,21 +348,11 @@ auto vk::RenderCore::CreateParameterSet(const df::StringView& name)->vk::Paramet
 }
 
 auto vk::RenderCore::CreateParameterSet(vk::ParameterSetDefinition* parameterSetDefinition)->vk::ParameterSet* {
-	parameterSetDefinition->IncrementRefCount();
-
-	auto params = m_ParameterSets.Create(*this, parameterSetDefinition);
-	
-	return params;
+	return m_ParameterSets.Create(*this, *parameterSetDefinition);
 }
 
 void vk::RenderCore::DestroyParameterSet(vk::ParameterSet* parameterSet) {
-	auto def = parameterSet->GetDefinition();
-
 	m_ParameterSets.Destroy(parameterSet);
-
-	if (def->DecrementRefCount() == 0) {
-		DestroyParameterSetDefinition(def);
-	}
 }
 
 auto vk::RenderCore::RegisterVertexAttribute(const df::StringView& name, df::EVertexAttributeFormat format, uint32 index) -> const vk::VertexAttribute* {
@@ -381,6 +402,10 @@ auto vk::RenderCore::GetShaderInclude(const df::StringView& name) const->const d
 	}
 
 	return m_NullInclude;
+}
+
+auto vk::RenderCore::GetShaderCompiler()->vk::ShaderCompiler* {
+	return m_ShaderCompiler;
 }
 
 void vk::RenderCore::RemoveImage(VkImage image) {
@@ -441,31 +466,6 @@ void vk::RenderCore::RemoveDescriptorPool(VkDescriptorPool descriptorPool) {
 
 void vk::RenderCore::RemoveCommandPool(VkCommandPool commandPool) {
 	m_VulkanObjectManager.RemoveCommandPool(m_VkDevice, commandPool);
-}
-
-auto vk::RenderCore::CreateParameterSetDefinition(const df::StringView& name)->vk::ParameterSetDefinition* {
-	const df::String strName = df::String(name);
-	auto it = m_ParameterSetDefinitionRegistry.find(strName);
-	if (it != m_ParameterSetDefinitionRegistry.end()) {
-		DFAssert(false, "Definition with given name already exists!");
-		return it->second;
-	}
-
-	auto def = m_ParameterSetDefinitions.Create(*this, name);
-
-	m_ParameterSetDefinitionRegistry[strName] = def;
-
-	return def;
-}
-
-void vk::RenderCore::DestroyParameterSetDefinition(vk::ParameterSetDefinition* parameterSetDefinition) {
-	const df::String& strName = parameterSetDefinition->GetName();
-	auto it = m_ParameterSetDefinitionRegistry.find(strName);
-	if (it != m_ParameterSetDefinitionRegistry.end() && it->second == parameterSetDefinition) {
-		m_ParameterSetDefinitionRegistry.erase(it);
-	}
-
-	m_ParameterSetDefinitions.Destroy(parameterSetDefinition);
 }
 
 bool vk::RenderCore::InitInstance() {

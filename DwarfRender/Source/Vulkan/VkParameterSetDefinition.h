@@ -60,9 +60,17 @@ namespace vk {
 		void DeclareTextureParameter(const df::StringView& name);
 		void DeclareBufferParameter(const df::StringView& name, df::EShaderConstantType dataType);
 
+		bool HasFloatParameter(const df::StringView& name);
+		bool HasVec2Parameter(const df::StringView& name);
+		bool HasVec3Parameter(const df::StringView& name);
+		bool HasVec4Parameter(const df::StringView& name);
+		bool HasMat3Parameter(const df::StringView& name);
+		bool HasMat4Parameter(const df::StringView& name);
+		bool HasTextureParameter(const df::StringView& name);
+		bool HasBufferParameter(const df::StringView& name);
+
 	public:
 		auto GetName() const -> const df::String&;
-		auto GerRefCount() const->uint32;
 		auto MakeShaderSnippet(uint32 idx) const->df::String;
 
 		auto IncrementRefCount()->uint32;

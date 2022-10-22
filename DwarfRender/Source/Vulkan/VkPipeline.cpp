@@ -3,6 +3,9 @@
 #include "VkDebug.h"
 #include "VkParameterSetDefinition.h"
 #include "VkParameterSet.h"
+#include "VkShaderCompiler.h"
+
+#include <iostream>
 
 bool vk::PipelineState::operator == (const PipelineState& other) const {
 	return
@@ -124,12 +127,32 @@ void vk::Pipeline::SetParameterSet(uint32 index, df::ParameterSet* parameterSet)
 	m_ParameterSets[index] = static_cast<vk::ParameterSet*>(parameterSet);
 }
 
-void vk::Pipeline::SetVertexShaderSpirV(const uint32* data, uint32 length) {
-	CreateShaderModule(data, length, m_VkVertexShaderModule);
-}
+void vk::Pipeline::BuildTest() {
+	auto shaderCompiler = m_RenderCore.GetShaderCompiler();
 
-void vk::Pipeline::SetFragmentShaderSpirV(const uint32* data, uint32 length) {
-	CreateShaderModule(data, length, m_VkFragmentShaderModule);
+	if (!m_VertexShaderCode.empty()) {
+		const auto vsCompileInfo = shaderCompiler->CompileShader(m_Name, m_VertexShaderCode.c_str(), vk::EShaderType::Vertex);
+
+		const auto& log = shaderCompiler->GetLog();
+		if (!log.empty()) {
+			std::cout << "VS Compile Error:\n" << log << "\n";
+			shaderCompiler->ClearLog();
+		} else {
+			CreateShaderModule(vsCompileInfo.m_SpirVCode.data(), uint32(vsCompileInfo.m_SpirVCode.size()), m_VkVertexShaderModule);
+		}
+	}
+
+	if (!m_FragmentShaderCode.empty()) {
+		const auto vsCompileInfo = shaderCompiler->CompileShader(m_Name, m_FragmentShaderCode.c_str(), vk::EShaderType::Fragment);
+
+		const auto& log = shaderCompiler->GetLog();
+		if (!log.empty()) {
+			std::cout << "FS Compile Error:\n" << log << "\n";
+			shaderCompiler->ClearLog();
+		} else {
+			CreateShaderModule(vsCompileInfo.m_SpirVCode.data(), uint32(vsCompileInfo.m_SpirVCode.size()), m_VkFragmentShaderModule);
+		}
+	}
 }
 
 void vk::Pipeline::CreateShaderModule(const uint32* data, uint32 length, VkShaderModule& shaderModule) {

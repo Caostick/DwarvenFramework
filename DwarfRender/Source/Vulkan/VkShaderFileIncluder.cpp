@@ -339,6 +339,12 @@ vk::ShaderFileIncluder::ShaderFileIncluder(
 	: m_RenderCore(renderCore)
 	, m_CompileInfo(info) {}
 
+vk::ShaderFileIncluder::~ShaderFileIncluder() {
+	for (auto str : m_TempStrings) {
+		DFDelete str;
+	}
+}
+
 glslang::TShader::Includer::IncludeResult* vk::ShaderFileIncluder::includeLocal(
 	const char* headerName,
 	const char* /*includerName*/,
@@ -357,8 +363,11 @@ glslang::TShader::Includer::IncludeResult* vk::ShaderFileIncluder::includeLocal(
 		if (df::AddUnique(m_CompileInfo.m_ParameterSets, paramsDefinition)) {
 			const uint32 idx = uint32(df::FindElement(m_CompileInfo.m_ParameterSets, paramsDefinition));
 
-			const auto& code = paramsDefinition->MakeShaderSnippet(idx);
-			return DFNew IncludeResult(headerName, code.c_str(), code.size(), nullptr);
+			auto* code = DFNew df::String;
+			m_TempStrings.push_back(code);
+
+			*code = paramsDefinition->MakeShaderSnippet(idx);
+			return DFNew IncludeResult(headerName, code->c_str(), code->size(), nullptr);
 		} else {
 			const auto& code = m_RenderCore.GetShaderInclude("");
 			return DFNew IncludeResult(headerName, code.c_str(), code.size(), nullptr);

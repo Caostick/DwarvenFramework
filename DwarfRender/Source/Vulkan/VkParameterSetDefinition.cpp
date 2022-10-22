@@ -3,6 +3,7 @@
 #include "VkDebug.h"
 
 #include <DwarvenCore/DebugName.h>
+#include <DwarvenCore/Assert.h>
 
 namespace {
 	auto GetAlignment(df::EShaderConstantType type)->uint32 {
@@ -54,6 +55,8 @@ vk::ParameterSetDefinition::ParameterSetDefinition(vk::RenderCore& renderCore, c
 }
 
 vk::ParameterSetDefinition::~ParameterSetDefinition() {
+	DFAssert(m_RefCount == 0, "There are still objects which use definition!");
+
 	m_RenderCore.RemoveDescriptorSetLayout(m_VkDescriptorSetLayout);
 }
 
@@ -120,19 +123,94 @@ void vk::ParameterSetDefinition::DeclareBufferParameter(const df::StringView& na
 	m_Buffers.emplace_back(def);
 }
 
-auto vk::ParameterSetDefinition::GetName() const -> const df::String& {
-	return m_Name;
+bool vk::ParameterSetDefinition::HasFloatParameter(const df::StringView& name) {
+	for (const auto& param : m_FloatConstants) {
+		if (param.m_Name == name) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
-auto vk::ParameterSetDefinition::GerRefCount() const->uint32 {
-	return m_RefCount;
+bool vk::ParameterSetDefinition::HasVec2Parameter(const df::StringView& name) {
+	for (const auto& param : m_Vec2Constants) {
+		if (param.m_Name == name) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool vk::ParameterSetDefinition::HasVec3Parameter(const df::StringView& name) {
+	for (const auto& param : m_Vec3Constants) {
+		if (param.m_Name == name) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool vk::ParameterSetDefinition::HasVec4Parameter(const df::StringView& name) {
+	for (const auto& param : m_Vec4Constants) {
+		if (param.m_Name == name) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool vk::ParameterSetDefinition::HasMat3Parameter(const df::StringView& name) {
+	for (const auto& param : m_Mat3Constants) {
+		if (param.m_Name == name) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool vk::ParameterSetDefinition::HasMat4Parameter(const df::StringView& name) {
+	for (const auto& param : m_Mat4Constants) {
+		if (param.m_Name == name) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool vk::ParameterSetDefinition::HasTextureParameter(const df::StringView& name) {
+	for (const auto& param : m_Textures) {
+		if (param.m_Name == name) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool vk::ParameterSetDefinition::HasBufferParameter(const df::StringView& name) {
+	for (const auto& param : m_Buffers) {
+		if (param.m_Name == name) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+auto vk::ParameterSetDefinition::GetName() const -> const df::String& {
+	return m_Name;
 }
 
 auto vk::ParameterSetDefinition::MakeShaderSnippet(uint32 idx) const->df::String {
 	df::String snippet;
 
 	snippet.reserve(1024);
-	snippet += "\n";
 
 	if (!m_Constants.empty()) {
 		snippet += df::String("layout(set = ");
@@ -203,6 +281,7 @@ auto vk::ParameterSetDefinition::IncrementRefCount()->uint32 {
 }
 
 auto vk::ParameterSetDefinition::DecrementRefCount() ->uint32 {
+	DFAssert(m_RefCount != 0, "Invalid parameter set definition ref count!");
 	return --m_RefCount;
 }
 
