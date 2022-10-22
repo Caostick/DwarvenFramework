@@ -2,6 +2,7 @@
 
 #include <DwarvenCore/Types.h>
 
+#define VK_DEBUG 1
 #define DF_USE_DEBUG_MARKERS 1
 
 namespace vk {
@@ -19,9 +20,4 @@ namespace vk {
 		constexpr uint32 MaxDynamicPipelineStates = 9;
 		constexpr uint32 MaxDescriptorCount = 16;
 	}
-
-	enum class RenderTargetTransition : uint8 {
-		ColorOutputToShaderRead = 0,
-		UndefinedToShaderRead
-	};
 }

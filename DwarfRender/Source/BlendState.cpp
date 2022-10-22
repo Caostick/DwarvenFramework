@@ -1,12 +1,12 @@
 #include <DwarfRender/BlendState.h>
 
-rf::BlendState::BlendState(EBlendState state) {
+df::BlendState::BlendState(EBlendState state) {
 	*this = state;
 }
 
-rf::BlendState& rf::BlendState::operator = (EBlendState state) {
+df::BlendState& df::BlendState::operator = (EBlendState state) {
 	switch (state) {
-	case rf::EBlendState::None:
+	case EBlendState::None:
 		m_BlendEnable = false;
 		m_ColorBlendOp = EBlendOp::Add;
 		m_AlphaBlendOp = EBlendOp::Add;
@@ -15,14 +15,14 @@ rf::BlendState& rf::BlendState::operator = (EBlendState state) {
 		m_DstColorBlendFactor = EBlendFactor::Zero;
 		m_DstAlphaBlendFactor = EBlendFactor::One;
 		break;
-	case rf::EBlendState::Alpha:
+	case EBlendState::Alpha:
 		m_BlendEnable = true;
-		m_ColorBlendOp = rf::EBlendOp::Add;
-		m_AlphaBlendOp = rf::EBlendOp::Add;
-		m_SrcColorBlendFactor = rf::EBlendFactor::SrcAlpha;
-		m_SrcAlphaBlendFactor = rf::EBlendFactor::One;
-		m_DstColorBlendFactor = rf::EBlendFactor::OneMinusSrcAlpha;
-		m_DstAlphaBlendFactor = rf::EBlendFactor::Zero;
+		m_ColorBlendOp = EBlendOp::Add;
+		m_AlphaBlendOp = EBlendOp::Add;
+		m_SrcColorBlendFactor = EBlendFactor::SrcAlpha;
+		m_SrcAlphaBlendFactor = EBlendFactor::One;
+		m_DstColorBlendFactor = EBlendFactor::OneMinusSrcAlpha;
+		m_DstAlphaBlendFactor = EBlendFactor::Zero;
 		break;
 	default:
 		break;
@@ -31,7 +31,7 @@ rf::BlendState& rf::BlendState::operator = (EBlendState state) {
 	return *this;
 }
 
-bool rf::BlendState::operator==(const BlendState& other) const {
+bool df::BlendState::operator==(const BlendState& other) const {
 	return
 		m_BlendEnable == other.m_BlendEnable &&
 		m_ColorBlendOp == other.m_ColorBlendOp &&
@@ -42,7 +42,7 @@ bool rf::BlendState::operator==(const BlendState& other) const {
 		m_DstAlphaBlendFactor == other.m_DstAlphaBlendFactor;
 }
 
-bool rf::BlendState::operator!=(const BlendState& other) const {
+bool df::BlendState::operator!=(const BlendState& other) const {
 	return
 		m_BlendEnable != other.m_BlendEnable ||
 		m_ColorBlendOp != other.m_ColorBlendOp ||

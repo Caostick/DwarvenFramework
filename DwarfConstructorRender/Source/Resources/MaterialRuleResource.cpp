@@ -1,0 +1,1 @@
+#include <DwarfConstructorRender/Resources/MaterialRuleResource.h>

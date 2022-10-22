@@ -2,17 +2,20 @@
 #include "VkAllocator.h"
 #include "VkHelper.h"
 #include "VkDebug.h"
-
-#include "../Descriptor.h"
-#include "../RenderCore.h"
+#include "VkRenderCore.h"
+#include "VkRenderPass.h"
+#include "VkParameterSet.h"
+#include "VkParameterSetDefinition.h"
+#include "VkPipeline.h"
 
 #include "Generated/Presentation.generated.h"
 
 #include <DwarfWindow/Window.h>
 
-#include <DwarfRender/GlobalObjects.h>
+//#include <DwarfRender/GlobalObjects.h>
 
 #include <DwarvenCore/Assert.h>
+#include <DwarvenCore/DebugName.h>
 
 #ifdef GLFW_WINDOW_IMPLEMENTATION
 #include <glfw/glfw3.h>
@@ -74,21 +77,21 @@ namespace /*anonymous*/ {
 
 
 
-rf::api::Presentation::Presentation()
-	:m_VkSurface(VK_NULL_HANDLE)
+vk::Presentation::Presentation()
+	: m_VkSurface(VK_NULL_HANDLE)
 	, m_VkSwapchain(VK_NULL_HANDLE)
 	, m_VkExtent({ 0,0 })
 	, m_VkFormat(VK_FORMAT_UNDEFINED)
+	, m_VSyncEnabled(true)
 	, m_MinImagesCount(0)
 	, m_ImagesCount(0)
 	, m_AvailableImageIndex(0) {}
 
-bool rf::api::Presentation::CreateSurface(VkInstance instance, df::Window* window) {
-	DFAssert(window, "Window is null!");
+bool vk::Presentation::CreateSurface(VkInstance instance, const df::Window& window) {
 	DFAssert(m_VkSurface == VK_NULL_HANDLE, "Surface already created!");
 
 #ifdef GLFW_WINDOW_IMPLEMENTATION
-	if (glfwCreateWindowSurface(instance, window->GetPtr(), vk::Allocator(), &m_VkSurface) != VK_SUCCESS) {
+	if (glfwCreateWindowSurface(instance, window.GetPtr(), vk::Allocator(), &m_VkSurface) != VK_SUCCESS) {
 		DFAssert(false, "Can't create Surface!");
 
 		return false;
@@ -100,14 +103,14 @@ bool rf::api::Presentation::CreateSurface(VkInstance instance, df::Window* windo
 	return true;
 }
 
-void rf::api::Presentation::DestroySurface(VkInstance instance) {
+void vk::Presentation::DestroySurface(VkInstance instance) {
 	DFAssert(m_VkSurface != VK_NULL_HANDLE, "Surface not created!");
 
 	vk::API::DestroySurfaceKHR(instance, m_VkSurface, vk::Allocator());
 	m_VkSurface = VK_NULL_HANDLE;
 }
 
-bool rf::api::Presentation::CreateSwapchain(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D extent, bool vSyncEnabled, uint32 graphicsFamilyIndex, uint32 presentFamilyIndex) {
+bool vk::Presentation::CreateSwapchain(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D extent, bool vSyncEnabled, uint32 graphicsFamilyIndex, uint32 presentFamilyIndex) {
 	DFAssert(m_VkSurface != VK_NULL_HANDLE, "Surface wasn't created!");
 	DFAssert(m_VkSwapchain == VK_NULL_HANDLE, "Swapchain already created!");
 
@@ -186,7 +189,7 @@ bool rf::api::Presentation::CreateSwapchain(VkDevice device, VkPhysicalDevice ph
 	return true;
 }
 
-void rf::api::Presentation::DestroySwapchain(VkDevice device) {
+void vk::Presentation::DestroySwapchain(VkDevice device) {
 	DFAssert(m_VkSwapchain != VK_NULL_HANDLE, "Swapchain not created!");
 
 	for (uint32 i = 0; i < m_ImagesCount; ++i) {
@@ -203,18 +206,18 @@ void rf::api::Presentation::DestroySwapchain(VkDevice device) {
 	m_ImagesCount = 0;
 }
 
-auto rf::api::Presentation::GetPhysicalDeviceSurfaceSupport(VkPhysicalDevice physicalDevice, uint32 queueFamilyIndex)->VkBool32 {
+auto vk::Presentation::GetPhysicalDeviceSurfaceSupport(VkPhysicalDevice physicalDevice, uint32 queueFamilyIndex)->VkBool32 {
 	VkBool32 presentSupport;
 	vk::API::GetPhysicalDeviceSurfaceSupportKHR(physicalDevice, queueFamilyIndex, m_VkSurface, &presentSupport);
 
 	return presentSupport;
 }
 
-auto rf::api::Presentation::AquireNextImage(VkDevice device, VkSemaphore semaphore) -> VkResult {
+auto vk::Presentation::AquireNextImage(VkDevice device, VkSemaphore semaphore) -> VkResult {
 	return vk::API::AcquireNextImageKHR(device, m_VkSwapchain, std::numeric_limits<uint64_t>::max(), semaphore, VK_NULL_HANDLE, &m_AvailableImageIndex);
 }
 
-auto rf::api::Presentation::Present(VkSemaphore semaphore, VkQueue presentQueue)->VkResult {
+auto vk::Presentation::Present(VkSemaphore semaphore, VkQueue presentQueue)->VkResult {
 	const VkSemaphore signalSemaphores[] = { semaphore };
 	const VkSwapchainKHR swapchains[] = { m_VkSwapchain };
 
@@ -229,13 +232,7 @@ auto rf::api::Presentation::Present(VkSemaphore semaphore, VkQueue presentQueue)
 	return vk::API::QueuePresentKHR(presentQueue, &presentInfo);
 }
 
-bool rf::api::Presentation::Load(rf::RenderCore& renderCore) {
-	// Load shaders
-	{
-		m_VertexShaderId = renderCore.CreateShaderModule("PresentVS", generated::presentation::vsCodeData, generated::presentation::vsCodeLength);
-		m_FragmentShaderId = renderCore.CreateShaderModule("PresentFS", generated::presentation::fsCodeData, generated::presentation::fsCodeLength);
-	}
-
+bool vk::Presentation::Load(vk::RenderCore& renderCore) {
 	// Create render pass
 	{
 		VkAttachmentDescription attachementDescription = {};
@@ -248,10 +245,73 @@ bool rf::api::Presentation::Load(rf::RenderCore& renderCore) {
 		attachementDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		attachementDescription.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
-		rf::ClearValue clearValue = { 0.0f, 0.0f, 0.0f, 0.0f };
+		VkClearValue clearValue = { 0.0f, 0.0f, 0.0f, 0.0f };
 
-		renderCore.GetAPIData().InitRenderPass(&m_RenderPass, g_StageDebugName, { attachementDescription }, { clearValue });
+		m_RenderPasses.resize(m_ImagesCount);
+		for (uint32 i = 0; i < m_ImagesCount; ++i) {
+			m_RenderPasses[i] = renderCore.CreateRenderPass();
+			m_RenderPasses[i]->SetExtents(m_VkExtent.width, m_VkExtent.height);
+			m_RenderPasses[i]->SetColorTarget(0, m_ImageViews[i], attachementDescription, clearValue);
+			m_RenderPasses[i]->SetName(df::DebugName("Present [%d]", i));
+		}
 	}
+
+	// Shaders
+	{
+		const char* vsCode =
+			"#version 450\n"
+			"#extension GL_ARB_separate_shader_objects : enable\n"
+
+			"layout(location = 0) out vec2 outTexcoord;\n"
+
+			"vec3 positions[3] = vec3[](\n"
+			"	vec3(0.0, 0.0),\n"
+			"	vec3(0.0, 2.0),\n"
+			"	vec3(2.0, 0.0),\n"
+			");\n"
+
+			"vec3 tcs[3] = vec3[](\n"
+			"	vec3(0.0, 0.0),\n"
+			"	vec3(0.0, 2.0),\n"
+			"	vec3(2.0, 0.0),\n"
+			");\n"
+
+			"void main() {\n"
+			"	gl_Position = vec4(positions[gl_VertexIndex], 0.0, 1.0);\n"
+			"	outTexcoord = tcs[gl_VertexIndex];\n"
+			"}";
+
+		const char* fsCode =
+			"#version 450\n"
+			"#extension GL_ARB_separate_shader_objects : enable\n"
+			"#extension GL_GOOGLE_include_directive : enable\n"
+
+			"#include \"ParameterSet:Present\"\n"
+
+			"layout(location = 0) in vec2 inTexcoord;\n"
+
+			"layout(location = 0) out vec4 outColor;\n"
+
+			"void main() {\n"
+			"	outColor = texture(texSampler, inTexcoord);\n"
+			"}";
+
+		m_ParametrSet = renderCore.CreateParameterSet("Present");
+		m_ParametrSet->DeclareTextureParameter("texSampler");
+
+		m_Pipeline = renderCore.CreatePipeline();
+		m_Pipeline->SetVertexShader(vsCode);
+		m_Pipeline->SetFragmentShader(fsCode);
+	}
+
+#if 0
+	// Load shaders
+	{
+		m_VertexShaderId = renderCore.CreateShaderModule("PresentVS", generated::presentation::vsCodeData, generated::presentation::vsCodeLength);
+		m_FragmentShaderId = renderCore.CreateShaderModule("PresentFS", generated::presentation::fsCodeData, generated::presentation::fsCodeLength);
+	}
+
+	
 
 	// Create shader descriptor set layout
 	{
@@ -287,14 +347,6 @@ bool rf::api::Presentation::Load(rf::RenderCore& renderCore) {
 
 	m_PipelineId = renderCore.CreatePipelineStateObject(g_StageDebugName, pipelineDescriptor);
 
-	// Framebuffers
-	{
-		m_Framebuffers.resize(m_ImagesCount);
-		for (uint32 i = 0; i < m_ImagesCount; ++i) {
-			const df::Vector<VkImageView> rt = { m_ImageViews[i] };
-			renderCore.GetAPIData().InitFramebuffer(&m_Framebuffers[i], g_StageDebugName, &m_RenderPass, rt, m_VkExtent.width, m_VkExtent.height);
-		}
-	}
 
 	// Descriptor sets
 	{
@@ -304,10 +356,20 @@ bool rf::api::Presentation::Load(rf::RenderCore& renderCore) {
 		}
 	}
 
+#endif
 	return true;
 }
 
-void rf::api::Presentation::Unload(rf::RenderCore& renderCore) {
+void vk::Presentation::Unload(vk::RenderCore& renderCore) {
+	renderCore.DestroyPipeline(m_Pipeline);
+	renderCore.DestroyParameterSet(m_ParametrSet);
+
+	for (auto& renderPass : m_RenderPasses) {
+		renderCore.DestroyRenderPass(renderPass);
+	}
+	m_RenderPasses.clear();
+
+#if 0
 	for (auto& fb : m_Framebuffers) {
 		renderCore.GetAPIData().ReleaseFramebuffer(&fb);
 	}
@@ -331,9 +393,11 @@ void rf::api::Presentation::Unload(rf::RenderCore& renderCore) {
 
 	renderCore.DestroyShaderModule(m_FragmentShaderId);
 	renderCore.DestroyShaderModule(m_VertexShaderId);
+#endif
 }
 
-bool rf::api::Presentation::RecreateSwapchain(rf::RenderCore& renderCore, VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D extent, bool vSyncEnabled, uint32 graphicsFamilyIndex, uint32 presentFamilyIndex) {
+bool vk::Presentation::RecreateSwapchain(vk::RenderCore& /*renderCore*/, VkDevice /*device*/, VkPhysicalDevice /*physicalDevice*/, VkExtent2D /*extent*/, bool /*vSyncEnabled*/, uint32 /*graphicsFamilyIndex*/, uint32 /*presentFamilyIndex*/) {
+#if 0
 	for (auto& fb : m_Framebuffers) {
 		renderCore.GetAPIData().ReleaseFramebuffer(&fb);
 	}
@@ -348,17 +412,25 @@ bool rf::api::Presentation::RecreateSwapchain(rf::RenderCore& renderCore, VkDevi
 		const df::Vector<VkImageView> rt = { m_ImageViews[i] };
 		renderCore.GetAPIData().InitFramebuffer(&m_Framebuffers[i], g_StageDebugName, &m_RenderPass, rt, m_VkExtent.width, m_VkExtent.height);
 	}
-
+#endif
 	return true;
 }
 
-bool rf::api::Presentation::RecreateSwapchain(rf::RenderCore& renderCore, VkDevice device, VkPhysicalDevice physicalDevice, uint32 graphicsFamilyIndex, uint32 presentFamilyIndex) {
+bool vk::Presentation::RecreateSwapchain(vk::RenderCore& renderCore, VkDevice device, VkPhysicalDevice physicalDevice, uint32 graphicsFamilyIndex, uint32 presentFamilyIndex) {
 	return RecreateSwapchain(renderCore, device, physicalDevice, m_VkExtent, m_VSyncEnabled, graphicsFamilyIndex, presentFamilyIndex);
 }
 
-void rf::api::Presentation::PresentTexture(rf::CommandBuffer& rcb, rf::TextureId textureId) {
+void vk::Presentation::PresentTexture(vk::CommandBuffer& rcb, vk::Texture* /*texture*/) {
 	DFScopedRenderEvent(rcb, "Present Render Stage");
 
+	rcb.BeginRenderPass(m_RenderPasses[m_AvailableImageIndex]);
+
+	//rcb.SetPipeline(m_Pipeline);
+	//rcb.Draw(3);
+
+	rcb.EndRenderPass();
+
+#if 0
 	const rf::SamplerId samplerId = rf::GlobalObjects::Get(ESamplerState::Nearest);
 	const rf::PassId renderPassId = &m_RenderPass;
 	const rf::PipelineId pipelineId = m_PipelineId;
@@ -374,4 +446,5 @@ void rf::api::Presentation::PresentTexture(rf::CommandBuffer& rcb, rf::TextureId
 	rcb.BindDescriptorSet(m_PipelineLayoutId, descriptorSetId);
 	rcb.Draw(3);
 	rcb.EndRenderPass();
+#endif
 }

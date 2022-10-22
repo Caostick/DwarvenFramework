@@ -2,12 +2,11 @@
 #include "VkObjectManager.h"
 #include "VkHelper.h"
 #include "VkDebug.h"
-
-#include "../CommandBuffer.h"
+#include "VkCommandBuffer.h"
 
 #include <DwarvenCore/Assert.h>
 
-rf::api::TransferBuffer::TransferBuffer() 
+vk::TransferBuffer::TransferBuffer() 
 	: m_Device(VK_NULL_HANDLE)
 	, m_Buffer(VK_NULL_HANDLE)
 	, m_Memory(VK_NULL_HANDLE)
@@ -16,7 +15,7 @@ rf::api::TransferBuffer::TransferBuffer()
 
 }
 
-void rf::api::TransferBuffer::Init(VkDevice device, VkDeviceSize size) {
+void vk::TransferBuffer::Init(VkDevice device, VkDeviceSize size) {
 	m_Device = device;
 	m_MemorySize = uint32(size);
 	m_FreeMemory = m_MemorySize;
@@ -30,12 +29,12 @@ void rf::api::TransferBuffer::Init(VkDevice device, VkDeviceSize size) {
 	vk::BindBufferMemory(m_Device, m_Buffer, m_Memory);
 }
 
-void rf::api::TransferBuffer::Release(vk::ObjectManager& objectManager) {
+void vk::TransferBuffer::Release(vk::ObjectManager& objectManager) {
 	objectManager.RemoveBuffer(m_Device, m_Buffer);
 	objectManager.RemoveDeviceMemory(m_Device, m_Memory);
 }
 
-void rf::api::TransferBuffer::SetBufferData(VkBuffer buffer, const void* data, uint32 dataSize, uint32 offset /*= 0*/) {
+void vk::TransferBuffer::SetBufferData(VkBuffer buffer, const void* data, uint32 dataSize, uint32 offset /*= 0*/) {
 	DFAssert(dataSize < m_FreeMemory, "Not enough memory in transfer buffer!");
 
 	Transaction transaction;
@@ -49,11 +48,11 @@ void rf::api::TransferBuffer::SetBufferData(VkBuffer buffer, const void* data, u
 	m_FreeMemory -= dataSize;
 }
 
-void rf::api::TransferBuffer::Execute(rf::CommandBuffer& rcb) {
+void vk::TransferBuffer::Execute(vk::CommandBuffer& rcb) {
 	DFScopedRenderEvent(rcb, "Execute Data Transfer");
 
 	for (const auto& transaction : m_Transactions) {
-		rcb.GetAPIData().CopyBuffer(m_Buffer, transaction.m_DstBuffer, transaction.m_DataSize, transaction.m_SrcBufferOffset, transaction.m_DstBufferOffset);
+		rcb.CopyBuffer(m_Buffer, transaction.m_DstBuffer, transaction.m_DataSize, transaction.m_SrcBufferOffset, transaction.m_DstBufferOffset);
 	}
 
 	m_Transactions.clear();

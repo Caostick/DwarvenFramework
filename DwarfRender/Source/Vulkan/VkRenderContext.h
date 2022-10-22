@@ -2,11 +2,11 @@
 
 #include <DwarvenCore/Types.h>
 
-namespace rf {
+namespace vk {
 	class CommandBuffer;
 }
 
-namespace rf {
+namespace vk {
 	struct RenderContext {
 		RenderContext() = default;
 		RenderContext(const RenderContext&) = default;
@@ -14,7 +14,7 @@ namespace rf {
 		RenderContext& operator = (const RenderContext&) = default;
 		RenderContext& operator = (RenderContext&&) = default;
 
-		rf::CommandBuffer* m_CommandBuffer = nullptr;
+		vk::CommandBuffer* m_CommandBuffer = nullptr;
 		uint32 m_FrameIndex = 0;
 	};
 }

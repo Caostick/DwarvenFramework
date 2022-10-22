@@ -2,7 +2,7 @@
 
 #include <DwarvenCore/Memory.h>
 
-rf::api::ScopedRenderEvent::ScopedRenderEvent(VkCommandBuffer rcb, const char* name)
+vk::ScopedRenderEvent::ScopedRenderEvent(VkCommandBuffer rcb, const char* name)
 	: m_VkCommandBuffer(rcb) {
 
 #if DF_USE_DEBUG_MARKERS
@@ -15,19 +15,19 @@ rf::api::ScopedRenderEvent::ScopedRenderEvent(VkCommandBuffer rcb, const char* n
 #endif
 }
 
-rf::api::ScopedRenderEvent::ScopedRenderEvent(rf::api::ScopedRenderEvent&& other) noexcept
+vk::ScopedRenderEvent::ScopedRenderEvent(vk::ScopedRenderEvent&& other) noexcept
 	: m_VkCommandBuffer(other.m_VkCommandBuffer) {
 	other.m_VkCommandBuffer = VK_NULL_HANDLE;
 }
 
-rf::api::ScopedRenderEvent& rf::api::ScopedRenderEvent::operator = (rf::api::ScopedRenderEvent&& other) noexcept {
+vk::ScopedRenderEvent& vk::ScopedRenderEvent::operator = (vk::ScopedRenderEvent&& other) noexcept {
 	m_VkCommandBuffer = other.m_VkCommandBuffer;
 	other.m_VkCommandBuffer = VK_NULL_HANDLE;
 
 	return *this;
 }
 
-rf::api::ScopedRenderEvent::~ScopedRenderEvent() {
+vk::ScopedRenderEvent::~ScopedRenderEvent() {
 #if DF_USE_DEBUG_MARKERS
 	if (m_VkCommandBuffer != VK_NULL_HANDLE) {
 		vk::API::CmdDebugMarkerEndEXT(m_VkCommandBuffer);

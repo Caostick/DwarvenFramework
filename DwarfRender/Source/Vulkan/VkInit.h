@@ -1,8 +1,8 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
+#include "VkDefinitions.h"
 
-#define VK_DEBUG 1
+#include <vulkan/vulkan.h>
 
 #if VK_DEBUG
 #define SET_DEBUG_NAME(device, x, name) SetDebugName(device, x, name)

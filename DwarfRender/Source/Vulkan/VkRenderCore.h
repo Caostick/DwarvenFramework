@@ -1,100 +1,161 @@
 #pragma once
 
 #include "VkAPI.h"
-#include "VkVertexDescription.h"
-#include "VkPresentation.h"
-#include "VkBuffer.h"
-#include "VkTexture.h"
-#include "VkPass.h"
-#include "VkFramebuffer.h"
 #include "VkObjectManager.h"
 #include "VkTransferBuffer.h"
-#include "VkRenderContext.h"
+#include "VkFrameData.h"
+#include "VkPresentation.h"
+#include "VkVertexAttribute.h"
 
-#include "../FrameData.h"
-#include "../Texture.h"
-#include "../Mesh.h"
-#include "../ShaderModule.h"
-#include "../VertexDescription.h"
-#include "../Pass.h"
-#include "../Framebuffer.h"
-#include "../Buffer.h"
-#include "../Sampler.h"
-#include "../Descriptor.h"
-#include "../DescriptorSet.h"
-#include "../DescriptorSetLayout.h"
-#include "../Pipeline.h"
-#include "../GraphicsPipeline.h"
-#include "../PipelineLayout.h"
-
-#include <DwarfRender/ObjectId.h>
-#include <DwarfRender/SamplerState.h>
-#include <DwarfRender/RasterizationState.h>
-#include <DwarfRender/PrimitiveTopology.h>
-#include <DwarfRender/BlendState.h>
-#include <DwarfRender/DepthState.h>
-#include <DwarfRender/PipelineDescriptor.h>
-#include <DwarfRender/MaterialRule.h>
-#include <DwarfRender/Material.h>
-
-#include <DwarvenCore/SparseArray.h>
-#include <DwarvenCore/ObjectPool.h>
-#include <DwarvenCore/StringView.h>
-#include <DwarvenCore/Vector.h>
 #include <DwarvenCore/Types.h>
-
-#include <DwarvenCore/Math/Math.h>
+#include <DwarvenCore/String.h>
+#include <DwarvenCore/Vector.h>
+#include <DwarvenCore/ObjectPool.h>
+#include <DwarvenCore/HashMap.h>
 
 namespace df {
 	class Window;
 }
 
-namespace rf {
-	namespace api {
-		struct RenderCore {
-		public:
-			RenderCore();
-			~RenderCore();
+namespace vk {
+	struct RenderContext;
 
-			void InitSampler(rf::SamplerId sampler, const df::StringView& name, const rf::SamplerState& samplerState);
-			void ReleaseSampler(rf::SamplerId sampler);
+	class RenderPass;
+	class Pipeline;
+	class ParameterSetDefinition;
+	class ParameterSet;
+}
 
-			void InitRenderPass(rf::PassId renderPass, const df::StringView& name, const df::Vector<VkAttachmentDescription>& attachementDescriptions, const df::Vector<rf::ClearValue>& clearValues);
-			void ReleaseRenderPass(rf::PassId renderPass);
+namespace vk {
+	class RenderCore {
+	public:
+		RenderCore(const df::Window& window);
 
-			void InitFramebuffer(rf::FramebufferId framebuffer, const df::StringView& name, rf::PassId renderPass, const df::Vector<VkImageView>& attachments, uint32 width, uint32 height);
-			void ReleaseFramebuffer(rf::FramebufferId framebuffer);
+		auto GetVkDevice() const->VkDevice;
 
-			void EmptyTrashCan();
+		bool Init();
+		void Release();
 
-		public:
-			VkInstance m_VkInstance;
-			VkPhysicalDevice m_VkPhysicalDevice;
-			VkDevice m_VkDevice;
+		bool Load();
+		void Unload();
 
-			uint32 m_PresentFamilyIndex;
-			uint32 m_GraphicsFamilyIndex;
-			uint32 m_TransferFamilyIndex;
-			uint32 m_ComputeFamilyIndex;
+		bool BeginFrame(vk::RenderContext& renderContext);
+		void EndFrame();
 
-			VkQueue m_PresentQueue;
-			VkQueue m_GraphicsQueue;
-			VkQueue m_TransferQueue;
-			VkQueue m_ComputeQueue;
+		void Present(vk::Texture* texture);
 
-			df::Vector<VkCommandPool> m_GraphicsCommandPools;
-			df::Vector<VkCommandPool> m_TransferCommandPools;
+		void CompleteAllCommands();
 
-			rf::api::Presentation m_Presentation;
-			rf::api::TransferBuffer m_TransferBuffer;
+		bool RecreateSwapchain(uint32 screenWidth, uint32 screenHeight);
+		bool RecreateSwapchain();
 
-			VkDescriptorPool m_DescriptorPool;
+		auto CreateRenderPass()->vk::RenderPass*;
+		void DestroyRenderPass(vk::RenderPass* renderPass);
 
-			VkPhysicalDeviceProperties m_DeviceProperties;
-			VkPhysicalDeviceFeatures m_DeviceFeatures;
-			VkPhysicalDeviceLimits m_DeviceLimits;
+		auto CreatePipeline()->vk::Pipeline*;
+		void DestroyPipeline(vk::Pipeline* pipeline);
 
-			vk::ObjectManager m_VulkanObjectManager;
-		};
-	}
+		auto FindParameterSetDefinition(const df::StringView& name) const -> const vk::ParameterSetDefinition*;
+
+		auto CreateParameterSet(const df::StringView& name)->vk::ParameterSet*;
+		auto CreateParameterSet(vk::ParameterSetDefinition* parameterSetDefinition)->vk::ParameterSet*;
+		void DestroyParameterSet(vk::ParameterSet* parameterSet);
+
+		auto RegisterVertexAttribute(const df::StringView& name, df::EVertexAttributeFormat format, uint32 index) -> const vk::VertexAttribute*;
+		auto FindVertexAttribute(const df::StringView& name) const -> const vk::VertexAttribute*;
+
+		void AddShaderInclude(const df::StringView& name, const df::StringView& content);
+		auto GetShaderInclude(const df::StringView& name) const -> const df::String&;
+
+	public:
+		void RemoveImage(VkImage image);
+		void RemoveImageView(VkImageView imageView);
+		void RemoveBuffer(VkBuffer buffer);
+		void RemoveBufferView(VkBufferView bufferView);
+		void RemoveDeviceMemory(VkDeviceMemory deviceMemory);
+		void RemoveSampler(VkSampler sampler);
+		void RemoveShaderModule(VkShaderModule shaderModule);
+		void RemoveRenderPass(VkRenderPass renderPass);
+		void RemoveDescriptorSet(VkDescriptorPool descriptorPool, VkDescriptorSet descriptorSet);
+		void RemoveDescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout);
+		void RemovePipelineLayout(VkPipelineLayout pipelineLayout);
+		void RemoveFramebuffer(VkFramebuffer framebuffer);
+		void RemovePipeline(VkPipeline pipeline);
+		void RemoveDescriptorPool(VkDescriptorPool descriptorPool);
+		void RemoveCommandPool(VkCommandPool commandPool);
+
+	private:
+		auto CreateParameterSetDefinition(const df::StringView& name)->vk::ParameterSetDefinition*;
+		void DestroyParameterSetDefinition(vk::ParameterSetDefinition* parameterSetDefinition);
+
+	private:
+		bool InitInstance();
+		bool InitPhysicalDevice();
+		bool InitDevice();
+
+		bool CheckForPreventedCaptureSoft();
+
+		bool InitCommandPools();
+		void ReleaseCommandPools();
+
+		bool InitDescriptorPools();
+		void ReleaseDescriptorPools();
+
+		bool InitFrameData(vk::FrameData& frameData);
+		void ReleaseFrameData(vk::FrameData& frameData);
+
+		bool InitCommandBuffers(vk::FrameData& frameData);
+		void ReleaseCommandBuffers(vk::FrameData& frameData);
+
+		void EmptyTrashCan();
+
+	private:
+		const df::Window& m_Window;
+
+		uint32 m_NumFramesInFlight;
+		uint32 m_FrameIndex;
+
+		df::Vector<vk::FrameData> m_FrameData;
+
+		vk::CommandBuffer m_TransferCommandBuffer;
+
+		df::ObjectPool<vk::RenderPass> m_RenderPasses;
+		df::ObjectPool<vk::Pipeline> m_Pipelines;
+		df::ObjectPool<vk::ParameterSetDefinition> m_ParameterSetDefinitions;
+		df::ObjectPool<vk::ParameterSet> m_ParameterSets;
+		df::ObjectPool<vk::VertexAttribute> m_VertexAttributes;
+
+		df::HashMap<df::String, vk::ParameterSetDefinition*> m_ParameterSetDefinitionRegistry;
+		df::HashMap<df::String, df::String> m_ShaderIncludes;
+		df::String m_NullInclude;
+
+		// Vk
+		VkInstance m_VkInstance;
+		VkPhysicalDevice m_VkPhysicalDevice;
+		VkDevice m_VkDevice;
+
+		uint32 m_PresentFamilyIndex;
+		uint32 m_GraphicsFamilyIndex;
+		uint32 m_TransferFamilyIndex;
+		uint32 m_ComputeFamilyIndex;
+
+		VkQueue m_PresentQueue;
+		VkQueue m_GraphicsQueue;
+		VkQueue m_TransferQueue;
+		VkQueue m_ComputeQueue;
+
+		df::Vector<VkCommandPool> m_GraphicsCommandPools;
+		df::Vector<VkCommandPool> m_TransferCommandPools;
+
+		vk::Presentation m_Presentation;
+		vk::TransferBuffer m_TransferBuffer;
+
+		VkDescriptorPool m_DescriptorPool;
+
+		VkPhysicalDeviceProperties m_DeviceProperties;
+		VkPhysicalDeviceFeatures m_DeviceFeatures;
+		VkPhysicalDeviceLimits m_DeviceLimits;
+
+		vk::ObjectManager m_VulkanObjectManager;
+	};
 }

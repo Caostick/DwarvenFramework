@@ -5,65 +5,25 @@ set(CPP_VERSION 17)
 
 project(${PROJECT_NAME})
 
-file(GLOB RENDERER_FILES
+file(GLOB RENDER_FILES
 	Include/DwarfRender/*.h
 	Include/DwarfRender/*.inl
 	Source/*.h
 	Source/*.inl
 	Source/*.cpp
 )
-source_group("Renderer" FILES ${RENDERER_FILES})
+source_group("Render" FILES ${RENDER_FILES})
 
-file(GLOB SHADER_GRAPH_FILES
-	Include/DwarfRender/ShaderGraph/*.h
-	Include/DwarfRender/ShaderGraph/*.inl
-	Source/ShaderGraph/*.h
-	Source/ShaderGraph/*.inl
-	Source/ShaderGraph/*.cpp
-)
-source_group("Renderer\\ShaderGraph" FILES ${SHADER_GRAPH_FILES})
-
-file(GLOB SHADER_GRAPH_NODES_FILES
-	Include/DwarfRender/ShaderGraph/Nodes/*.h
-	Include/DwarfRender/ShaderGraph/Nodes/*.inl
-	Source/ShaderGraph/Nodes/*.h
-	Source/ShaderGraph/Nodes/*.inl
-	Source/ShaderGraph/Nodes/*.cpp
-)
-source_group("Renderer\\ShaderGraph\\Nodes" FILES ${SHADER_GRAPH_NODES_FILES})
-
-file(GLOB RESOURCES_FILES
-	Include/DwarfRender/Resources/*.h
-	Include/DwarfRender/Resources/*.inl
-	Source/Resources/*.h
-	Source/Resources/*.inl
-	Source/Resources/*.cpp
-)
-source_group("Renderer\\Resources" FILES ${RESOURCES_FILES})
-
-file(GLOB LOADERS_FILES
-	Include/DwarfRender/Loaders/*.h
-	Include/DwarfRender/Loaders/*.inl
-	Source/Loaders/*.h
-	Source/Loaders/*.inl
-	Source/Loaders/*.cpp
-)
-source_group("Renderer\\Loaders" FILES ${LOADERS_FILES})
-
-file(GLOB API_FILES
+file(GLOB RENDER_VK_FILES
 	Source/Vulkan/*.h
 	Source/Vulkan/*.inl
 	Source/Vulkan/*.cpp
 )
-source_group("Renderer\\API" FILES ${API_FILES})
+source_group("Render\\Vulkan" FILES ${RENDER_VK_FILES})
 
 add_library (${PROJECT_NAME} STATIC
-	${RENDERER_FILES}
-	${SHADER_GRAPH_FILES}
-	${SHADER_GRAPH_NODES_FILES}
-	${RESOURCES_FILES}
-	${LOADERS_FILES}
-	${API_FILES}
+	${RENDER_FILES}
+	${RENDER_VK_FILES}
 )
 
 include_directories(Include/)
