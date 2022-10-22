@@ -1,5 +1,5 @@
-# DwarfRenderer (Very WIP. Unusable atm)
-DwarvenFramework module to provide game rendering.
+# DwarfRender
+DwarvenFramework module to provide simple interface for rendering.
 
 Dependencies:
 =============
