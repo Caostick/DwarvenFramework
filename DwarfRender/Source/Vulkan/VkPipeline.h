@@ -6,6 +6,7 @@
 
 #include <DwarvenCore/String.h>
 #include <DwarvenCore/Vector.h>
+#include <DwarvenCore/Bitset.h>
 
 namespace vk {
 	class RenderCore;

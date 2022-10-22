@@ -6,6 +6,7 @@
 #include "VkFrameData.h"
 #include "VkPresentation.h"
 #include "VkVertexAttribute.h"
+#include "VkSampler.h"
 
 #include <DwarvenCore/Types.h>
 #include <DwarvenCore/String.h>
@@ -72,6 +73,8 @@ namespace vk {
 
 		auto GetShaderCompiler()->vk::ShaderCompiler*;
 
+		auto RequestSampler(const vk::SamplerState& state)->vk::Sampler*;
+
 	public:
 		void RemoveImage(VkImage image);
 		void RemoveImageView(VkImageView imageView);
@@ -126,6 +129,7 @@ namespace vk {
 		df::ObjectPool<vk::ParameterSetDefinition> m_ParameterSetDefinitions;
 		df::ObjectPool<vk::ParameterSet> m_ParameterSets;
 		df::ObjectPool<vk::VertexAttribute> m_VertexAttributes;
+		df::ObjectPool<vk::Sampler> m_Samplers;
 
 		df::HashMap<df::String, vk::ParameterSetDefinition*> m_ParameterSetDefinitionRegistry;
 		df::HashMap<df::String, df::String> m_ShaderIncludes;

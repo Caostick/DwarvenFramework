@@ -5,8 +5,8 @@
 #include "VkRenderCore.h"
 #include "VkRenderPass.h"
 #include "VkParameterSet.h"
-#include "VkParameterSetDefinition.h"
 #include "VkPipeline.h"
+#include "VkTexture.h"
 
 #include "Generated/Presentation.generated.h"
 
@@ -415,13 +415,15 @@ bool vk::Presentation::RecreateSwapchain(vk::RenderCore& renderCore, VkDevice de
 	return RecreateSwapchain(renderCore, device, physicalDevice, m_VkExtent, m_VSyncEnabled, graphicsFamilyIndex, presentFamilyIndex);
 }
 
-void vk::Presentation::PresentTexture(vk::CommandBuffer& rcb, vk::Texture* /*texture*/) {
+void vk::Presentation::PresentTexture(vk::CommandBuffer& rcb, vk::Texture* texture) {
 	DFScopedRenderEvent(rcb, "Present Render Stage");
+
+	m_ParametrSet->SetTexture("texSampler", texture);
 
 	rcb.BeginRenderPass(m_RenderPasses[m_AvailableImageIndex]);
 
-	//rcb.SetPipeline(m_Pipeline);
-	//rcb.Draw(3);
+	rcb.SetPipeline(m_Pipeline);
+	rcb.Draw(3);
 
 	rcb.EndRenderPass();
 

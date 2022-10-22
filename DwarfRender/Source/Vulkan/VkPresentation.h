@@ -58,16 +58,5 @@ namespace vk {
 		df::Vector<vk::RenderPass*> m_RenderPasses;
 		vk::Pipeline* m_Pipeline;
 		vk::ParameterSet* m_ParametrSet;
-
-		//df::Vector<rf::DescriptorSetId> m_DescriptorSets;
-
-		//rf::Pass m_RenderPass;
-		//df::Vector<rf::Framebuffer> m_Framebuffers;
-
-		//rf::DescriptorSetLayoutId m_ShaderDescriptorSetLayoutId;
-		//rf::PipelineId m_PipelineId;
-		//rf::PipelineLayoutId m_PipelineLayoutId;
-		//rf::ShaderModuleId m_VertexShaderId;
-		//rf::ShaderModuleId m_FragmentShaderId;
 	};
 }

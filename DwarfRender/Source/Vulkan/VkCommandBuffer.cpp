@@ -9,6 +9,30 @@ vk::CommandBuffer::CommandBuffer()
 	: m_VkCommandBuffer(VK_NULL_HANDLE) 
 	, m_CurrentRenderPass(nullptr) {}
 
+vk::CommandBuffer::~CommandBuffer() {
+
+}
+
+void vk::CommandBuffer::BeginRenderPass(df::RenderPass* renderPass) {
+	BeginRenderPass(static_cast<vk::RenderPass*>(renderPass));
+}
+
+void vk::CommandBuffer::EndRenderPass() {
+	m_CurrentRenderPass = nullptr;
+
+	vk::API::CmdEndRenderPass(m_VkCommandBuffer);
+}
+
+void vk::CommandBuffer::SetPipeline(df::Pipeline* pipeline) {
+	SetPipeline(static_cast<vk::Pipeline*>(pipeline));
+}
+
+void vk::CommandBuffer::Draw(uint32 vertexCount) {
+	ValidateState();
+
+	vk::API::CmdDraw(m_VkCommandBuffer, vertexCount, 1, 0, 0);
+}
+
 auto vk::CommandBuffer::Get() const->VkCommandBuffer {
 	return m_VkCommandBuffer;
 }
@@ -134,12 +158,10 @@ void vk::CommandBuffer::BeginRenderPass(vk::RenderPass* renderPass) {
 	vk::API::CmdSetScissor(m_VkCommandBuffer, 0, 1, &scissor);
 }
 
-void vk::CommandBuffer::EndRenderPass() {
-	m_CurrentRenderPass = nullptr;
-
-	vk::API::CmdEndRenderPass(m_VkCommandBuffer);
-}
-
 void vk::CommandBuffer::SetPipeline(vk::Pipeline* pipeline) {
 	m_CurrentPipeline = pipeline;
+}
+
+void vk::CommandBuffer::ValidateState() {
+
 }

@@ -352,8 +352,8 @@ glslang::TShader::Includer::IncludeResult* vk::ShaderFileIncluder::includeLocal(
 
 	const df::StringView includeName = df::StringView(headerName);
 
-	if (const auto vertexAttribule = FetchVertexAttribute(m_RenderCore, includeName)) {
-		const auto attr = vertexAttribule.Get();
+	if (const auto vertexAttribute = FetchVertexAttribute(m_RenderCore, includeName)) {
+		const auto attr = vertexAttribute.Get();
 
 		const auto& code = attr->m_ShaderString;
 		return DFNew IncludeResult(headerName, code.c_str(), code.size(), nullptr);

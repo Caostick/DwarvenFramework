@@ -203,6 +203,46 @@ bool vk::ParameterSetDefinition::HasBufferParameter(const df::StringView& name) 
 	return false;
 }
 
+auto vk::ParameterSetDefinition::GetConstantBufferSize() const->uint32 {
+	return m_ConstantBufferSize;
+}
+
+auto vk::ParameterSetDefinition::GetConstants() const -> const df::Vector<ShaderConstantDefinition*>& {
+	return m_Constants;
+}
+
+auto vk::ParameterSetDefinition::GetFloatConstants() const -> const df::Vector<ShaderFloatDefinition>& {
+	return m_FloatConstants;
+}
+
+auto vk::ParameterSetDefinition::GetVec2Constants() const -> const df::Vector<ShaderVec2Definition>& {
+	return m_Vec2Constants;
+}
+
+auto vk::ParameterSetDefinition::GetVec3Constants() const -> const df::Vector<ShaderVec3Definition>& {
+	return m_Vec3Constants;
+}
+
+auto vk::ParameterSetDefinition::GetVec4Constants() const -> const df::Vector<ShaderVec4Definition>& {
+	return m_Vec4Constants;
+}
+
+auto vk::ParameterSetDefinition::GetMat3Constants() const -> const df::Vector<ShaderMat3Definition>& {
+	return m_Mat3Constants;
+}
+
+auto vk::ParameterSetDefinition::GetMat4Constants() const -> const df::Vector<ShaderMat4Definition>& {
+	return m_Mat4Constants;
+}
+
+auto vk::ParameterSetDefinition::GetBuffers() const -> const df::Vector<ShaderBufferDefinition>& {
+	return m_Buffers;
+}
+
+auto vk::ParameterSetDefinition::GetTextures() const -> const df::Vector<ShaderTextureDefinition>& {
+	return m_Textures;
+}
+
 auto vk::ParameterSetDefinition::GetName() const -> const df::String& {
 	return m_Name;
 }

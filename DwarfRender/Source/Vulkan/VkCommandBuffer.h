@@ -16,7 +16,16 @@ namespace vk {
 	class CommandBuffer : public df::CommandBuffer {
 	public:
 		CommandBuffer();
+		virtual ~CommandBuffer();
 
+		virtual void BeginRenderPass(df::RenderPass* renderPass) override;
+		virtual void EndRenderPass() override;
+
+		virtual void SetPipeline(df::Pipeline* pipeline) override;
+
+		virtual void Draw(uint32 vertexCount) override;
+
+	public:
 		auto Get() const->VkCommandBuffer;
 
 		bool Init(const df::StringView& name, VkDevice device, VkCommandPool commandPool);
@@ -34,9 +43,10 @@ namespace vk {
 		auto ScopedRenderEvent(const char* name)->vk::ScopedRenderEvent;
 
 		void BeginRenderPass(vk::RenderPass* renderPass);
-		void EndRenderPass();
 
 		void SetPipeline(vk::Pipeline* pipeline);
+
+		void ValidateState();
 
 	private:
 		VkCommandBuffer m_VkCommandBuffer;

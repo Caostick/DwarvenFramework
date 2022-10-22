@@ -69,6 +69,17 @@ namespace vk {
 		bool HasTextureParameter(const df::StringView& name);
 		bool HasBufferParameter(const df::StringView& name);
 
+		auto GetConstantBufferSize() const->uint32;
+		auto GetConstants() const -> const df::Vector<ShaderConstantDefinition*>&;
+		auto GetFloatConstants() const -> const df::Vector<ShaderFloatDefinition>&;
+		auto GetVec2Constants() const -> const df::Vector<ShaderVec2Definition>&;
+		auto GetVec3Constants() const -> const df::Vector<ShaderVec3Definition>&;
+		auto GetVec4Constants() const -> const df::Vector<ShaderVec4Definition>&;
+		auto GetMat3Constants() const -> const df::Vector<ShaderMat3Definition>&;
+		auto GetMat4Constants() const -> const df::Vector<ShaderMat4Definition>&;
+		auto GetBuffers() const -> const df::Vector<ShaderBufferDefinition>&;
+		auto GetTextures() const -> const df::Vector<ShaderTextureDefinition>&;
+
 	public:
 		auto GetName() const -> const df::String&;
 		auto MakeShaderSnippet(uint32 idx) const->df::String;

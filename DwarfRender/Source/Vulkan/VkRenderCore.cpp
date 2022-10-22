@@ -148,6 +148,11 @@ void vk::RenderCore::Release() {
 
 	m_VertexAttributes.Clear();
 
+	for (auto sampler : m_Samplers) {
+		m_VulkanObjectManager.RemoveSampler(m_VkDevice, sampler->GetHandle());
+	}
+	m_Samplers.Clear();
+
 	EmptyTrashCan();
 
 	// Destroy device and physical device
@@ -406,6 +411,36 @@ auto vk::RenderCore::GetShaderInclude(const df::StringView& name) const->const d
 
 auto vk::RenderCore::GetShaderCompiler()->vk::ShaderCompiler* {
 	return m_ShaderCompiler;
+}
+
+auto vk::RenderCore::RequestSampler(const vk::SamplerState& state)->vk::Sampler* {
+	for (auto sampler : m_Samplers) {
+		if (*sampler == state) {
+			return sampler;
+		}
+	}
+
+	VkSamplerCreateInfo samplerCreateInfo = {};
+	samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+	samplerCreateInfo.magFilter = state.m_VkFilter;
+	samplerCreateInfo.minFilter = state.m_VkFilter;
+	samplerCreateInfo.addressModeU = state.m_VkAddressMode;
+	samplerCreateInfo.addressModeV = state.m_VkAddressMode;
+	samplerCreateInfo.addressModeW = state.m_VkAddressMode;
+	samplerCreateInfo.anisotropyEnable = VK_TRUE;
+	samplerCreateInfo.maxAnisotropy = 16;
+	samplerCreateInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+	samplerCreateInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+	samplerCreateInfo.mipmapMode = state.m_VkMipMapMode;
+
+	VkSampler vkSampler = VK_NULL_HANDLE;
+	if (vk::API::CreateSampler(m_VkDevice, &samplerCreateInfo, vk::Allocator(), &vkSampler) != VK_SUCCESS) {
+		DFAssert(false, "Can't create Sampler!");
+	}
+
+	DFVkDebugName(m_VkDevice, vkSampler, "Sampler");
+
+	return m_Samplers.Create(state, vkSampler);
 }
 
 void vk::RenderCore::RemoveImage(VkImage image) {
