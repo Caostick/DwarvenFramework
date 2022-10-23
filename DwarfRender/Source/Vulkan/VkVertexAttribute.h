@@ -1,5 +1,7 @@
 #pragma once
 
+#include "VkAPI.h"
+
 #include <DwarfRender/VertexAttribute.h>
 
 namespace df {
@@ -23,6 +25,8 @@ namespace df {
 	};
 
 	auto ToShaderInOutType(df::EVertexAttributeFormat format)->df::EShaderInOutType;
+	auto ToStride(df::EVertexAttributeFormat format)->uint32;
+	auto ToVkFormat(df::EVertexAttributeFormat format)->VkFormat;
 	auto ToAttributeSize(df::EVertexAttributeFormat format)->uint32;
 	auto ToAttributeSize(df::EShaderInOutType type)->uint32;
 	auto ToShaderInOutString(df::EShaderInOutType type) -> const char*;

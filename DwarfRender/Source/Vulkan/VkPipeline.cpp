@@ -140,9 +140,10 @@ bool vk::Pipeline::Build() {
 	}
 
 	// Pipeline Layout
-	{
-		m_VkPipelineLayout = CreateLayout();
-	}
+	m_VkPipelineLayout = CreateLayout();
+
+	// Vertex Description
+	CreateVertexDescription();
 
 	m_IsBuilt = true;
 
@@ -448,4 +449,22 @@ auto vk::Pipeline::CreateLayout()->VkPipelineLayout {
 	DFVkDebugName(vkDevice, vkPipelineLayout, m_Name);
 
 	return vkPipelineLayout;
+}
+
+void vk::Pipeline::CreateVertexDescription() {
+	m_BindingDescriptions.resize(m_VertexAttributes.size());
+	m_AttributeDescriptions.resize(m_VertexAttributes.size());
+
+	for (size_t i = 0; i < m_VertexAttributes.size(); ++i) {
+		m_BindingDescriptions[i] = {};
+		m_BindingDescriptions[i].binding = m_VertexAttributes[i]->m_Index;
+		m_BindingDescriptions[i].stride = df::ToStride(m_VertexAttributes[i]->m_Format);
+		m_BindingDescriptions[i].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+		m_AttributeDescriptions[i] = {};
+		m_AttributeDescriptions[i].binding = i;
+		m_AttributeDescriptions[i].location = i;
+		m_AttributeDescriptions[i].format = df::ToVkFormat(m_VertexAttributes[i]->m_Format);
+		m_AttributeDescriptions[i].offset = 0;
+	}
 }

@@ -79,6 +79,7 @@ namespace vk {
 	private:
 		auto CreateShaderModule(const uint32* data, uint32 length) -> VkShaderModule;
 		auto CreateLayout()->VkPipelineLayout;
+		void CreateVertexDescription();
 
 
 		auto CreatePipelineStateObject()->VkPipeline;
@@ -106,6 +107,9 @@ namespace vk {
 		vk::PipelineState m_State;
 
 		VkPipelineLayout m_VkPipelineLayout;
+
+		df::Vector<VkVertexInputAttributeDescription> m_AttributeDescriptions;
+		df::Vector<VkVertexInputBindingDescription> m_BindingDescriptions;
 
 		df::Vector<PipelineStateObjectSlot> m_PipelineStateObjects;
 		df::Vector<const vk::ParameterSetDefinition*> m_ParameterSetDefinitions;
