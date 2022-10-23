@@ -1,5 +1,6 @@
 #include "VkCommandBuffer.h"
 #include "VkRenderPass.h"
+#include "VkParameterSet.h"
 #include "VkPipeline.h"
 #include "VkDebug.h"
 
@@ -7,7 +8,9 @@
 
 vk::CommandBuffer::CommandBuffer()
 	: m_VkCommandBuffer(VK_NULL_HANDLE) 
-	, m_CurrentRenderPass(nullptr) {}
+	, m_CurrentRenderPass(nullptr) 
+	, m_CurrentPipeline(nullptr) {
+}
 
 vk::CommandBuffer::~CommandBuffer() {
 
@@ -25,6 +28,10 @@ void vk::CommandBuffer::EndRenderPass() {
 
 void vk::CommandBuffer::SetPipeline(df::Pipeline* pipeline) {
 	SetPipeline(static_cast<vk::Pipeline*>(pipeline));
+}
+
+bool vk::CommandBuffer::BindParameterSet(df::ParameterSet* parameterSet) {
+	return BindParameterSet(static_cast<vk::ParameterSet*>(parameterSet));
 }
 
 void vk::CommandBuffer::Draw(uint32 vertexCount) {
@@ -160,6 +167,12 @@ void vk::CommandBuffer::BeginRenderPass(vk::RenderPass* renderPass) {
 
 void vk::CommandBuffer::SetPipeline(vk::Pipeline* pipeline) {
 	m_CurrentPipeline = pipeline;
+}
+
+bool vk::CommandBuffer::BindParameterSet(vk::ParameterSet* /*parameterSet*/) {
+	DFAssert(m_CurrentPipeline != nullptr, "Can't bind parameter set - Pipeline is not set!");
+
+	return false;
 }
 
 void vk::CommandBuffer::ValidateState() {

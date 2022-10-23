@@ -262,41 +262,46 @@ bool vk::Presentation::Load(vk::RenderCore& renderCore) {
 			"layout(location = 0) out vec2 outTexcoord;\n"
 			"\n"
 			"vec2 positions[3] = vec2[](\n"
-			"	vec2(0.0, 0.0),\n"
-			"	vec2(0.0, 2.0),\n"
-			"	vec2(2.0, 0.0)\n"
+			"    vec2(0.0, 0.0),\n"
+			"    vec2(0.0, 2.0),\n"
+			"    vec2(2.0, 0.0)\n"
 			");\n"
 			"\n"
 			"vec2 tcs[3] = vec2[](\n"
-			"	vec2(0.0, 0.0),\n"
-			"	vec2(0.0, 2.0),\n"
-			"	vec2(2.0, 0.0)\n"
+			"    vec2(0.0, 0.0),\n"
+			"    vec2(0.0, 2.0),\n"
+			"    vec2(2.0, 0.0)\n"
 			");\n"
 			"\n"
 			"void main() {\n"
-			"	gl_Position = vec4(positions[gl_VertexIndex], 0.0, 1.0);\n"
-			"	outTexcoord = tcs[gl_VertexIndex];\n"
+			"    gl_Position = vec4(positions[gl_VertexIndex], 0.0, 1.0);\n"
+			"    outTexcoord = tcs[gl_VertexIndex];\n"
 			"}";
 
 		const char* fsCode =
-			"#include \"ParameterSet:Present\"\n"
+			"#ParameterSet Present\n"
 			"\n"
 			"layout(location = 0) in vec2 inTexcoord;\n"
 			"\n"
 			"layout(location = 0) out vec4 outColor;\n"
 			"\n"
 			"void main() {\n"
-			"	outColor = texture(texSampler, inTexcoord);\n"
+			"    outColor = texture(Texture, inTexcoord);\n"
 			"}";
 
 		m_ParametrSet = renderCore.CreateParameterSet("Present");
-		m_ParametrSet->DeclareTextureParameter("texSampler");
+		m_ParametrSet->DeclareFloatParameter("Foo");
+		m_ParametrSet->DeclareMat3Parameter("AnyMat");
+		m_ParametrSet->DeclareVec4Parameter("Foo2");
+		m_ParametrSet->DeclareBufferParameter("Buffer", df::EShaderConstantType::Vec4);
+		m_ParametrSet->DeclareTextureParameter("Texture");
+		m_ParametrSet->Build();
 
 		m_Pipeline = renderCore.CreatePipeline();
-		m_Pipeline->SetVertexShader(vsCode);
-		m_Pipeline->SetFragmentShader(fsCode);
-
-		m_Pipeline->BuildTest();
+		m_Pipeline->DeclareName("Present");
+		m_Pipeline->DeclareVertexShader(vsCode);
+		m_Pipeline->DeclareFragmentShader(fsCode);
+		m_Pipeline->Build();
 	}
 
 #if 0
@@ -421,9 +426,8 @@ void vk::Presentation::PresentTexture(vk::CommandBuffer& rcb, vk::Texture* textu
 	m_ParametrSet->SetTexture("texSampler", texture);
 
 	rcb.BeginRenderPass(m_RenderPasses[m_AvailableImageIndex]);
-
-	rcb.SetPipeline(m_Pipeline);
-	rcb.Draw(3);
+	//rcb.SetPipeline(m_Pipeline);
+	//rcb.Draw(3);
 
 	rcb.EndRenderPass();
 

@@ -131,12 +131,12 @@ vk::ShaderCompiler::~ShaderCompiler() {
 
 auto vk::ShaderCompiler::CompileShader(
 	const df::String& shaderName,
-	const char* code,
-	EShaderType shaderType)->ShaderCompileInfo {
-
-	ShaderCompileInfo info;
+	const df::Vector<const char*> codeParts,
+	EShaderType shaderType)->df::Vector<uint32> {
 
 	ClearLog();
+
+	df::Vector<uint32> spirVCode;
 
 	EShLanguage shaderLanguage = EShLanguage::EShLangCount;
 	switch (shaderType) {
@@ -159,7 +159,12 @@ auto vk::ShaderCompiler::CompileShader(
 		break;
 	}
 
-	const char* inputData[2] = { Preamble, code };
+	df::Vector<const char*> inputData(codeParts.size() + 1);
+	inputData[0] = Preamble;
+	for (size_t i = 0; i < codeParts.size(); ++i) {
+		inputData[i + 1] = codeParts[i];
+	}
+
 	const int defaultVersion = 100;
 	const int version = 100;
 	const EShMessages messages = EShMessages(EShMsgSpvRules | EShMsgVulkanRules);
@@ -169,12 +174,12 @@ auto vk::ShaderCompiler::CompileShader(
 	TBuiltInResource resources = GetResources();
 
 	glslang::TShader shader = glslang::TShader(shaderLanguage);
-	shader.setStrings(inputData, 2);
+	shader.setStrings(inputData.data(), static_cast<int>(inputData.size()));
 	shader.setEnvInput(glslang::EShSourceGlsl, shaderLanguage, glslang::EShClientVulkan, version);
 	shader.setEnvClient(glslang::EShClientVulkan, vulkanClientVersion);
 	shader.setEnvTarget(glslang::EShTargetSpv, targetVersion);
 
-	ShaderFileIncluder includer = vk::ShaderFileIncluder(m_RenderCore, info);
+	ShaderFileIncluder includer = vk::ShaderFileIncluder(m_RenderCore);
 
 	df::String preprocessedCode;
 	if (!shader.preprocess(&resources, defaultVersion, ENoProfile, false, false, messages, &preprocessedCode, includer)) {
@@ -182,7 +187,7 @@ auto vk::ShaderCompiler::CompileShader(
 		AddLogLine(shader.getInfoLog());
 		AddLogLine(shader.getInfoDebugLog());
 
-		return info;
+		return spirVCode;
 	}
 
 	const char* preprocessedInputData = preprocessedCode.c_str();
@@ -196,7 +201,7 @@ auto vk::ShaderCompiler::CompileShader(
 		AddLogLine(shader.getInfoLog());
 		AddLogLine(shader.getInfoDebugLog());
 
-		return info;
+		return spirVCode;
 	}
 
 	glslang::TProgram program;
@@ -207,7 +212,7 @@ auto vk::ShaderCompiler::CompileShader(
 		AddLogLine(shader.getInfoLog());
 		AddLogLine(shader.getInfoDebugLog());
 
-		return info;
+		return spirVCode;
 	}
 
 	spv::SpvBuildLogger logger;
@@ -221,13 +226,13 @@ auto vk::ShaderCompiler::CompileShader(
 	spvOptions.validate = false;
 #endif
 
-	glslang::GlslangToSpv(*program.getIntermediate(shaderLanguage), info.m_SpirVCode, &logger, &spvOptions);
+	glslang::GlslangToSpv(*program.getIntermediate(shaderLanguage), spirVCode, &logger, &spvOptions);
 
 	if (logger.getAllMessages().length() != 0) {
 		AddLogLine(logger.getAllMessages());
 	}
 
-	return info;
+	return spirVCode;
 }
 
 auto vk::ShaderCompiler::GetLog() const ->const df::String& {

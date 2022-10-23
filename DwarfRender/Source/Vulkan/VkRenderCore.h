@@ -34,6 +34,7 @@ namespace vk {
 		RenderCore(const df::Window& window);
 
 		auto GetVkDevice() const->VkDevice;
+		auto GetVkDescriptorPool() const->VkDescriptorPool;
 
 		bool Init();
 		void Release();

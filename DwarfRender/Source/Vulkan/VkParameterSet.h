@@ -17,16 +17,17 @@ namespace vk {
 	class ParameterSet : public df::ParameterSet {
 	public:
 		ParameterSet(RenderCore& renderCore, ParameterSetDefinition& definition);
-		~ParameterSet();
+		virtual ~ParameterSet() override;
 
-		virtual void DeclareFloatParameter(const df::StringView& name, float defaultValue) override;
-		virtual void DeclareVec2Parameter(const df::StringView& name, const Vec2& defaultValue) override;
-		virtual void DeclareVec3Parameter(const df::StringView& name, const Vec3& defaultValue) override;
-		virtual void DeclareVec4Parameter(const df::StringView& name, const Vec4& defaultValue) override;
-		virtual void DeclareMat3Parameter(const df::StringView& name, const Mat3& defaultValue) override;
-		virtual void DeclareMat4Parameter(const df::StringView& name, const Mat4& defaultValue) override;
+		virtual void DeclareFloatParameter(const df::StringView& name, float defaultValue = 0.0f) override;
+		virtual void DeclareVec2Parameter(const df::StringView& name, const Vec2& defaultValue = Vec2()) override;
+		virtual void DeclareVec3Parameter(const df::StringView& name, const Vec3& defaultValue = Vec3()) override;
+		virtual void DeclareVec4Parameter(const df::StringView& name, const Vec4& defaultValue = Vec4()) override;
+		virtual void DeclareMat3Parameter(const df::StringView& name, const Mat3& defaultValue = Mat3::Identity()) override;
+		virtual void DeclareMat4Parameter(const df::StringView& name, const Mat4& defaultValue = Mat4::Identity()) override;
 		virtual void DeclareTextureParameter(const df::StringView& name) override;
 		virtual void DeclareBufferParameter(const df::StringView& name, df::EShaderConstantType dataType) override;
+		virtual void Build() override;
 
 		virtual bool HasFloatParameter(const df::StringView& name) override;
 		virtual bool HasVec2Parameter(const df::StringView& name) override;
@@ -51,6 +52,9 @@ namespace vk {
 
 	public:
 		auto GetDefinition() const->ParameterSetDefinition&;
+		auto GetDescriptorSetHandle() const->VkDescriptorSet;
+
+		void Update();
 
 	private:
 		void SetFloatByOffset(uint32 constOffset, float value);
@@ -86,6 +90,8 @@ namespace vk {
 		void SetAddressModeByIndex(uint32 index, df::EAddressMode addressMode);
 		bool SetAddressModeByName(const df::StringView& textureName, df::EAddressMode addressMode);
 
+		void UpdateDescriptorSet();
+
 	private:
 		struct TesxtureState {
 			vk::Texture* m_Texture = nullptr;
@@ -96,10 +102,15 @@ namespace vk {
 		RenderCore& m_RenderCore;
 		ParameterSetDefinition& m_Definition;
 
-		//df::Vector<DescriptorSetId> m_DescriptorSet;
+		df::Vector<VkDescriptorSet> m_DescriptorSets;
 		df::Vector<TesxtureState> m_Textures;
 		df::Vector<vk::Buffer*> m_Buffers;
 
 		uint8* m_ConstandBufferDataPtr;
+		uint8* m_ConstandBufferData;
+
+		int32 m_ActiveDescriptorIndex;
+		bool m_UpdateDescriptorSet;
+		bool m_IsBuilt;
 	};
 }

@@ -10,7 +10,11 @@
 
 namespace vk {
 	class RenderCore;
+	class RenderPass;
 	class ParameterSet;
+	class ParameterSetDefinition;
+
+	struct VertexAttribute;
 }
 
 namespace vk {
@@ -28,6 +32,8 @@ namespace vk {
 		df::RasterizationState m_RasterizationState = df::ERasterizationState::Fill;
 		df::DepthState m_DepthState = df::EDepthStencilState::LessEqual;
 		df::EPrimitiveTopology m_PrimitiveTopology = df::EPrimitiveTopology::Triangles;
+
+		const vk::RenderPass* m_RenderPass = nullptr;
 	};
 }
 
@@ -35,11 +41,12 @@ namespace vk {
 	class Pipeline : public df::Pipeline {
 	public:
 		Pipeline(vk::RenderCore& renderCore);
+		virtual ~Pipeline() override;
 
-		virtual void SetName(const df::StringView& name) override;
-
-		virtual void SetVertexShader(const df::StringView& code) override;
-		virtual void SetFragmentShader(const df::StringView& code) override;
+		virtual void DeclareName(const df::StringView& name) override;
+		virtual void DeclareVertexShader(const df::StringView& code) override;
+		virtual void DeclareFragmentShader(const df::StringView& code) override;
+		virtual bool Build() override;
 
 		virtual void SetBlendEnabled(bool value) override;
 		virtual void SetColorBlendOp(df::EBlendOp value) override;
@@ -65,19 +72,31 @@ namespace vk {
 
 		virtual void SetPrimitiveTopology(df::EPrimitiveTopology value) override;
 
-		virtual void SetParameterSet(uint32 index, df::ParameterSet* parameterSet) override;
-
 	public:
-		void BuildTest();
+		auto GetParameterSetSlot(vk::ParameterSet* parameterSet) const -> int32;
+		auto GetPipelineForState(const vk::RenderPass* renderPass)->VkPipeline;
 
 	private:
-		void CreateShaderModule(const uint32* data, uint32 length, VkShaderModule& shaderModule);
+		auto CreateShaderModule(const uint32* data, uint32 length) -> VkShaderModule;
+		auto CreateLayout()->VkPipelineLayout;
+
+
+		auto CreatePipelineStateObject()->VkPipeline;
+
+		auto ParseShader(const df::StringView& code) -> df::String;
 
 	private:
+		struct PipelineStateObjectSlot {
+			PipelineStateObjectSlot() = default;
+			PipelineStateObjectSlot(const vk::PipelineState& state, const VkPipeline vkPipeline);
+
+			const vk::PipelineState m_State;
+			const VkPipeline m_PipelineStateObject;
+		};
+
 		vk::RenderCore& m_RenderCore;
 
 		df::String m_Name;
-
 		df::String m_VertexShaderCode;
 		df::String m_FragmentShaderCode;
 
@@ -86,6 +105,13 @@ namespace vk {
 
 		vk::PipelineState m_State;
 
-		df::Vector<vk::ParameterSet*> m_ParameterSets;
+		VkPipelineLayout m_VkPipelineLayout;
+
+		df::Vector<PipelineStateObjectSlot> m_PipelineStateObjects;
+		df::Vector<const vk::ParameterSetDefinition*> m_ParameterSetDefinitions;
+		df::Vector<const vk::VertexAttribute*> m_VertexAttributes;
+		df::Bitset<64> m_RequiredVertexAttributes;
+
+		bool m_IsBuilt;
 	};
 }

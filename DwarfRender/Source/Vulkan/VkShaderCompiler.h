@@ -29,9 +29,9 @@ namespace vk {
 
 		auto CompileShader(
 			const df::String& shaderName,
-			const char* code,
+			const df::Vector<const char*> codeParts,
 			EShaderType shaderType
-		)->ShaderCompileInfo;
+		)->df::Vector<uint32>;
 
 		auto GetLog() const ->const df::String&;
 		void ClearLog();

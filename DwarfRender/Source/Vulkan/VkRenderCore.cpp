@@ -60,6 +60,10 @@ auto vk::RenderCore::GetVkDevice() const->VkDevice {
 	return m_VkDevice;
 }
 
+auto vk::RenderCore::GetVkDescriptorPool() const->VkDescriptorPool {
+	return m_DescriptorPool;
+}
+
 bool vk::RenderCore::Init() {
 	AddShaderInclude("", "");
 

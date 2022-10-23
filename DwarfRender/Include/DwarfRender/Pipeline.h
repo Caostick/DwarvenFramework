@@ -16,10 +16,10 @@ namespace df {
 	public:
 		virtual ~Pipeline() {}
 
-		virtual void SetName(const df::StringView& name) = 0;
-
-		virtual void SetVertexShader(const df::StringView& code) = 0;
-		virtual void SetFragmentShader(const df::StringView& code) = 0;
+		virtual void DeclareName(const df::StringView& name) = 0;
+		virtual void DeclareVertexShader(const df::StringView& code) = 0;
+		virtual void DeclareFragmentShader(const df::StringView& code) = 0;
+		virtual bool Build() = 0;
 
 		virtual void SetBlendEnabled(bool value) = 0;
 		virtual void SetColorBlendOp(EBlendOp value) = 0;
@@ -44,7 +44,5 @@ namespace df {
 		virtual void SetRasterizationState(ERasterizationState value) = 0;
 
 		virtual void SetPrimitiveTopology(EPrimitiveTopology value) = 0;
-
-		virtual void SetParameterSet(uint32 index, ParameterSet* parameterSet) = 0;
 	};
 }

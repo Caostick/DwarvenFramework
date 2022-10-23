@@ -51,7 +51,8 @@ vk::ParameterSetDefinition::ParameterSetDefinition(vk::RenderCore& renderCore, c
 	, m_Name(name)
 	, m_RefCount(0)
 	, m_ConstantBufferSize(0)
-	, m_VkDescriptorSetLayout(VK_NULL_HANDLE) {
+	, m_VkDescriptorSetLayout(VK_NULL_HANDLE)
+	, m_IsBuilt(false) {
 }
 
 vk::ParameterSetDefinition::~ParameterSetDefinition() {
@@ -259,12 +260,12 @@ auto vk::ParameterSetDefinition::MakeShaderSnippet(uint32 idx) const->df::String
 		snippet += std::to_string(0);
 		snippet += ") uniform _";
 		snippet += m_Name;
-		snippet += "UBO";
+		snippet += "CB";
 		snippet += " {";
 		snippet += "\n";
 
 		for (const auto& constant : m_Constants) {
-			snippet += "  " + ShaderConstantTypeToString(constant->GetType()) + " ";
+			snippet += "    " + ShaderConstantTypeToString(constant->GetType()) + " ";
 			snippet += constant->m_Name;
 			snippet += ";";
 			snippet += "\n";
@@ -272,7 +273,7 @@ auto vk::ParameterSetDefinition::MakeShaderSnippet(uint32 idx) const->df::String
 
 		snippet += "} ";
 		snippet += m_Name;
-		snippet += "UBO;";
+		snippet += "CB;";
 		snippet += "\n";
 		snippet += "\n";
 	}
@@ -286,9 +287,9 @@ auto vk::ParameterSetDefinition::MakeShaderSnippet(uint32 idx) const->df::String
 			snippet += ") readonly buffer _";
 			snippet += buffer.m_Name;
 			snippet += " {\n";
-			snippet += "  ";
+			snippet += "    ";
 			snippet += ShaderConstantTypeToString(buffer.m_DataType);
-			snippet += " data[];\n";
+			snippet += " Data[];\n";
 			snippet += "} ";
 			snippet += buffer.m_Name;
 			snippet += ";";
@@ -313,7 +314,30 @@ auto vk::ParameterSetDefinition::MakeShaderSnippet(uint32 idx) const->df::String
 
 	snippet.shrink_to_fit();
 
+
 	return snippet;
+}
+
+auto vk::ParameterSetDefinition::CreateDescriptorSet()->VkDescriptorSet {
+	VkDevice vkDevice = m_RenderCore.GetVkDevice();
+	VkDescriptorPool vkDescriptorPool = m_RenderCore.GetVkDescriptorPool();
+
+	VkDescriptorSetAllocateInfo allocateInfo = {};
+	allocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+	allocateInfo.descriptorPool = vkDescriptorPool;
+	allocateInfo.descriptorSetCount = 1;
+	allocateInfo.pSetLayouts = &m_VkDescriptorSetLayout;
+
+	VkDescriptorSet vkDescriptorSet = VK_NULL_HANDLE;
+	vk::API::AllocateDescriptorSets(vkDevice, &allocateInfo, &vkDescriptorSet);
+
+	DFVkDebugName(vkDevice, vkDescriptorSet, m_Name);
+
+	return vkDescriptorSet;
+}
+
+auto vk::ParameterSetDefinition::GetVkDescriptorSetLayout() const->VkDescriptorSetLayout {
+	return m_VkDescriptorSetLayout;
 }
 
 auto vk::ParameterSetDefinition::IncrementRefCount()->uint32 {
@@ -326,6 +350,10 @@ auto vk::ParameterSetDefinition::DecrementRefCount() ->uint32 {
 }
 
 void vk::ParameterSetDefinition::Build() {
+	if (m_IsBuilt) {
+		return;
+	}
+
 	for (auto& constant : m_Mat4Constants) {
 		m_Constants.push_back(&constant);
 	}
@@ -363,6 +391,10 @@ void vk::ParameterSetDefinition::Build() {
 	for (auto& texture : m_Textures) {
 		texture.m_Binding = bindingIndex++;
 	}
+
+	CreateRenderData();
+
+	m_IsBuilt = true;
 }
 
 void vk::ParameterSetDefinition::CreateRenderData() {

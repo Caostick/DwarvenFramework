@@ -83,14 +83,19 @@ namespace vk {
 	public:
 		auto GetName() const -> const df::String&;
 		auto MakeShaderSnippet(uint32 idx) const->df::String;
+		auto CreateDescriptorSet() -> VkDescriptorSet;
+
+		auto GetVkDescriptorSetLayout() const->VkDescriptorSetLayout;
 
 		auto IncrementRefCount()->uint32;
 		auto DecrementRefCount()->uint32;
 
-	private:
 		void Build();
+
+	private:
 		void CreateRenderData();
 
+	private:
 		vk::RenderCore& m_RenderCore;
 
 		df::String m_Name;
@@ -110,6 +115,8 @@ namespace vk {
 		df::Vector<ShaderTextureDefinition> m_Textures;
 
 		VkDescriptorSetLayout m_VkDescriptorSetLayout;
+
+		bool m_IsBuilt;
 	};
 }
 

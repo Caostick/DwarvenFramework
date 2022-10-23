@@ -10,6 +10,7 @@
 namespace vk {
 	class RenderPass;
 	class Pipeline;
+	class ParameterSet;
 }
 
 namespace vk {
@@ -22,6 +23,7 @@ namespace vk {
 		virtual void EndRenderPass() override;
 
 		virtual void SetPipeline(df::Pipeline* pipeline) override;
+		virtual bool BindParameterSet(df::ParameterSet* parameterSet) override;
 
 		virtual void Draw(uint32 vertexCount) override;
 
@@ -45,6 +47,7 @@ namespace vk {
 		void BeginRenderPass(vk::RenderPass* renderPass);
 
 		void SetPipeline(vk::Pipeline* pipeline);
+		bool BindParameterSet(vk::ParameterSet* parameterSet);
 
 		void ValidateState();
 
