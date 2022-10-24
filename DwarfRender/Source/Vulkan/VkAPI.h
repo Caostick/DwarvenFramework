@@ -49,6 +49,7 @@ namespace vk {
         VK_FUNCTION(BeginCommandBuffer);
         VK_FUNCTION(BindBufferMemory);
         VK_FUNCTION(BindImageMemory);
+        VK_FUNCTION(CmdBlitImage);
         VK_FUNCTION(CmdBeginRenderPass);
         VK_FUNCTION(CmdBindDescriptorSets);
         VK_FUNCTION(CmdBindIndexBuffer);

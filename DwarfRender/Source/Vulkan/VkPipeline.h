@@ -75,6 +75,7 @@ namespace vk {
 	public:
 		auto GetParameterSetSlot(vk::ParameterSet* parameterSet) const -> int32;
 		auto GetPipelineForState(const vk::RenderPass* renderPass)->VkPipeline;
+		auto GetVkPipelineLayout() const->VkPipelineLayout;
 
 	private:
 		auto CreateShaderModule(const uint32* data, uint32 length) -> VkShaderModule;

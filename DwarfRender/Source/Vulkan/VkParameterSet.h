@@ -52,7 +52,7 @@ namespace vk {
 
 	public:
 		auto GetDefinition() const->ParameterSetDefinition&;
-		auto GetDescriptorSetHandle() const->VkDescriptorSet;
+		auto GetVkDescriptorSet() const->VkDescriptorSet;
 
 		void Update();
 
@@ -90,26 +90,38 @@ namespace vk {
 		void SetAddressModeByIndex(uint32 index, df::EAddressMode addressMode);
 		bool SetAddressModeByName(const df::StringView& textureName, df::EAddressMode addressMode);
 
+		void UpdateConstantBuffer();
 		void UpdateDescriptorSet();
 
 	private:
-		struct TesxtureState {
+		struct TextureState {
+			uint32 m_Binding = 0;
 			vk::Texture* m_Texture = nullptr;
 			vk::Sampler* m_Sampler = nullptr;
 			vk::SamplerState m_CurrentState;
+			VkDescriptorImageInfo m_DescriptorInfo = {};
+		};
+
+		struct BufferState {
+			uint32 m_Binding = 0;
+			vk::Buffer* m_Buffer = nullptr;
+			VkDescriptorBufferInfo m_DescriptorInfo = {};
 		};
 
 		RenderCore& m_RenderCore;
 		ParameterSetDefinition& m_Definition;
 
-		df::Vector<VkDescriptorSet> m_DescriptorSets;
-		df::Vector<TesxtureState> m_Textures;
-		df::Vector<vk::Buffer*> m_Buffers;
+		df::Vector<VkWriteDescriptorSet> m_Writes;
+		df::Vector<VkDescriptorSet> m_VkDescriptorSets;
+		df::Vector<TextureState> m_Textures;
+		df::Vector<BufferState> m_Buffers;
 
+		BufferState m_ConstantBuffer;
 		uint8* m_ConstandBufferDataPtr;
 		uint8* m_ConstandBufferData;
 
 		int32 m_ActiveDescriptorIndex;
+		bool m_UpdateConstantBuffer;
 		bool m_UpdateDescriptorSet;
 		bool m_IsBuilt;
 	};

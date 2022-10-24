@@ -408,6 +408,10 @@ auto vk::Pipeline::GetPipelineForState(const vk::RenderPass* renderPass)->VkPipe
 	return CreatePipelineStateObject();
 }
 
+auto vk::Pipeline::GetVkPipelineLayout() const->VkPipelineLayout {
+	return m_VkPipelineLayout;
+}
+
 auto vk::Pipeline::CreateShaderModule(const uint32* data, uint32 length) -> VkShaderModule {
 	VkDevice vkDevice = m_RenderCore.GetVkDevice();
 
@@ -462,8 +466,8 @@ void vk::Pipeline::CreateVertexDescription() {
 		m_BindingDescriptions[i].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
 		m_AttributeDescriptions[i] = {};
-		m_AttributeDescriptions[i].binding = i;
-		m_AttributeDescriptions[i].location = i;
+		m_AttributeDescriptions[i].binding = uint32(i);
+		m_AttributeDescriptions[i].location = uint32(i);
 		m_AttributeDescriptions[i].format = df::ToVkFormat(m_VertexAttributes[i]->m_Format);
 		m_AttributeDescriptions[i].offset = 0;
 	}

@@ -6,6 +6,71 @@
 
 #include <DwarvenCore/Assert.h>
 
+namespace {
+	void ToVk(vk::EImageLayout layout, VkImageLayout& vkLayout, VkAccessFlags& accessFlags) {
+		switch (layout) {
+		case vk::EImageLayout::Undefined:
+			vkLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			accessFlags = 0;
+			break;
+		case vk::EImageLayout::General:
+			vkLayout = VK_IMAGE_LAYOUT_GENERAL;
+			accessFlags = 0;
+			break;
+		case vk::EImageLayout::ColorAttachment:
+			vkLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+			accessFlags = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+			break;
+		case vk::EImageLayout::ColorReadOnly:
+			vkLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			accessFlags = VK_ACCESS_SHADER_READ_BIT;
+			break;
+		case vk::EImageLayout::DepthStencilAttachment:
+			vkLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+			accessFlags = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+			break;
+		case vk::EImageLayout::DepthStencilReadOnly:
+			vkLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+			accessFlags = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+			break;
+		case vk::EImageLayout::DepthReadOnlyStencilAttachment:
+			vkLayout = VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL;
+			accessFlags = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+			break;
+		case vk::EImageLayout::DepthAttachmentStencilReadOnly:
+			vkLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL;
+			accessFlags = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+			break;
+		case vk::EImageLayout::DepthAttachment:
+			vkLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
+			accessFlags = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+			break;
+		case vk::EImageLayout::DepthReadOnly:
+			vkLayout = VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
+			accessFlags = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+			break;
+		case vk::EImageLayout::StencilAttachment:
+			vkLayout = VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL;
+			accessFlags = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+			break;
+		case vk::EImageLayout::StencilReadOnly:
+			vkLayout = VK_IMAGE_LAYOUT_STENCIL_READ_ONLY_OPTIMAL;
+			accessFlags = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+			break;
+		case vk::EImageLayout::TransferSrc:
+			vkLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+			accessFlags = VK_ACCESS_TRANSFER_READ_BIT;
+			break;
+		case vk::EImageLayout::TransferDst:
+			vkLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+			accessFlags = VK_ACCESS_TRANSFER_WRITE_BIT;
+			break;
+		default:
+			break;
+		}
+	}
+}
+
 vk::CommandBuffer::CommandBuffer()
 	: m_VkCommandBuffer(VK_NULL_HANDLE) 
 	, m_CurrentRenderPass(nullptr) 
@@ -83,6 +148,9 @@ void vk::CommandBuffer::End() {
 	if (vk::API::EndCommandBuffer(m_VkCommandBuffer) != VK_SUCCESS) {
 		DFAssert(false, "Failed to record CommandBuffer!");
 	}
+
+	m_CurrentPipeline = nullptr;
+	m_CurrentRenderPass = nullptr;
 }
 
 void vk::CommandBuffer::Submit(VkQueue queue) {
@@ -98,6 +166,54 @@ void vk::CommandBuffer::Wait(VkQueue queue) {
 	vk::API::QueueWaitIdle(queue);
 }
 
+void vk::CommandBuffer::ImageLayoutTransition(VkImage image, vk::EImageLayout oldLayout, vk::EImageLayout newLayout, bool isDepth /*= false*/, bool isStencil /*= false*/) {
+	VkImageMemoryBarrier barrier{};
+	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+	barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	barrier.newLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	barrier.image = image;
+	barrier.subresourceRange.baseMipLevel = 0;
+	barrier.subresourceRange.levelCount = 1;
+	barrier.subresourceRange.baseArrayLayer = 0;
+	barrier.subresourceRange.layerCount = 1;
+	barrier.srcAccessMask = 0;
+	barrier.dstAccessMask = 0;
+	barrier.subresourceRange.aspectMask = (!isDepth && !isStencil) ? VK_IMAGE_ASPECT_COLOR_BIT : 0;
+	barrier.subresourceRange.aspectMask |= isDepth ? VK_IMAGE_ASPECT_DEPTH_BIT : 0;
+	barrier.subresourceRange.aspectMask |= isStencil ? VK_IMAGE_ASPECT_STENCIL_BIT : 0;
+
+	VkPipelineStageFlags sourceStage = (oldLayout == vk::EImageLayout::TransferDst) ? VK_PIPELINE_STAGE_TRANSFER_BIT : VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+	VkPipelineStageFlags destinationStage = (newLayout == vk::EImageLayout::TransferDst) ? VK_PIPELINE_STAGE_TRANSFER_BIT : VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+
+	if (oldLayout == EImageLayout::ColorReadOnly ||
+		oldLayout == EImageLayout::DepthReadOnly ||
+		oldLayout == EImageLayout::DepthStencilReadOnly) {
+
+		sourceStage |= VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+	}
+
+	if (oldLayout == EImageLayout::ColorAttachment) {
+		sourceStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	} else if (oldLayout == EImageLayout::DepthStencilAttachment) {
+		sourceStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+	}
+
+	if (newLayout == EImageLayout::ColorAttachment) {
+		destinationStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	} else if (newLayout == EImageLayout::DepthStencilAttachment) {
+		destinationStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+	} else if (newLayout == EImageLayout::DepthStencilReadOnly) {
+		destinationStage = VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+	}
+
+	ToVk(oldLayout, barrier.oldLayout, barrier.srcAccessMask);
+	ToVk(newLayout, barrier.newLayout, barrier.dstAccessMask);
+
+	vk::API::CmdPipelineBarrier(m_VkCommandBuffer, sourceStage, destinationStage, 0, 0, nullptr, 0, nullptr, 1, &barrier);
+}
+
 void vk::CommandBuffer::CopyBuffer(VkBuffer src, VkBuffer dst, uint32 range, uint32 srcOffset /*= 0*/, uint32 dstOffset /*= 0*/) {
 	VkBufferCopy copyRegion = {};
 	copyRegion.size = range;
@@ -109,7 +225,7 @@ void vk::CommandBuffer::CopyBuffer(VkBuffer src, VkBuffer dst, uint32 range, uin
 	vk::API::CmdCopyBuffer(m_VkCommandBuffer, src, dst, 1, &copyRegion);
 }
 
-void vk::CommandBuffer::CopyBufferToImage(VkBuffer src, VkImage dst, uint32 width, uint32 height) {
+void vk::CommandBuffer::CopyBufferToImage(VkBuffer src, VkImage dst, uint32 width, uint32 height, int32 widthOffset /*= 0*/, int32 heightOffset /*= 0*/) {
 	VkBufferImageCopy copyRegion = {};
 	copyRegion.bufferOffset = 0;
 	copyRegion.bufferRowLength = 0;
@@ -118,7 +234,7 @@ void vk::CommandBuffer::CopyBufferToImage(VkBuffer src, VkImage dst, uint32 widt
 	copyRegion.imageSubresource.mipLevel = 0;
 	copyRegion.imageSubresource.baseArrayLayer = 0;
 	copyRegion.imageSubresource.layerCount = 1;
-	copyRegion.imageOffset = { 0, 0, 0 };
+	copyRegion.imageOffset = { widthOffset, heightOffset, 0 };
 	copyRegion.imageExtent = { width, height, 1 };
 
 	vk::API::CmdCopyBufferToImage(m_VkCommandBuffer, src, dst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copyRegion);
@@ -169,10 +285,20 @@ void vk::CommandBuffer::SetPipeline(vk::Pipeline* pipeline) {
 	m_CurrentPipeline = pipeline;
 }
 
-bool vk::CommandBuffer::BindParameterSet(vk::ParameterSet* /*parameterSet*/) {
+bool vk::CommandBuffer::BindParameterSet(vk::ParameterSet* parameterSet) {
 	DFAssert(m_CurrentPipeline != nullptr, "Can't bind parameter set - Pipeline is not set!");
 
-	return false;
+	const int32 slotIdx = m_CurrentPipeline->GetParameterSetSlot(parameterSet);
+	if (slotIdx == -1) {
+		return false;
+	}
+
+	const VkPipelineLayout vkPipelineLayout = m_CurrentPipeline->GetVkPipelineLayout();
+	const VkDescriptorSet vkDescriptorSet = parameterSet->GetVkDescriptorSet();
+
+	vk::API::CmdBindDescriptorSets(m_VkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipelineLayout, uint32(slotIdx), 1, &vkDescriptorSet, 0, nullptr);
+
+	return true;
 }
 
 void vk::CommandBuffer::ValidateState() {

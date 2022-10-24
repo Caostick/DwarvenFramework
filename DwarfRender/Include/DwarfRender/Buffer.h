@@ -3,6 +3,6 @@
 namespace df {
 	class Buffer {
 	public:
-	private:
+		virtual ~Buffer() {}
 	};
 }

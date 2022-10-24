@@ -25,6 +25,6 @@ bool vk::Sampler::operator != (const SamplerState& state) const {
 	return m_State != state;
 }
 
-auto vk::Sampler::GetHandle() const->VkSampler {
+auto vk::Sampler::GetVkSampler() const->VkSampler {
 	return m_VkSampler;
 }

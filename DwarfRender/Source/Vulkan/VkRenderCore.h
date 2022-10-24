@@ -26,6 +26,8 @@ namespace vk {
 	class ParameterSetDefinition;
 	class ParameterSet;
 	class ShaderCompiler;
+	class Buffer;
+	class Texture;
 }
 
 namespace vk {
@@ -57,6 +59,12 @@ namespace vk {
 
 		auto CreatePipeline()->vk::Pipeline*;
 		void DestroyPipeline(vk::Pipeline* pipeline);
+
+		auto CreateBuffer()->vk::Buffer*;
+		void DestroyBuffer(vk::Buffer* buffer);
+
+		auto CreateTexture()->vk::Texture*;
+		void DestroyTexture(vk::Texture* texture);
 
 		auto CreateParameterSetDefinition(const df::StringView& name)->vk::ParameterSetDefinition*;
 		void DestroyParameterSetDefinition(vk::ParameterSetDefinition* parameterSetDefinition);
@@ -92,6 +100,9 @@ namespace vk {
 		void RemovePipeline(VkPipeline pipeline);
 		void RemoveDescriptorPool(VkDescriptorPool descriptorPool);
 		void RemoveCommandPool(VkCommandPool commandPool);
+
+		void SetBufferData(VkBuffer buffer, const void* data, uint32 dataSize, uint32 offset = 0);
+		void SetImageData(VkImage image, const void* data, uint32 dataSize, uint32 width, uint32 height, int32 widthOffset = 0, int32 heightOffset = 0);
 
 	private:
 		bool InitInstance();
@@ -131,6 +142,10 @@ namespace vk {
 		df::ObjectPool<vk::ParameterSet> m_ParameterSets;
 		df::ObjectPool<vk::VertexAttribute> m_VertexAttributes;
 		df::ObjectPool<vk::Sampler> m_Samplers;
+		df::ObjectPool<vk::Buffer> m_Buffers;
+		df::ObjectPool<vk::Texture> m_Textures;
+
+		df::Vector<vk::Texture*> m_TexturesToInitLayout;
 
 		df::HashMap<df::String, vk::ParameterSetDefinition*> m_ParameterSetDefinitionRegistry;
 		df::HashMap<df::String, df::String> m_ShaderIncludes;

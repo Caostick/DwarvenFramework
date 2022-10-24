@@ -25,7 +25,7 @@ namespace vk {
 		bool operator == (const SamplerState& state) const;
 		bool operator != (const SamplerState& state) const;
 
-		auto GetHandle() const->VkSampler;
+		auto GetVkSampler() const->VkSampler;
 
 	private:
 		SamplerState m_State;

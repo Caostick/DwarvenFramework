@@ -52,6 +52,7 @@ vk::ParameterSet::ParameterSet(RenderCore& renderCore, ParameterSetDefinition& d
 	, m_ConstandBufferDataPtr(nullptr) 
 	, m_ConstandBufferData(nullptr)
 	, m_ActiveDescriptorIndex(-1) 
+	, m_UpdateConstantBuffer(true)
 	, m_UpdateDescriptorSet(true) 
 	, m_IsBuilt(false) {
 	m_Definition.IncrementRefCount();
@@ -62,7 +63,7 @@ vk::ParameterSet::~ParameterSet() {
 		m_RenderCore.DestroyParameterSetDefinition(&m_Definition);
 	}
 
-	for (auto vkDescriptorSet : m_DescriptorSets) {
+	for (auto vkDescriptorSet : m_VkDescriptorSets) {
 		m_RenderCore.RemoveDescriptorSet(m_RenderCore.GetVkDescriptorPool(), vkDescriptorSet);
 	}
 
@@ -121,7 +122,14 @@ void vk::ParameterSet::Build() {
 	m_Definition.Build();
 
 	m_Buffers.resize(m_Definition.GetBuffers().size());
+	for (size_t i = 0; i < m_Buffers.size(); ++i) {
+		m_Buffers[i].m_Binding = m_Definition.GetBuffers()[i].m_Binding;
+	}
+
 	m_Textures.resize(m_Definition.GetTextures().size());
+	for (size_t i = 0; i < m_Textures.size(); ++i) {
+		m_Textures[i].m_Binding = m_Definition.GetTextures()[i].m_Binding;
+	}
 
 	const auto constantBufferSize = m_Definition.GetConstantBufferSize();
 	if (constantBufferSize > 0) {
@@ -242,14 +250,18 @@ auto vk::ParameterSet::GetDefinition() const->ParameterSetDefinition& {
 	return m_Definition;
 }
 
-auto vk::ParameterSet::GetDescriptorSetHandle() const->VkDescriptorSet {
+auto vk::ParameterSet::GetVkDescriptorSet() const->VkDescriptorSet {
 	DFAssert(m_ActiveDescriptorIndex >= 0, "Parameter set should be updated first!");
 
-	return m_DescriptorSets[m_ActiveDescriptorIndex];
+	return m_VkDescriptorSets[m_ActiveDescriptorIndex];
 }
 
 void vk::ParameterSet::Update() {
 	DFAssert(m_IsBuilt, "Can't update parameter set - parameter set is not build yet!");
+
+	if (m_UpdateConstantBuffer) {
+
+	}
 
 	if (m_UpdateDescriptorSet) {
 		UpdateDescriptorSet();
@@ -370,7 +382,7 @@ bool vk::ParameterSet::SetMat4ByName(const df::StringView& name, const Mat4& val
 void vk::ParameterSet::SetBufferByIndex(uint32 index, vk::Buffer* buffer) {
 	DFAssert(m_IsBuilt, "Can't set parameter - parameter set is not build yet!");
 
-	m_Buffers[index] = buffer;
+	m_Buffers[index].m_Buffer = buffer;
 }
 
 bool vk::ParameterSet::SetBufferByName(const df::StringView& name, vk::Buffer* buffer) {
@@ -462,17 +474,86 @@ bool vk::ParameterSet::SetAddressModeByName(const df::StringView& textureName, d
 	return false;
 }
 
+void vk::ParameterSet::UpdateConstantBuffer() {
+
+	m_UpdateConstantBuffer = false;
+}
+
 void vk::ParameterSet::UpdateDescriptorSet() {
+	const VkDevice vkDevice = m_RenderCore.GetVkDevice();
+
 	constexpr uint32 MaxDescriptorSetsPerParameterSet = 3;
 	m_ActiveDescriptorIndex = (m_ActiveDescriptorIndex + 1) % MaxDescriptorSetsPerParameterSet;
 
-	if (m_DescriptorSets.size() <= m_ActiveDescriptorIndex) {
-		m_DescriptorSets.resize(m_ActiveDescriptorIndex + 1);
+	if (m_VkDescriptorSets.size() <= m_ActiveDescriptorIndex) {
+		m_VkDescriptorSets.resize(m_ActiveDescriptorIndex + 1);
 
-		m_DescriptorSets[m_ActiveDescriptorIndex] = m_Definition.CreateDescriptorSet();
+		m_VkDescriptorSets[m_ActiveDescriptorIndex] = m_Definition.CreateDescriptorSet();
 	}
 
+	// Constant Buffer
+	{
+		VkDescriptorBufferInfo& bufferInfo = m_ConstantBuffer.m_DescriptorInfo;
+		bufferInfo.buffer = m_ConstantBuffer.m_Buffer->GetVkBuffer();
+		bufferInfo.offset = 0;
+		bufferInfo.range = m_ConstantBuffer.m_Buffer->GetVkDeviceSize();
 
+		VkWriteDescriptorSet writeDescriptorSet = {};
+		writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		writeDescriptorSet.dstSet = m_VkDescriptorSets[m_ActiveDescriptorIndex];
+		writeDescriptorSet.dstBinding = m_ConstantBuffer.m_Binding;
+		writeDescriptorSet.dstArrayElement = 0;
+		writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		writeDescriptorSet.descriptorCount = 1;
+		writeDescriptorSet.pBufferInfo = &m_ConstantBuffer.m_DescriptorInfo;
+	}
+
+	// Buffers
+	for (auto& buffer : m_Buffers) {
+		VkDescriptorBufferInfo& bufferInfo = buffer.m_DescriptorInfo;
+		bufferInfo.buffer = buffer.m_Buffer->GetVkBuffer();
+		bufferInfo.offset = 0;
+		bufferInfo.range = buffer.m_Buffer->GetVkDeviceSize();
+
+		VkWriteDescriptorSet writeDescriptorSet = {};
+		writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		writeDescriptorSet.dstSet = m_VkDescriptorSets[m_ActiveDescriptorIndex];
+		writeDescriptorSet.dstBinding = buffer.m_Binding;
+		writeDescriptorSet.dstArrayElement = 0;
+		writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		writeDescriptorSet.descriptorCount = 1;
+		writeDescriptorSet.pBufferInfo = &buffer.m_DescriptorInfo;
+	}
+
+	// Textures
+	for (auto& texture : m_Textures) {
+
+
+		if (*texture.m_Sampler != texture.m_CurrentState) {
+			texture.m_Sampler = m_RenderCore.RequestSampler(texture.m_CurrentState);
+		}
+		const bool isDepthStencil = texture.m_Texture->IsDepthStencil();
+
+		VkDescriptorImageInfo& imageInfo = texture.m_DescriptorInfo;
+		imageInfo.sampler = texture.m_Sampler->GetVkSampler();
+		imageInfo.imageView = texture.m_Texture->GetVkImageView();
+		imageInfo.imageLayout = isDepthStencil
+			? VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
+			: VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+
+		VkWriteDescriptorSet writeDescriptorSet = {};
+		writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		writeDescriptorSet.dstSet = m_VkDescriptorSets[m_ActiveDescriptorIndex];
+		writeDescriptorSet.dstBinding = texture.m_Binding;
+		writeDescriptorSet.dstArrayElement = 0;
+		writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		writeDescriptorSet.descriptorCount = 1;
+		writeDescriptorSet.pImageInfo = &texture.m_DescriptorInfo;
+	}
+
+	vk::API::UpdateDescriptorSets(vkDevice, uint32(m_Writes.size()), m_Writes.data(), 0, nullptr);
+	m_Writes.clear();
 
 	m_UpdateDescriptorSet = false;
 }

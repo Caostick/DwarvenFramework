@@ -83,6 +83,9 @@ vk::Presentation::Presentation()
 	, m_VkExtent({ 0,0 })
 	, m_VkFormat(VK_FORMAT_UNDEFINED)
 	, m_VSyncEnabled(true)
+	, m_ParametrSet(nullptr)
+	, m_Pipeline(nullptr)
+	, m_TestTexture(nullptr)
 	, m_MinImagesCount(0)
 	, m_ImagesCount(0)
 	, m_AvailableImageIndex(0) {}
@@ -233,6 +236,11 @@ auto vk::Presentation::Present(VkSemaphore semaphore, VkQueue presentQueue)->VkR
 }
 
 bool vk::Presentation::Load(vk::RenderCore& renderCore) {
+
+	m_TestTexture = renderCore.CreateTexture();
+	m_TestTexture->Create(512, 512, df::ETextureFormat::R8G8B8A8_UNorm, true, df::EImageUsageFlag::Texture);
+	m_TestTexture->GenerateMips();
+	
 	// Create render pass
 	{
 		VkAttachmentDescription attachementDescription = {};
@@ -361,6 +369,7 @@ bool vk::Presentation::Load(vk::RenderCore& renderCore) {
 }
 
 void vk::Presentation::Unload(vk::RenderCore& renderCore) {
+	renderCore.DestroyTexture(m_TestTexture);
 	renderCore.DestroyPipeline(m_Pipeline);
 	renderCore.DestroyParameterSet(m_ParametrSet);
 
@@ -423,10 +432,44 @@ bool vk::Presentation::RecreateSwapchain(vk::RenderCore& renderCore, VkDevice de
 void vk::Presentation::PresentTexture(vk::CommandBuffer& rcb, vk::Texture* texture) {
 	DFScopedRenderEvent(rcb, "Present Render Stage");
 
+	struct Color {
+		uint8 R;
+		uint8 G;
+		uint8 B;
+		uint8 A;
+	};
+
+	const uint32 width = m_TestTexture->GetWidth();
+	const uint32 height = m_TestTexture->GetHeight();
+
+	df::Vector<Color> texData(width * height);
+	for (uint32 x = 0; x < width; ++x) {
+		for (uint32 y = 0; y < height; ++y) {
+			const uint32 idx = x + y * width;
+
+			auto& c = texData[idx];
+
+			c.A = 255;
+			if ((x + y) & 1) {
+				c.R = 255;
+				c.G = 255;
+				c.B = 255;
+			} else {
+				c.R = 0;
+				c.G = 0;
+				c.B = 0;
+			}
+		}
+	}
+
+	m_TestTexture->SetData(texData.data(), uint32(texData.size() * sizeof(Color)));
+
 	m_ParametrSet->SetTexture("texSampler", texture);
+	//m_ParametrSet->Update();
 
 	rcb.BeginRenderPass(m_RenderPasses[m_AvailableImageIndex]);
 	//rcb.SetPipeline(m_Pipeline);
+	//rcb.BindParameterSet(m_ParametrSet);
 	//rcb.Draw(3);
 
 	rcb.EndRenderPass();

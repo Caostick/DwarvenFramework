@@ -47,19 +47,19 @@ void vk::Renderer::DestroyMesh(df::Mesh* mesh) {
 }
 
 auto vk::Renderer::CreateBuffer()->df::Buffer* {
-	return DFNew vk::Buffer;
+	return m_RenderCore.CreateBuffer();
 }
 
 void vk::Renderer::DestroyBuffer(df::Buffer* buffer) {
-	DFDelete buffer;
+	m_RenderCore.DestroyBuffer(static_cast<vk::Buffer*>(buffer));
 }
 
 auto vk::Renderer::CreateTexture()->df::Texture* {
-	return DFNew vk::Texture;
+	return m_RenderCore.CreateTexture();
 }
 
 void vk::Renderer::DestroyTexture(df::Texture* texture) {
-	DFDelete texture;
+	m_RenderCore.DestroyTexture(static_cast<vk::Texture*>(texture));
 }
 
 auto vk::Renderer::CreateRenderPass()->df::RenderPass* {

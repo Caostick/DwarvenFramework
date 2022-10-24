@@ -10,6 +10,8 @@
 #include "VkParameterSetDefinition.h"
 #include "VkParameterSet.h"
 #include "VkShaderCompiler.h"
+#include "VkBuffer.h"
+#include "VkTexture.h"
 
 #include <DwarfWindow/Window.h>
 
@@ -24,9 +26,6 @@ vk::RenderCore::RenderCore(const df::Window& window)
 	m_NumFramesInFlight = 0;
 	m_FrameIndex = 0;
 
-
-	//m_TransferCommandBuffer;
-
 	m_VkInstance = VK_NULL_HANDLE;
 	m_VkPhysicalDevice = VK_NULL_HANDLE;
 	m_VkDevice = VK_NULL_HANDLE;
@@ -40,12 +39,6 @@ vk::RenderCore::RenderCore(const df::Window& window)
 	m_GraphicsQueue = VK_NULL_HANDLE;
 	m_TransferQueue = VK_NULL_HANDLE;
 	m_ComputeQueue = VK_NULL_HANDLE;
-
-	//m_GraphicsCommandPools;
-	//m_TransferCommandPools;
-
-	//m_Presentation;
-	//m_TransferBuffer;
 
 	m_DescriptorPool = VK_NULL_HANDLE;
 
@@ -153,7 +146,7 @@ void vk::RenderCore::Release() {
 	m_VertexAttributes.Clear();
 
 	for (auto sampler : m_Samplers) {
-		m_VulkanObjectManager.RemoveSampler(m_VkDevice, sampler->GetHandle());
+		m_VulkanObjectManager.RemoveSampler(m_VkDevice, sampler->GetVkSampler());
 	}
 	m_Samplers.Clear();
 
@@ -213,12 +206,15 @@ bool vk::RenderCore::BeginFrame(vk::RenderContext& renderContext) {
 
 	frame.m_CommandBuffer.Begin();
 
-	// Update dynamic buffers
-	/*for (auto buffer : m_Buffers) {
-		if (!buffer->m_IsStatic) {
-			SyncBufferData(buffer, m_FrameIndex);
+	// Init texture layouts
+	for (auto texture : m_TexturesToInitLayout) {
+		if (texture->IsDepthStencil()) {
+			frame.m_CommandBuffer.ImageLayoutTransition(texture->GetVkImage(), vk::EImageLayout::Undefined, vk::EImageLayout::DepthStencilReadOnly);
+		} else {
+			frame.m_CommandBuffer.ImageLayoutTransition(texture->GetVkImage(), vk::EImageLayout::Undefined, vk::EImageLayout::ColorReadOnly);
 		}
-	}*/
+	}
+	m_TexturesToInitLayout.clear();
 
 	// Transfer
 	{
@@ -314,6 +310,26 @@ auto vk::RenderCore::CreatePipeline()->vk::Pipeline* {
 
 void vk::RenderCore::DestroyPipeline(vk::Pipeline* pipeline) {
 	m_Pipelines.Destroy(pipeline);
+}
+
+auto vk::RenderCore::CreateBuffer()->vk::Buffer* {
+	return m_Buffers.Create(*this);
+}
+
+void vk::RenderCore::DestroyBuffer(vk::Buffer* buffer) {
+	m_Buffers.Destroy(buffer);
+}
+
+auto vk::RenderCore::CreateTexture()->vk::Texture* {
+	auto texture = m_Textures.Create(*this);
+
+	m_TexturesToInitLayout.push_back(texture);
+
+	return texture;
+}
+
+void vk::RenderCore::DestroyTexture(vk::Texture* texture) {
+	m_Textures.Destroy(texture);
 }
 
 auto vk::RenderCore::CreateParameterSetDefinition(const df::StringView& name)->vk::ParameterSetDefinition* {
@@ -505,6 +521,14 @@ void vk::RenderCore::RemoveDescriptorPool(VkDescriptorPool descriptorPool) {
 
 void vk::RenderCore::RemoveCommandPool(VkCommandPool commandPool) {
 	m_VulkanObjectManager.RemoveCommandPool(m_VkDevice, commandPool);
+}
+
+void vk::RenderCore::SetBufferData(VkBuffer buffer, const void* data, uint32 dataSize, uint32 offset /*= 0*/) {
+	m_TransferBuffer.SetBufferData(buffer, data, dataSize, offset);
+}
+
+void vk::RenderCore::SetImageData(VkImage image, const void* data, uint32 dataSize, uint32 width, uint32 height, int32 widthOffset /*= 0*/, int32 heightOffset /*= 0*/) {
+	m_TransferBuffer.SetImageData(image, data, dataSize, width, height, widthOffset, heightOffset);
 }
 
 bool vk::RenderCore::InitInstance() {

@@ -14,6 +14,27 @@ namespace vk {
 }
 
 namespace vk {
+	enum class EImageLayout {
+		Undefined,
+		General,
+		ColorAttachment,
+		ColorReadOnly,
+		DepthStencilAttachment,
+		DepthStencilReadOnly,
+		DepthReadOnlyStencilAttachment,
+		DepthAttachmentStencilReadOnly,
+		DepthAttachment,
+		DepthReadOnly,
+		StencilAttachment,
+		StencilReadOnly,
+		TransferSrc,
+		TransferDst,
+
+		COUNT
+	};
+}
+
+namespace vk {
 	class CommandBuffer : public df::CommandBuffer {
 	public:
 		CommandBuffer();
@@ -39,8 +60,9 @@ namespace vk {
 		void Submit(VkQueue queue);
 		void Wait(VkQueue queue);
 
+		void ImageLayoutTransition(VkImage image, vk::EImageLayout oldLayout, vk::EImageLayout newLayout, bool isDepth = false, bool isStencil = false);
 		void CopyBuffer(VkBuffer src, VkBuffer dst, uint32 range, uint32 srcOffset = 0, uint32 dstOffset = 0);
-		void CopyBufferToImage(VkBuffer src, VkImage dst, uint32 width, uint32 height);
+		void CopyBufferToImage(VkBuffer src, VkImage dst, uint32 width, uint32 height, int32 widthOffset = 0, int32 heightOffset = 0);
 
 		auto ScopedRenderEvent(const char* name)->vk::ScopedRenderEvent;
 

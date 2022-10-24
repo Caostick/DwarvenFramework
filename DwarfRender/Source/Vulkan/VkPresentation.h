@@ -58,5 +58,6 @@ namespace vk {
 		df::Vector<vk::RenderPass*> m_RenderPasses;
 		vk::Pipeline* m_Pipeline;
 		vk::ParameterSet* m_ParametrSet;
+		vk::Texture* m_TestTexture;
 	};
 }
