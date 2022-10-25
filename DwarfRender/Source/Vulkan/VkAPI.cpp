@@ -33,12 +33,13 @@
 
 bool vk::API::Load() {
     VulkanLib = LoadLibrary("vulkan-1.dll");
+    if (!VulkanLib) {
+        return false;
+    }
 
     LOAD_GLOBAL_FUNCTION(CreateInstance);
     LOAD_GLOBAL_FUNCTION(DestroyInstance);
     LOAD_GLOBAL_FUNCTION(GetInstanceProcAddr);
-
-    
 
     return true;
 }
@@ -76,6 +77,7 @@ bool vk::API::LoadDeviceFunctions(VkDevice device) {
     LOAD_DEVICE_FUNCTION(BeginCommandBuffer);
     LOAD_DEVICE_FUNCTION(BindBufferMemory);
     LOAD_DEVICE_FUNCTION(BindImageMemory);
+    LOAD_DEVICE_FUNCTION(CmdBlitImage);
     LOAD_DEVICE_FUNCTION(CmdBeginRenderPass);
     LOAD_DEVICE_FUNCTION(CmdBindDescriptorSets);
     LOAD_DEVICE_FUNCTION(CmdBindIndexBuffer);
@@ -189,6 +191,7 @@ VK_FUNCTION(AllocateMemory);
 VK_FUNCTION(BeginCommandBuffer);
 VK_FUNCTION(BindBufferMemory);
 VK_FUNCTION(BindImageMemory);
+VK_FUNCTION(CmdBlitImage);
 VK_FUNCTION(CmdBeginRenderPass);
 VK_FUNCTION(CmdBindDescriptorSets);
 VK_FUNCTION(CmdBindIndexBuffer);

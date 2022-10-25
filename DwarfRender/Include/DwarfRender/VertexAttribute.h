@@ -75,7 +75,7 @@ namespace df {
 
 	struct VertexAttribute {
 		df::String m_Name;
-		EVertexAttributeFormat m_Format;
-		uint32 m_Index;
+		EVertexAttributeFormat m_Format = EVertexAttributeFormat::X8_UNorm;
+		uint32 m_Index = 0;
 	};
 }

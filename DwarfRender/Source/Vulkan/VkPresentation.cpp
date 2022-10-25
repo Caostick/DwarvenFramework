@@ -238,7 +238,7 @@ auto vk::Presentation::Present(VkSemaphore semaphore, VkQueue presentQueue)->VkR
 bool vk::Presentation::Load(vk::RenderCore& renderCore) {
 
 	m_TestTexture = renderCore.CreateTexture();
-	m_TestTexture->Create(512, 512, df::ETextureFormat::R8G8B8A8_UNorm, true, df::EImageUsageFlag::Texture);
+	m_TestTexture->Create(256, 768, df::ETextureFormat::R8G8B8A8_UNorm, true, df::EImageUsageFlag::Texture);
 	m_TestTexture->GenerateMips();
 	
 	// Create render pass
@@ -450,19 +450,14 @@ void vk::Presentation::PresentTexture(vk::CommandBuffer& rcb, vk::Texture* textu
 			auto& c = texData[idx];
 
 			c.A = 255;
-			if ((x + y) & 1) {
-				c.R = 255;
-				c.G = 255;
-				c.B = 255;
-			} else {
-				c.R = 0;
-				c.G = 0;
-				c.B = 0;
-			}
+			c.R = rand() % 255;
+			c.G = rand() % 255;
+			c.B = rand() % 255;
 		}
 	}
 
 	m_TestTexture->SetData(texData.data(), uint32(texData.size() * sizeof(Color)));
+	rcb.GenerateMips(m_TestTexture);
 
 	m_ParametrSet->SetTexture("texSampler", texture);
 	//m_ParametrSet->Update();

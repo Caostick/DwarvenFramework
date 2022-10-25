@@ -7,7 +7,7 @@ auto vk::ToVkImageUsageFlags(df::ImageUsageFlags flags)->VkImageUsageFlags {
 	VkImageUsageFlags imageUsageFlags = 0;
 
 	if (flags.Has(df::EImageUsageFlag::Texture)) {
-		imageUsageFlags |= VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+		imageUsageFlags |= VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
 	}
 
 	if (flags.Has(df::EImageUsageFlag::RenderTarget)) {
@@ -126,7 +126,13 @@ void vk::Texture::SetData(void* data, uint32 size) {
 }
 
 void vk::Texture::GenerateMips() {
-	// @TODO:
+	// @TODO: Check if image format supports linear blitting
+	/*VkFormatProperties formatProperties;
+	vk::API::GetPhysicalDeviceFormatProperties(physicalDevice, imageFormat, &formatProperties);
+
+	if (!(formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT)) {
+		DFAssert(false, "Texture image format does not support linear blitting!");
+	}*/
 }
 
 auto vk::Texture::GetWidth() const->uint32 {

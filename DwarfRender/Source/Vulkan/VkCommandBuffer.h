@@ -11,6 +11,7 @@ namespace vk {
 	class RenderPass;
 	class Pipeline;
 	class ParameterSet;
+	class Texture;
 }
 
 namespace vk {
@@ -60,9 +61,11 @@ namespace vk {
 		void Submit(VkQueue queue);
 		void Wait(VkQueue queue);
 
-		void ImageLayoutTransition(VkImage image, vk::EImageLayout oldLayout, vk::EImageLayout newLayout, bool isDepth = false, bool isStencil = false);
+		void ImageLayoutTransition(VkImage image, vk::EImageLayout oldLayout, vk::EImageLayout newLayout, uint32 mips = 1, bool isDepth = false, bool isStencil = false);
 		void CopyBuffer(VkBuffer src, VkBuffer dst, uint32 range, uint32 srcOffset = 0, uint32 dstOffset = 0);
 		void CopyBufferToImage(VkBuffer src, VkImage dst, uint32 width, uint32 height, int32 widthOffset = 0, int32 heightOffset = 0);
+
+		void GenerateMips(vk::Texture* texture);
 
 		auto ScopedRenderEvent(const char* name)->vk::ScopedRenderEvent;
 

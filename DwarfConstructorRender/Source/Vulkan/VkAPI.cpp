@@ -33,12 +33,13 @@
 
 bool vk::API::Load() {
     VulkanLib = LoadLibrary("vulkan-1.dll");
+    if (!VulkanLib) {
+        return false;
+    }
 
     LOAD_GLOBAL_FUNCTION(CreateInstance);
     LOAD_GLOBAL_FUNCTION(DestroyInstance);
     LOAD_GLOBAL_FUNCTION(GetInstanceProcAddr);
-
-    
 
     return true;
 }

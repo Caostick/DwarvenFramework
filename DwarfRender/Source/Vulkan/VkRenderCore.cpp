@@ -209,9 +209,9 @@ bool vk::RenderCore::BeginFrame(vk::RenderContext& renderContext) {
 	// Init texture layouts
 	for (auto texture : m_TexturesToInitLayout) {
 		if (texture->IsDepthStencil()) {
-			frame.m_CommandBuffer.ImageLayoutTransition(texture->GetVkImage(), vk::EImageLayout::Undefined, vk::EImageLayout::DepthStencilReadOnly);
+			frame.m_CommandBuffer.ImageLayoutTransition(texture->GetVkImage(), vk::EImageLayout::Undefined, vk::EImageLayout::DepthStencilReadOnly, texture->GetMips(), texture->IsDepth(), texture->IsStencil());
 		} else {
-			frame.m_CommandBuffer.ImageLayoutTransition(texture->GetVkImage(), vk::EImageLayout::Undefined, vk::EImageLayout::ColorReadOnly);
+			frame.m_CommandBuffer.ImageLayoutTransition(texture->GetVkImage(), vk::EImageLayout::Undefined, vk::EImageLayout::ColorReadOnly, texture->GetMips());
 		}
 	}
 	m_TexturesToInitLayout.clear();
