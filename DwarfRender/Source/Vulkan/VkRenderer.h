@@ -44,8 +44,6 @@ namespace vk {
 		virtual auto CreatePipeline()->df::Pipeline* override;
 		virtual void DestroyPipeline(df::Pipeline* pipeline) override;
 
-		virtual void Update() override;
-
 		virtual auto BeginFrame()->df::CommandBuffer* override;
 		virtual void EndFrame() override;
 

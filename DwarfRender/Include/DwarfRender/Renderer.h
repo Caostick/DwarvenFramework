@@ -44,8 +44,6 @@ namespace df {
 		virtual auto CreatePipeline()->df::Pipeline* = 0;
 		virtual void DestroyPipeline(df::Pipeline* pipeline) = 0;
 
-		virtual void Update() = 0;
-
 		virtual auto BeginFrame()->df::CommandBuffer* = 0;
 		virtual void EndFrame() = 0;
 

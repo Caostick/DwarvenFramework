@@ -98,10 +98,6 @@ void vk::Renderer::DestroyPipeline(df::Pipeline* pipeline) {
 	m_RenderCore.DestroyPipeline(static_cast<vk::Pipeline*>(pipeline));
 }
 
-void vk::Renderer::Update() {
-
-}
-
 auto vk::Renderer::BeginFrame()->df::CommandBuffer* {
 	vk::RenderContext context = {};
 
