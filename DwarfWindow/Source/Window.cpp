@@ -60,14 +60,21 @@ void df::Window::Release() {
 #endif
 }
 
+bool df::Window::ShouldClose() const {
+	return glfwWindowShouldClose(m_Window);
+}
+
 bool df::Window::Update() {
 	DFAssert(m_Window != nullptr, "Window is not created!");
 
-	if (glfwWindowShouldClose(m_Window)) {
-		return false;
-	}
-
 	glfwPollEvents();
+
+	int w = 0;
+	int h = 0;
+	glfwGetWindowSize(m_Window, &w, &h);
+
+	m_Width = uint32(w);
+	m_Height = uint32(h);
 
 	//double mouseX, mouseY;
 	//glfwGetCursorPos(m_Window, &mouseX, &mouseY);

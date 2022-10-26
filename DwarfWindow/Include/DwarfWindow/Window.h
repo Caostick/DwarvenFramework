@@ -20,6 +20,7 @@ namespace df {
 		bool Init(uint32 width, uint32 height);
 		void Release();
 
+		bool ShouldClose() const;
 		bool Update();
 		void SwapBuffers();
 

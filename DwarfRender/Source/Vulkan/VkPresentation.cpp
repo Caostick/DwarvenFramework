@@ -315,7 +315,32 @@ void vk::Presentation::Unload(vk::RenderCore& renderCore) {
 	m_RenderPasses.clear();
 }
 
-bool vk::Presentation::RecreateSwapchain(vk::RenderCore& /*renderCore*/, VkDevice /*device*/, VkPhysicalDevice /*physicalDevice*/, VkExtent2D /*extent*/, bool /*vSyncEnabled*/, uint32 /*graphicsFamilyIndex*/, uint32 /*presentFamilyIndex*/) {
+bool vk::Presentation::RecreateSwapchain(vk::RenderCore& /*renderCore*/, VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D extent, bool vSyncEnabled, uint32 graphicsFamilyIndex, uint32 presentFamilyIndex) {
+	DestroySwapchain(device);
+	if (!CreateSwapchain(device, physicalDevice, extent, vSyncEnabled, graphicsFamilyIndex, presentFamilyIndex)) {
+		return false;
+	}
+
+	// Update render pass
+	{
+		VkAttachmentDescription attachementDescription = {};
+		attachementDescription.format = m_VkFormat;
+		attachementDescription.samples = VK_SAMPLE_COUNT_1_BIT;
+		attachementDescription.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		attachementDescription.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+		attachementDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		attachementDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		attachementDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		attachementDescription.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+		VkClearValue clearValue = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+		for (uint32 i = 0; i < m_ImagesCount; ++i) {
+			m_RenderPasses[i]->SetExtents(m_VkExtent.width, m_VkExtent.height);
+			m_RenderPasses[i]->SetColorTarget(0, m_ImageViews[i], attachementDescription, clearValue);
+		}
+	}
+
 	return true;
 }
 

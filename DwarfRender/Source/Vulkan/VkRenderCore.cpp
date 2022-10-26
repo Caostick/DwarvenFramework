@@ -4,7 +4,6 @@
 #include "VkDefinitions.h"
 #include "VkDebug.h"
 #include "VkHelper.h"
-#include "VkRenderContext.h"
 #include "VkRenderPass.h"
 #include "VkPipeline.h"
 #include "VkParameterSetDefinition.h"
@@ -183,7 +182,10 @@ void vk::RenderCore::Unload() {
 	m_Presentation.Unload(*this);
 }
 
-bool vk::RenderCore::BeginFrame(vk::RenderContext& renderContext) {
+auto vk::RenderCore::BeginFrame() ->vk::CommandBuffer* {
+	if (!ValidateScreenSize()) {
+		return nullptr;
+	}
 
 	m_VulkanObjectManager.Update();
 
@@ -229,10 +231,7 @@ bool vk::RenderCore::BeginFrame(vk::RenderContext& renderContext) {
 	}
 	m_TexturesToGenerateMips.clear();
 
-	renderContext.m_CommandBuffer = &frame.m_CommandBuffer;
-	renderContext.m_FrameIndex = m_FrameIndex;
-
-	return true;
+	return &frame.m_CommandBuffer;
 }
 
 void vk::RenderCore::EndFrame() {
@@ -734,6 +733,16 @@ bool vk::RenderCore::InitDevice() {
 	return true;
 }
 
+bool vk::RenderCore::ValidateScreenSize() {
+	const uint32 width = m_Window.GetWidth();
+	const uint32 height = m_Window.GetHeight();
+
+	if (width == 0 || height == 0) {
+		return false;
+	}
+
+	return true;
+}
 
 bool vk::RenderCore::CheckForPreventedCaptureSoft() {
 #define DF_PREVENT_RENDERDOC 0

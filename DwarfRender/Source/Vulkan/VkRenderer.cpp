@@ -8,7 +8,6 @@
 #include "VkRenderPass.h"
 #include "VkPipeline.h"
 #include "VkCommandBuffer.h"
-#include "VkRenderContext.h"
 
 #include <DwarvenCore/New.h>
 
@@ -99,11 +98,7 @@ void vk::Renderer::DestroyPipeline(df::Pipeline* pipeline) {
 }
 
 auto vk::Renderer::BeginFrame()->df::CommandBuffer* {
-	vk::RenderContext context = {};
-
-	m_RenderCore.BeginFrame(context);
-
-	return context.m_CommandBuffer;
+	return m_RenderCore.BeginFrame();
 }
 
 void vk::Renderer::EndFrame() {

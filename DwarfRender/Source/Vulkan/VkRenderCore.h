@@ -44,7 +44,7 @@ namespace vk {
 		bool Load();
 		void Unload();
 
-		bool BeginFrame(vk::RenderContext& renderContext);
+		auto BeginFrame()->vk::CommandBuffer*;
 		void EndFrame();
 
 		void Present(vk::Texture* texture);
@@ -111,6 +111,7 @@ namespace vk {
 		bool InitPhysicalDevice();
 		bool InitDevice();
 
+		bool ValidateScreenSize();
 		bool CheckForPreventedCaptureSoft();
 
 		bool InitCommandPools();
