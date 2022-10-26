@@ -13,6 +13,18 @@ namespace df {
 		Clear,
 		Load
 	};
+
+	struct ClearColor {
+		float Red = 0.0f;
+		float Green = 0.0f;
+		float Blue = 0.0f;
+		float Alpha = 0.0f;
+	};
+
+	struct ClearDepth {
+		float Depth = 0.0f;
+		uint32 Stencil = 0;
+	};
 }
 
 namespace df {
@@ -21,8 +33,8 @@ namespace df {
 		virtual ~RenderPass() {}
 
 		virtual void SetName(const df::StringView& name) = 0;
-		virtual void SetTarget(uint32 index, df::Texture* texture, df::ERenderTargetOp operation = df::ERenderTargetOp::Clear, const Vec4& clearValue = Vec4()) = 0;
-		virtual void SetDepthStencilTarget(df::Texture* texture, df::ERenderTargetOp operation = df::ERenderTargetOp::Clear, float clearValue = 0.0f) = 0;
+		virtual void SetTarget(uint32 index, df::Texture* texture, df::ERenderTargetOp operation = df::ERenderTargetOp::Clear, const ClearColor& clearValue = ClearColor()) = 0;
+		virtual void SetDepthStencilTarget(df::Texture* texture, df::ERenderTargetOp operation = df::ERenderTargetOp::Clear, const ClearDepth& clearValue = ClearDepth()) = 0;
 
 	private:
 	};

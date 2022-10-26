@@ -46,12 +46,13 @@ void vk::RenderPass::SetName(const df::StringView& name) {
 	m_Name = name;
 }
 
-void vk::RenderPass::SetTarget(uint32 index, df::Texture* texture, df::ERenderTargetOp operation, const Vec4& clearValue) {
+void vk::RenderPass::SetTarget(uint32 index, df::Texture* texture, df::ERenderTargetOp operation, const df::ClearColor& clearValue) {
 	vk::Texture* vkTexture = static_cast<vk::Texture*>(texture);
 
 	const VkFormat vkFormat = vkTexture->GetVkFormat();
 	const VkImageView vkImageView = vkTexture->GetVkImageView();
-	const VkClearValue vkClearValue = { clearValue.X, clearValue.Y, clearValue.Z, clearValue.W };
+	VkClearValue vkClearValue = {};
+	vkClearValue.color = { clearValue.Red, clearValue.Green, clearValue.Blue, clearValue.Alpha };
 
 	VkAttachmentDescription attachementDescription = {};
 	attachementDescription.format = vkFormat;
@@ -66,12 +67,13 @@ void vk::RenderPass::SetTarget(uint32 index, df::Texture* texture, df::ERenderTa
 	SetColorTarget(index, vkImageView, attachementDescription, vkClearValue);
 }
 
-void vk::RenderPass::SetDepthStencilTarget(df::Texture* texture, df::ERenderTargetOp operation, float clearValue) {
+void vk::RenderPass::SetDepthStencilTarget(df::Texture* texture, df::ERenderTargetOp operation, const df::ClearDepth& clearValue) {
 	vk::Texture* vkTexture = static_cast<vk::Texture*>(texture);
 
 	const VkFormat vkFormat = vkTexture->GetVkFormat();
 	const VkImageView vkImageView = vkTexture->GetVkImageView();
-	const VkClearValue vkClearValue = { clearValue, 0 };
+	VkClearValue vkClearValue = {};
+	vkClearValue.depthStencil = { clearValue.Depth, clearValue.Stencil };
 
 	VkAttachmentDescription attachementDescription = {};
 	attachementDescription.format = vkFormat;
