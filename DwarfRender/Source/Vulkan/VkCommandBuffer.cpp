@@ -4,67 +4,82 @@
 #include "VkPipeline.h"
 #include "VkTexture.h"
 #include "VkDebug.h"
+#include "VkScopedRenderEvent.h"
 
 #include <DwarvenCore/Assert.h>
 
 namespace {
-	void ToVk(vk::EImageLayout layout, VkImageLayout& vkLayout, VkAccessFlags& accessFlags) {
+	void ToVk(vk::EImageLayout layout, VkImageLayout& vkLayout, VkAccessFlags& accessFlags, VkPipelineStageFlags& stageFlags) {
 		switch (layout) {
 		case vk::EImageLayout::Undefined:
 			vkLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 			accessFlags = 0;
+			stageFlags = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
 			break;
 		case vk::EImageLayout::General:
 			vkLayout = VK_IMAGE_LAYOUT_GENERAL;
 			accessFlags = 0;
+			stageFlags = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
 			break;
 		case vk::EImageLayout::ColorAttachment:
 			vkLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 			accessFlags = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+			stageFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 			break;
 		case vk::EImageLayout::ColorReadOnly:
 			vkLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			accessFlags = VK_ACCESS_SHADER_READ_BIT;
+			stageFlags = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 			break;
 		case vk::EImageLayout::DepthStencilAttachment:
 			vkLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 			accessFlags = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+			stageFlags = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 			break;
 		case vk::EImageLayout::DepthStencilReadOnly:
 			vkLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 			accessFlags = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+			stageFlags = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 			break;
 		case vk::EImageLayout::DepthReadOnlyStencilAttachment:
 			vkLayout = VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL;
 			accessFlags = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+			stageFlags = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 			break;
 		case vk::EImageLayout::DepthAttachmentStencilReadOnly:
 			vkLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL;
 			accessFlags = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+			stageFlags = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 			break;
 		case vk::EImageLayout::DepthAttachment:
 			vkLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
 			accessFlags = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+			stageFlags = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 			break;
 		case vk::EImageLayout::DepthReadOnly:
 			vkLayout = VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
 			accessFlags = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+			stageFlags = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 			break;
 		case vk::EImageLayout::StencilAttachment:
 			vkLayout = VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL;
 			accessFlags = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+			stageFlags = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 			break;
 		case vk::EImageLayout::StencilReadOnly:
 			vkLayout = VK_IMAGE_LAYOUT_STENCIL_READ_ONLY_OPTIMAL;
 			accessFlags = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+			stageFlags = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 			break;
 		case vk::EImageLayout::TransferSrc:
 			vkLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
 			accessFlags = VK_ACCESS_TRANSFER_READ_BIT;
+			stageFlags = VK_PIPELINE_STAGE_TRANSFER_BIT;
 			break;
 		case vk::EImageLayout::TransferDst:
 			vkLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 			accessFlags = VK_ACCESS_TRANSFER_WRITE_BIT;
+			stageFlags = VK_PIPELINE_STAGE_TRANSFER_BIT;
 			break;
 		default:
 			break;
@@ -167,7 +182,7 @@ void vk::CommandBuffer::Wait(VkQueue queue) {
 	vk::API::QueueWaitIdle(queue);
 }
 
-void vk::CommandBuffer::ImageLayoutTransition(VkImage image, vk::EImageLayout oldLayout, vk::EImageLayout newLayout, uint32 mips /*= 1*/, bool isDepth /*= false*/, bool isStencil /*= false*/) {
+void vk::CommandBuffer::ImageLayoutTransition(VkImage image, uint32 mipCount, vk::EImageLayout oldLayout, vk::EImageLayout newLayout, int32 mip /*= -1*/, bool isDepth /*= false*/, bool isStencil /*= false*/) {
 	VkImageMemoryBarrier barrier{};
 	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 	barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -175,8 +190,8 @@ void vk::CommandBuffer::ImageLayoutTransition(VkImage image, vk::EImageLayout ol
 	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.image = image;
-	barrier.subresourceRange.baseMipLevel = 0;
-	barrier.subresourceRange.levelCount = mips;
+	barrier.subresourceRange.baseMipLevel = (mip < 0) ? 0 : mip;
+	barrier.subresourceRange.levelCount = (mip < 0) ? mipCount : mip;
 	barrier.subresourceRange.baseArrayLayer = 0;
 	barrier.subresourceRange.layerCount = 1;
 	barrier.srcAccessMask = 0;
@@ -185,34 +200,22 @@ void vk::CommandBuffer::ImageLayoutTransition(VkImage image, vk::EImageLayout ol
 	barrier.subresourceRange.aspectMask |= isDepth ? VK_IMAGE_ASPECT_DEPTH_BIT : 0;
 	barrier.subresourceRange.aspectMask |= isStencil ? VK_IMAGE_ASPECT_STENCIL_BIT : 0;
 
-	VkPipelineStageFlags sourceStage = (oldLayout == vk::EImageLayout::TransferDst) ? VK_PIPELINE_STAGE_TRANSFER_BIT : VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-	VkPipelineStageFlags destinationStage = (newLayout == vk::EImageLayout::TransferDst) ? VK_PIPELINE_STAGE_TRANSFER_BIT : VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+	VkPipelineStageFlags sourceStage = 0;
+	VkPipelineStageFlags destinationStage = 0;
 
-	if (oldLayout == EImageLayout::ColorReadOnly ||
-		oldLayout == EImageLayout::DepthReadOnly ||
-		oldLayout == EImageLayout::DepthStencilReadOnly) {
-
-		sourceStage |= VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-	}
-
-	if (oldLayout == EImageLayout::ColorAttachment) {
-		sourceStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	} else if (oldLayout == EImageLayout::DepthStencilAttachment) {
-		sourceStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-	}
-
-	if (newLayout == EImageLayout::ColorAttachment) {
-		destinationStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	} else if (newLayout == EImageLayout::DepthStencilAttachment) {
-		destinationStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-	} else if (newLayout == EImageLayout::DepthStencilReadOnly) {
-		destinationStage = VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-	}
-
-	ToVk(oldLayout, barrier.oldLayout, barrier.srcAccessMask);
-	ToVk(newLayout, barrier.newLayout, barrier.dstAccessMask);
+	ToVk(oldLayout, barrier.oldLayout, barrier.srcAccessMask, sourceStage);
+	ToVk(newLayout, barrier.newLayout, barrier.dstAccessMask, destinationStage);
 
 	vk::API::CmdPipelineBarrier(m_VkCommandBuffer, sourceStage, destinationStage, 0, 0, nullptr, 0, nullptr, 1, &barrier);
+}
+
+void vk::CommandBuffer::ImageLayoutTransition(vk::Texture* texture, vk::EImageLayout oldLayout, vk::EImageLayout newLayout, int32 mip /*= -1*/) {
+	const bool isDepth = texture->IsDepth();
+	const bool isStencil = texture->IsStencil();
+	const auto mipCount = texture->GetMips();
+	const auto image = texture->GetVkImage();
+
+	ImageLayoutTransition(image, mipCount, oldLayout, newLayout, mip, isDepth, isStencil);
 }
 
 void vk::CommandBuffer::CopyBuffer(VkBuffer src, VkBuffer dst, uint32 range, uint32 srcOffset /*= 0*/, uint32 dstOffset /*= 0*/) {
@@ -242,8 +245,14 @@ void vk::CommandBuffer::CopyBufferToImage(VkBuffer src, VkImage dst, uint32 widt
 }
 
 void vk::CommandBuffer::GenerateMips(vk::Texture* texture) {
-	const VkImage vkImage = texture->GetVkImage();
+	DFScopedRenderEvent((*this), "Generate Mips");
+
 	const uint32 mipLevels = texture->GetMips();
+	if (mipLevels < 2) {
+		return;
+	}
+
+	const VkImage vkImage = texture->GetVkImage();
 	const uint32 width = texture->GetWidth();
 	const uint32 height = texture->GetHeight();
 	const bool isDepth = texture->IsDepth();

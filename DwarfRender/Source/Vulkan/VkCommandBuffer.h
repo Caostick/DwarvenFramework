@@ -61,7 +61,8 @@ namespace vk {
 		void Submit(VkQueue queue);
 		void Wait(VkQueue queue);
 
-		void ImageLayoutTransition(VkImage image, vk::EImageLayout oldLayout, vk::EImageLayout newLayout, uint32 mips = 1, bool isDepth = false, bool isStencil = false);
+		void ImageLayoutTransition(VkImage image, uint32 mipCount, vk::EImageLayout oldLayout, vk::EImageLayout newLayout, int32 mip = -1, bool isDepth = false, bool isStencil = false);
+		void ImageLayoutTransition(vk::Texture* texture, vk::EImageLayout oldLayout, vk::EImageLayout newLayout, int32 mip = -1);
 		void CopyBuffer(VkBuffer src, VkBuffer dst, uint32 range, uint32 srcOffset = 0, uint32 dstOffset = 0);
 		void CopyBufferToImage(VkBuffer src, VkImage dst, uint32 width, uint32 height, int32 widthOffset = 0, int32 heightOffset = 0);
 

@@ -23,7 +23,7 @@ namespace vk {
 		virtual ~Texture() override;
 
 		virtual void SetName(const df::StringView& name) override;
-		virtual void Create(uint32 width, uint32 height, df::ETextureFormat format, bool mips, df::ImageUsageFlags usage) override;
+		virtual void Create(uint32 width, uint32 height, df::ETextureFormat format, df::ImageUsageFlags usage) override;
 		virtual void SetData(void* data, uint32 size) override;
 		virtual void GenerateMips() override;
 		virtual auto GetWidth() const->uint32 override;

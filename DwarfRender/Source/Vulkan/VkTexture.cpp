@@ -7,7 +7,7 @@ auto vk::ToVkImageUsageFlags(df::ImageUsageFlags flags)->VkImageUsageFlags {
 	VkImageUsageFlags imageUsageFlags = 0;
 
 	if (flags.Has(df::EImageUsageFlag::Texture)) {
-		imageUsageFlags |= VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+		imageUsageFlags |= VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 	}
 
 	if (flags.Has(df::EImageUsageFlag::RenderTarget)) {
@@ -16,6 +16,10 @@ auto vk::ToVkImageUsageFlags(df::ImageUsageFlags flags)->VkImageUsageFlags {
 
 	if (flags.Has(df::EImageUsageFlag::DepthRenderTarget)) {
 		imageUsageFlags |= VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+	}
+
+	if (flags.Has(df::EImageUsageFlag::Mips)) {
+		imageUsageFlags |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
 	}
 
 	return imageUsageFlags;
@@ -97,14 +101,14 @@ void vk::Texture::SetName(const df::StringView& name) {
 	}
 }
 
-void vk::Texture::Create(uint32 width, uint32 height, df::ETextureFormat format, bool mips, df::ImageUsageFlags usage) {
+void vk::Texture::Create(uint32 width, uint32 height, df::ETextureFormat format, df::ImageUsageFlags usage) {
 	const VkDevice vkDevice = m_RenderCore.GetVkDevice();
 
 	m_Width = width;
 	m_Height = height;
 	m_Format = format;
 	m_UsageFlags = usage;
-	m_Mips = mips ? static_cast<uint32>(std::log2(std::max(width, height))) : 0 + 1;
+	m_Mips = 1 + (usage.Has(df::EImageUsageFlag::Mips) ? static_cast<uint32>(std::log2(std::max(width, height))) : 0);
 
 	m_VkUsageFlags = ToVkImageUsageFlags(m_UsageFlags);
 	m_VkFormat = ToVkFormat(m_Format);

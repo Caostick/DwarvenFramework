@@ -238,7 +238,7 @@ auto vk::Presentation::Present(VkSemaphore semaphore, VkQueue presentQueue)->VkR
 bool vk::Presentation::Load(vk::RenderCore& renderCore) {
 
 	m_TestTexture = renderCore.CreateTexture();
-	m_TestTexture->Create(256, 768, df::ETextureFormat::R8G8B8A8_UNorm, true, df::EImageUsageFlag::Texture);
+	m_TestTexture->Create(16, 16, df::ETextureFormat::R8G8B8A8_UNorm, df::EImageUsageFlag::Texture);
 	m_TestTexture->GenerateMips();
 	
 	// Create render pass

@@ -29,6 +29,7 @@ namespace df {
 		Texture = 1 << 0,
 		RenderTarget = 1 << 1,
 		DepthRenderTarget = 1 << 2,
+		Mips = 1 << 3,
 	};
 
 	using ImageUsageFlags = df::EnumFlags<EImageUsageFlag>;
@@ -41,7 +42,7 @@ namespace df {
 		virtual ~Texture() {}
 
 		virtual void SetName(const df::StringView& name) = 0;
-		virtual void Create(uint32 width, uint32 height, ETextureFormat format, bool mips = false, ImageUsageFlags usage = EImageUsageFlag::Texture) = 0;
+		virtual void Create(uint32 width, uint32 height, ETextureFormat format, ImageUsageFlags usage = EImageUsageFlag::Texture) = 0;
 		virtual void SetData(void* data, uint32 size) = 0;
 		virtual void GenerateMips() = 0;
 		virtual auto GetWidth() const->uint32 = 0;
