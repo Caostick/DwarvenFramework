@@ -59,6 +59,9 @@ namespace vk {
 
 		virtual void SetName(const df::StringView& name) override;
 
+		virtual void SetTarget(uint32 index, df::Texture* texture, df::ERenderTargetOp operation, const Vec4& clearValue) override;
+		virtual void SetDepthStencilTarget(df::Texture* texture, df::ERenderTargetOp operation, float clearValue) override;
+
 		void Validate();
 
 		void SetExtents(uint32 width, uint32 height);
@@ -72,6 +75,8 @@ namespace vk {
 		auto GetVkFramebuffer() const->VkFramebuffer;
 		auto GetVkClearValues() const -> const df::Vector<VkClearValue>&;
 		auto GetVkExtents() const->const VkExtent2D&;
+
+		auto GetColorAttachmentCount() const -> uint32;
 
 	private:
 		void Build();

@@ -382,7 +382,7 @@ void vk::ParameterSetDefinition::Build() {
 		m_ConstantBufferSize += constant->GetSize() + padding;
 	}
 
-	uint32 bindingIndex = 1;
+	uint32 bindingIndex = (m_ConstantBufferSize > 0) ? 1 : 0;
 
 	for (auto& buffer : m_Buffers) {
 		buffer.m_Binding = bindingIndex++;

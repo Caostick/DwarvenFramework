@@ -3,12 +3,226 @@
 #include "VkDebug.h"
 #include "VkParameterSetDefinition.h"
 #include "VkParameterSet.h"
+#include "VkRenderPass.h"
 #include "VkShaderCompiler.h"
 #include "VkShaderParsing.h"
+
 
 #include <DwarvenCore/StringOperations.h>
 
 #include <iostream>
+
+namespace {
+	auto ToVkPolygonMode(df::EPolygonMode value)->VkPolygonMode {
+		switch (value) {
+		case df::EPolygonMode::Fill:
+			return VK_POLYGON_MODE_FILL;
+		case df::EPolygonMode::Line:
+			return VK_POLYGON_MODE_LINE;
+		case df::EPolygonMode::Point:
+			return VK_POLYGON_MODE_POINT;
+		default:
+			return VK_POLYGON_MODE_FILL;
+		}
+	}
+
+	auto ToVkCullMode(df::ECullMode value)->VkCullModeFlagBits {
+		switch (value) {
+		case df::ECullMode::None:
+			return VK_CULL_MODE_NONE;
+		case df::ECullMode::Front:
+			return VK_CULL_MODE_FRONT_BIT;
+		case df::ECullMode::Back:
+			return VK_CULL_MODE_BACK_BIT;
+		case df::ECullMode::FrontAndBack:
+			return VK_CULL_MODE_FRONT_AND_BACK;
+		default:
+			return VK_CULL_MODE_NONE;
+		}
+	}
+
+	auto ToVkFrontFace(df::EFrontFace value)->VkFrontFace {
+		switch (value) {
+		case df::EFrontFace::CounterClockwise:
+			return VK_FRONT_FACE_COUNTER_CLOCKWISE;
+		case df::EFrontFace::Clockwise:
+			return VK_FRONT_FACE_CLOCKWISE;
+		default:
+			return VK_FRONT_FACE_CLOCKWISE;
+		}
+	}
+
+	auto ToVkBlendFactor(df::EBlendFactor value)->VkBlendFactor {
+		switch (value) {
+		case df::EBlendFactor::Zero:
+			return VK_BLEND_FACTOR_ZERO;
+		case df::EBlendFactor::One:
+			return VK_BLEND_FACTOR_ONE;
+		case df::EBlendFactor::SrcColor:
+			return VK_BLEND_FACTOR_SRC_COLOR;
+		case df::EBlendFactor::OneMinusSrcColor:
+			return VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR;
+		case df::EBlendFactor::DstColor:
+			return VK_BLEND_FACTOR_DST_COLOR;
+		case df::EBlendFactor::OneMinusDstColor:
+			return VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR;
+		case df::EBlendFactor::SrcAlpha:
+			return VK_BLEND_FACTOR_SRC_ALPHA;
+		case df::EBlendFactor::OneMinusSrcAlpha:
+			return VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+		case df::EBlendFactor::DstAlpha:
+			return VK_BLEND_FACTOR_DST_ALPHA;
+		case df::EBlendFactor::OneMinusDstAlpha:
+			return VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA;
+		default:
+			return VK_BLEND_FACTOR_ZERO;
+		}
+	}
+
+	auto ToVkBlendOp(df::EBlendOp value)->VkBlendOp {
+		switch (value) {
+		case df::EBlendOp::Add:
+			return VK_BLEND_OP_ADD;
+		case df::EBlendOp::Subtract:
+			return VK_BLEND_OP_SUBTRACT;
+		case df::EBlendOp::ReverseSubtract:
+			return VK_BLEND_OP_REVERSE_SUBTRACT;
+		case df::EBlendOp::Min:
+			return VK_BLEND_OP_MIN;
+		case df::EBlendOp::Max:
+			return VK_BLEND_OP_MAX;
+		default:
+			return VK_BLEND_OP_ADD;
+		}
+	}
+
+	auto ToVkDepthCompareOp(df::EDepthCompareOp value)->VkCompareOp {
+		switch (value) {
+		case df::EDepthCompareOp::Never:
+			return VK_COMPARE_OP_NEVER;
+		case df::EDepthCompareOp::Equal:
+			return VK_COMPARE_OP_EQUAL;
+		case df::EDepthCompareOp::NotEqual:
+			return VK_COMPARE_OP_NOT_EQUAL;
+		case df::EDepthCompareOp::Greater:
+			return VK_COMPARE_OP_GREATER;
+		case df::EDepthCompareOp::GreaterEqual:
+			return VK_COMPARE_OP_GREATER_OR_EQUAL;
+		case df::EDepthCompareOp::Less:
+			return VK_COMPARE_OP_LESS;
+		case df::EDepthCompareOp::LessEqual:
+			return VK_COMPARE_OP_LESS_OR_EQUAL;
+		case df::EDepthCompareOp::Always:
+			return VK_COMPARE_OP_ALWAYS;
+		default:
+			return VK_COMPARE_OP_EQUAL;
+		}
+	}
+
+	auto ToVkStencilOp(df::EStencilOp value)->VkStencilOp {
+		switch (value) {
+		case df::EStencilOp::Keep:
+			return VK_STENCIL_OP_KEEP;
+		case df::EStencilOp::Zero:
+			return VK_STENCIL_OP_ZERO;
+		case df::EStencilOp::Replace:
+			return VK_STENCIL_OP_REPLACE;
+		case df::EStencilOp::Increment:
+			return VK_STENCIL_OP_INCREMENT_AND_CLAMP;
+		case df::EStencilOp::Decrement:
+			return VK_STENCIL_OP_DECREMENT_AND_CLAMP;
+		case df::EStencilOp::Invert:
+			return VK_STENCIL_OP_INVERT;
+		default:
+			return VK_STENCIL_OP_KEEP;
+		}
+	}
+
+	auto ToVkPrimitiveTopology(df::EPrimitiveTopology topology)->VkPrimitiveTopology {
+		switch (topology) {
+		case df::EPrimitiveTopology::Points:
+			return VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
+		case df::EPrimitiveTopology::Lines:
+			return VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+		case df::EPrimitiveTopology::Triangles:
+			return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+		default:
+			return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+		}
+	}
+
+	auto ToVkPipelineRasterizationStateCreateInfo(const df::RasterizationState& rasterizationState)->VkPipelineRasterizationStateCreateInfo {
+		VkPipelineRasterizationStateCreateInfo createInfo = {};
+
+		createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+		createInfo.pNext = nullptr;
+		createInfo.flags = 0;
+		createInfo.depthClampEnable = VK_FALSE;
+		createInfo.rasterizerDiscardEnable = rasterizationState.m_RasterizerDiscardEnable;
+		createInfo.polygonMode = ToVkPolygonMode(rasterizationState.m_PolygonMode);
+		createInfo.cullMode = ToVkCullMode(rasterizationState.m_CullMode);
+		createInfo.frontFace = ToVkFrontFace(rasterizationState.m_FrontFace);
+		createInfo.depthBiasEnable = VK_FALSE;
+		createInfo.depthBiasConstantFactor = 0.0f;
+		createInfo.depthBiasClamp = 0.0f;
+		createInfo.depthBiasSlopeFactor = 0.0f;
+		createInfo.lineWidth = 1.0f;
+
+		return createInfo;
+	}
+
+	void ToVkPipelineColorBlendStateCreateInfo(VkPipelineColorBlendStateCreateInfo& createInfo, df::Vector<VkPipelineColorBlendAttachmentState>& states, const df::BlendState& blendState, uint32 count) {
+
+		VkPipelineColorBlendAttachmentState attachmentState = {};
+		attachmentState.blendEnable = blendState.m_BlendEnable;
+
+		attachmentState.srcColorBlendFactor = ToVkBlendFactor(blendState.m_SrcColorBlendFactor);
+		attachmentState.dstColorBlendFactor = ToVkBlendFactor(blendState.m_DstColorBlendFactor);
+		attachmentState.colorBlendOp = ToVkBlendOp(blendState.m_ColorBlendOp);
+		attachmentState.srcAlphaBlendFactor = ToVkBlendFactor(blendState.m_SrcAlphaBlendFactor);
+		attachmentState.dstAlphaBlendFactor = ToVkBlendFactor(blendState.m_DstAlphaBlendFactor);
+		attachmentState.alphaBlendOp = ToVkBlendOp(blendState.m_AlphaBlendOp);
+		attachmentState.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+
+		states = {};
+		states.resize(count);
+
+		for (auto& it : states) {
+			it = attachmentState;
+		}
+
+		createInfo = {};
+		createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+		createInfo.pNext = nullptr;
+		createInfo.flags = 0;
+		createInfo.logicOpEnable = VK_FALSE;
+		createInfo.logicOp = VK_LOGIC_OP_COPY;
+		createInfo.attachmentCount = count;
+		createInfo.pAttachments = states.data();
+		createInfo.blendConstants[0] = 0.0f;
+		createInfo.blendConstants[1] = 0.0f;
+		createInfo.blendConstants[2] = 0.0f;
+		createInfo.blendConstants[3] = 0.0f;
+	}
+
+	auto ToVkPipelineDepthStencilStateCreateInfo(const df::DepthState& depthState) ->VkPipelineDepthStencilStateCreateInfo {
+		VkPipelineDepthStencilStateCreateInfo createInfo = {};
+		createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+		createInfo.pNext = nullptr;
+		createInfo.flags = 0;
+		createInfo.depthTestEnable = depthState.m_DepthTestEnable;
+		createInfo.depthWriteEnable = depthState.m_DepthWriteEnable;
+		createInfo.depthCompareOp = ToVkDepthCompareOp(depthState.m_DepthCompareOp);
+		createInfo.depthBoundsTestEnable = VK_FALSE;
+		createInfo.stencilTestEnable = depthState.m_StencilTestEnable;
+		createInfo.front = {};
+		createInfo.back = {};
+		createInfo.minDepthBounds = 0.0f;
+		createInfo.maxDepthBounds = 1.0f;
+
+		return createInfo;
+	}
+}
 
 bool vk::PipelineState::operator == (const PipelineState& other) const {
 	return
@@ -38,6 +252,10 @@ vk::Pipeline::Pipeline(vk::RenderCore& renderCore)
 }
 
 vk::Pipeline::~Pipeline() {
+	for (auto&& state : m_PipelineStateObjects) {
+		m_RenderCore.RemovePipeline(state.m_PipelineStateObject);
+	}
+
 	if (m_VkPipelineLayout != VK_NULL_HANDLE) {
 		m_RenderCore.RemovePipelineLayout(m_VkPipelineLayout);
 	}
@@ -190,12 +408,113 @@ auto vk::Pipeline::CreatePipelineStateObject()->VkPipeline {
 	DFAssert(m_IsBuilt, "Can't create pipeline state object - pipeline is not built yet!");
 	DFAssert(m_State.m_RenderPass != nullptr, "There is no active render pass to build pipeline state object!");
 
+	const VkDevice vkDevice = m_RenderCore.GetVkDevice();
 
+	df::Vector<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos;
+	if (m_VkVertexShaderModule != VK_NULL_HANDLE) {
+		VkPipelineShaderStageCreateInfo pipelineShaderStageCreateInfo = {};
+		pipelineShaderStageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+		pipelineShaderStageCreateInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+		pipelineShaderStageCreateInfo.module = m_VkVertexShaderModule;
+		pipelineShaderStageCreateInfo.pName = "main";
 
+		shaderStageCreateInfos.emplace_back(pipelineShaderStageCreateInfo);
+	}
+	if (m_VkFragmentShaderModule != VK_NULL_HANDLE) {
+		VkPipelineShaderStageCreateInfo pipelineShaderStageCreateInfo = {};
+		pipelineShaderStageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+		pipelineShaderStageCreateInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+		pipelineShaderStageCreateInfo.module = m_VkFragmentShaderModule;
+		pipelineShaderStageCreateInfo.pName = "main";
+
+		shaderStageCreateInfos.emplace_back(pipelineShaderStageCreateInfo);
+	}
+
+	df::Vector<VkDynamicState> dynamicStates = {
+		VK_DYNAMIC_STATE_VIEWPORT,
+		VK_DYNAMIC_STATE_SCISSOR
+	};
+
+	const uint32 colorAttachmentCount = m_State.m_RenderPass->GetColorAttachmentCount();
+
+	VkPipelineColorBlendStateCreateInfo blendStateCreateInfo;
+	df::Vector<VkPipelineColorBlendAttachmentState> blendAttachmentStates;
+	ToVkPipelineColorBlendStateCreateInfo(blendStateCreateInfo, blendAttachmentStates, m_State.m_BlendState, colorAttachmentCount);
+
+	const auto& vertexInputBindingDescriptions = m_BindingDescriptions;
+	const auto& vertexInputAttributeDescriptions = m_AttributeDescriptions;
+
+	const VkPipelineDepthStencilStateCreateInfo depthStencilStateCreateInfo = ToVkPipelineDepthStencilStateCreateInfo(m_State.m_DepthState);
+	const VkPipelineRasterizationStateCreateInfo rasterizationStateCreateInfo = ToVkPipelineRasterizationStateCreateInfo(m_State.m_RasterizationState);
+
+	const uint32 defaultWidth = 4;
+	const uint32 defaultHidth = 4;
+
+	VkPipelineVertexInputStateCreateInfo vertexInputStateCreateInfo = {};
+	vertexInputStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+	vertexInputStateCreateInfo.vertexBindingDescriptionCount = uint32(vertexInputBindingDescriptions.size());
+	vertexInputStateCreateInfo.vertexAttributeDescriptionCount = uint32(vertexInputAttributeDescriptions.size());
+	vertexInputStateCreateInfo.pVertexBindingDescriptions = vertexInputBindingDescriptions.data();
+	vertexInputStateCreateInfo.pVertexAttributeDescriptions = vertexInputAttributeDescriptions.data();
+
+	VkPipelineInputAssemblyStateCreateInfo inputAssemblyStateCreateInfo = {};
+	inputAssemblyStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+	inputAssemblyStateCreateInfo.topology = ToVkPrimitiveTopology(m_State.m_PrimitiveTopology);
+	inputAssemblyStateCreateInfo.primitiveRestartEnable = VK_FALSE;
+
+	VkViewport viewport = {};
+	viewport.x = 0.0f;
+	viewport.y = 0.0f;
+	viewport.width = float(defaultWidth);
+	viewport.height = float(defaultHidth);
+	viewport.minDepth = 0.0f;
+	viewport.maxDepth = 1.0f;
+
+	VkRect2D scissor = {};
+	scissor.offset = { 0, 0 };
+	scissor.extent.width = defaultWidth;
+	scissor.extent.height = defaultHidth;
+
+	VkPipelineViewportStateCreateInfo viewportStateCreateInfo = {};
+	viewportStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+	viewportStateCreateInfo.viewportCount = 1;
+	viewportStateCreateInfo.pViewports = &viewport;
+	viewportStateCreateInfo.scissorCount = 1;
+	viewportStateCreateInfo.pScissors = &scissor;
+
+	VkPipelineMultisampleStateCreateInfo multisampleStateCreateInfo = {};
+	multisampleStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+	multisampleStateCreateInfo.sampleShadingEnable = VK_FALSE;
+	multisampleStateCreateInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+
+	VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo = {};
+	dynamicStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+	dynamicStateCreateInfo.dynamicStateCount = uint32(dynamicStates.size());
+	dynamicStateCreateInfo.pDynamicStates = dynamicStates.data();
+
+	VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo = {};
+	graphicsPipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+	graphicsPipelineCreateInfo.stageCount = uint32(shaderStageCreateInfos.size());
+	graphicsPipelineCreateInfo.pStages = shaderStageCreateInfos.data();
+	graphicsPipelineCreateInfo.pVertexInputState = &vertexInputStateCreateInfo;
+	graphicsPipelineCreateInfo.pInputAssemblyState = &inputAssemblyStateCreateInfo;
+	graphicsPipelineCreateInfo.pViewportState = &viewportStateCreateInfo;
+	graphicsPipelineCreateInfo.pRasterizationState = &rasterizationStateCreateInfo;
+	graphicsPipelineCreateInfo.pMultisampleState = &multisampleStateCreateInfo;
+	graphicsPipelineCreateInfo.pColorBlendState = &blendStateCreateInfo;
+	graphicsPipelineCreateInfo.pDepthStencilState = &depthStencilStateCreateInfo;
+	graphicsPipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
+	graphicsPipelineCreateInfo.layout = m_VkPipelineLayout;
+	graphicsPipelineCreateInfo.renderPass = m_State.m_RenderPass->GetVkRenderPass();
+	graphicsPipelineCreateInfo.subpass = 0;
+	graphicsPipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
 
 	VkPipeline vkPipeline = VK_NULL_HANDLE;
+	if (vk::API::CreateGraphicsPipelines(vkDevice, VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, vk::Allocator(), &vkPipeline) != VK_SUCCESS) {
+		DFAssert(false, "Can't create GraphicsPipeline!");
+	}
 
-
+	DFVkDebugName(vkDevice, vkPipeline, m_Name);
 
 	m_PipelineStateObjects.push_back(PipelineStateObjectSlot(m_State, vkPipeline));
 	return vkPipeline;

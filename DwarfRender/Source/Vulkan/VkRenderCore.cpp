@@ -223,6 +223,12 @@ bool vk::RenderCore::BeginFrame(vk::RenderContext& renderContext) {
 		m_TransferBuffer.Execute(frame.m_CommandBuffer);
 	}
 
+	// Generate Mips
+	for (auto texture : m_TexturesToGenerateMips) {
+		frame.m_CommandBuffer.GenerateMips(texture);
+	}
+	m_TexturesToGenerateMips.clear();
+
 	renderContext.m_CommandBuffer = &frame.m_CommandBuffer;
 	renderContext.m_FrameIndex = m_FrameIndex;
 
@@ -529,6 +535,10 @@ void vk::RenderCore::SetBufferData(VkBuffer buffer, const void* data, uint32 dat
 
 void vk::RenderCore::SetImageData(VkImage image, const void* data, uint32 dataSize, uint32 width, uint32 height, int32 widthOffset /*= 0*/, int32 heightOffset /*= 0*/) {
 	m_TransferBuffer.SetImageData(image, data, dataSize, width, height, widthOffset, heightOffset);
+}
+
+void vk::RenderCore::GenerateMips(vk::Texture* texture) {
+	m_TexturesToGenerateMips.push_back(texture);
 }
 
 bool vk::RenderCore::InitInstance() {

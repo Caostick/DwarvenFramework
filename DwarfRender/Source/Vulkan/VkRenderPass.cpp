@@ -2,8 +2,24 @@
 #include "VkDebug.h"
 #include "VkAllocator.h"
 #include "VkRenderCore.h"
+#include "VkTexture.h"
 
 #include <DwarvenCore/Assert.h>
+
+namespace {
+	auto ToVkAttachmentLoadOp(df::ERenderTargetOp value)->VkAttachmentLoadOp {
+		switch (value) {
+		case df::ERenderTargetOp::DontCare:
+			return VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		case df::ERenderTargetOp::Clear:
+			return VK_ATTACHMENT_LOAD_OP_CLEAR;
+		case df::ERenderTargetOp::Load:
+			return VK_ATTACHMENT_LOAD_OP_LOAD;
+		default:
+			return VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		}
+	}
+}
 
 vk::RenderPass::RenderPass(vk::RenderCore& renderCore) 
 	: m_RenderCore(renderCore)
@@ -29,6 +45,46 @@ void vk::RenderPass::SetName(const df::StringView& name) {
 	m_Name = name;
 }
 
+void vk::RenderPass::SetTarget(uint32 index, df::Texture* texture, df::ERenderTargetOp operation, const Vec4& clearValue) {
+	vk::Texture* vkTexture = static_cast<vk::Texture*>(texture);
+
+	const VkFormat vkFormat = vkTexture->GetVkFormat();
+	const VkImageView vkImageView = vkTexture->GetVkImageView();
+	const VkClearValue vkClearValue = { clearValue.X, clearValue.Y, clearValue.Z, clearValue.W };
+
+	VkAttachmentDescription attachementDescription = {};
+	attachementDescription.format = vkFormat;
+	attachementDescription.samples = VK_SAMPLE_COUNT_1_BIT;
+	attachementDescription.loadOp = ToVkAttachmentLoadOp(operation);
+	attachementDescription.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	attachementDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	attachementDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	attachementDescription.initialLayout = VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL;
+	attachementDescription.finalLayout = VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL;
+
+	SetColorTarget(index, vkImageView, attachementDescription, vkClearValue);
+}
+
+void vk::RenderPass::SetDepthStencilTarget(df::Texture* texture, df::ERenderTargetOp operation, float clearValue) {
+	vk::Texture* vkTexture = static_cast<vk::Texture*>(texture);
+
+	const VkFormat vkFormat = vkTexture->GetVkFormat();
+	const VkImageView vkImageView = vkTexture->GetVkImageView();
+	const VkClearValue vkClearValue = { clearValue, 0 };
+
+	VkAttachmentDescription attachementDescription = {};
+	attachementDescription.format = vkFormat;
+	attachementDescription.samples = VK_SAMPLE_COUNT_1_BIT;
+	attachementDescription.loadOp = ToVkAttachmentLoadOp(operation);
+	attachementDescription.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	attachementDescription.stencilLoadOp = ToVkAttachmentLoadOp(operation);
+	attachementDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	attachementDescription.initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+	attachementDescription.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+
+	SetDepthStencilTarget(vkImageView, attachementDescription, vkClearValue);
+}
+
 void vk::RenderPass::Validate() {
 	if (m_IsBuilt) {
 		return;
@@ -50,10 +106,6 @@ void vk::RenderPass::SetColorTarget(uint32 index, VkImageView imageView, const V
 	m_ColorAttachmnets[index].ImageView = imageView;
 	m_ColorAttachmnets[index].Description = description;
 	m_ColorAttachmnets[index].ClearValue = clearValue;
-
-	//static_assert(sizeof(renderPass->m_APIData.m_ClearValues[i]) == sizeof(clearValues[i]), "ClearVlaue incompatible!");
-	//static_assert(sizeof(renderPass->m_APIData.m_ClearValues[i].color) == sizeof(clearValues[i].ColorValue), "ClearVlaue incompatible!");
-	//static_assert(sizeof(renderPass->m_APIData.m_ClearValues[i].depthStencil) == sizeof(clearValues[i].DepthStencilValue), "ClearVlaue incompatible!");
 
 	m_IsBuilt = false;
 }
@@ -88,6 +140,10 @@ auto vk::RenderPass::GetVkClearValues() const -> const df::Vector<VkClearValue>&
 
 auto vk::RenderPass::GetVkExtents() const->const VkExtent2D& {
 	return m_VkExtents;
+}
+
+auto vk::RenderPass::GetColorAttachmentCount() const -> uint32 {
+	return uint32(m_ColorAttachmnets.size());
 }
 
 void vk::RenderPass::Build() {

@@ -85,7 +85,6 @@ vk::Presentation::Presentation()
 	, m_VSyncEnabled(true)
 	, m_ParametrSet(nullptr)
 	, m_Pipeline(nullptr)
-	, m_TestTexture(nullptr)
 	, m_MinImagesCount(0)
 	, m_ImagesCount(0)
 	, m_AvailableImageIndex(0) {}
@@ -236,11 +235,6 @@ auto vk::Presentation::Present(VkSemaphore semaphore, VkQueue presentQueue)->VkR
 }
 
 bool vk::Presentation::Load(vk::RenderCore& renderCore) {
-
-	m_TestTexture = renderCore.CreateTexture();
-	m_TestTexture->Create(16, 16, df::ETextureFormat::R8G8B8A8_UNorm, df::EImageUsageFlag::Texture);
-	m_TestTexture->GenerateMips();
-	
 	// Create render pass
 	{
 		VkAttachmentDescription attachementDescription = {};
@@ -270,9 +264,9 @@ bool vk::Presentation::Load(vk::RenderCore& renderCore) {
 			"layout(location = 0) out vec2 outTexcoord;\n"
 			"\n"
 			"vec2 positions[3] = vec2[](\n"
-			"    vec2(0.0, 0.0),\n"
-			"    vec2(0.0, 2.0),\n"
-			"    vec2(2.0, 0.0)\n"
+			"    vec2(-1.0, -1.0),\n"
+			"    vec2(-1.0, 3.0),\n"
+			"    vec2(3.0, -1.0)\n"
 			");\n"
 			"\n"
 			"vec2 tcs[3] = vec2[](\n"
@@ -298,10 +292,6 @@ bool vk::Presentation::Load(vk::RenderCore& renderCore) {
 			"}";
 
 		m_ParametrSet = renderCore.CreateParameterSet("Present");
-		m_ParametrSet->DeclareFloatParameter("Foo");
-		m_ParametrSet->DeclareMat3Parameter("AnyMat");
-		m_ParametrSet->DeclareVec4Parameter("Foo2");
-		m_ParametrSet->DeclareBufferParameter("Buffer", df::EShaderConstantType::Vec4);
 		m_ParametrSet->DeclareTextureParameter("Texture");
 		m_ParametrSet->Build();
 
@@ -312,64 +302,10 @@ bool vk::Presentation::Load(vk::RenderCore& renderCore) {
 		m_Pipeline->Build();
 	}
 
-#if 0
-	// Load shaders
-	{
-		m_VertexShaderId = renderCore.CreateShaderModule("PresentVS", generated::presentation::vsCodeData, generated::presentation::vsCodeLength);
-		m_FragmentShaderId = renderCore.CreateShaderModule("PresentFS", generated::presentation::fsCodeData, generated::presentation::fsCodeLength);
-	}
-
-	
-
-	// Create shader descriptor set layout
-	{
-		rf::DescriptorLayout vsLayout;
-		rf::DescriptorLayout fsLayout;
-		fsLayout.m_Descriptors[0] = rf::EDescriptorType::CombinedImageSampler;
-
-		m_ShaderDescriptorSetLayoutId = renderCore.CreateDescriptorSetLayout(
-			g_StageDebugName,
-			vsLayout,
-			fsLayout
-		);
-	}
-
-	// Create pipeline layout
-	{
-		const df::Vector<rf::DescriptorSetLayoutId> descriptorSetLayouts = {
-			m_ShaderDescriptorSetLayoutId
-		};
-
-		m_PipelineLayoutId = renderCore.CreatePipelineLayout(g_StageDebugName, descriptorSetLayouts);
-	}
-
-	rf::PipelineDescriptor pipelineDescriptor;
-	pipelineDescriptor.m_RenderPassId = &m_RenderPass;
-	pipelineDescriptor.m_BlendStateId = rf::GlobalObjects::Get(EBlendState::None);
-	pipelineDescriptor.m_DepthStateId = rf::GlobalObjects::Get(EDepthStencilState::Always);
-	pipelineDescriptor.m_RasterizationStateId = rf::GlobalObjects::Get(ERasterizationState::Fill);
-	pipelineDescriptor.m_PipelineLayoutId = m_PipelineLayoutId;
-	pipelineDescriptor.m_VertexDescriptionId = renderCore.RequestEmptyVertexDescription();
-	pipelineDescriptor.m_VertexShaderId = m_VertexShaderId;
-	pipelineDescriptor.m_FragmentShaderId = m_FragmentShaderId;
-
-	m_PipelineId = renderCore.CreatePipelineStateObject(g_StageDebugName, pipelineDescriptor);
-
-
-	// Descriptor sets
-	{
-		m_DescriptorSets.resize(m_ImagesCount);
-		for (auto& ds : m_DescriptorSets) {
-			ds = renderCore.CreateDescriptorSet(g_StageDebugName, 0, m_ShaderDescriptorSetLayoutId);
-		}
-	}
-
-#endif
 	return true;
 }
 
 void vk::Presentation::Unload(vk::RenderCore& renderCore) {
-	renderCore.DestroyTexture(m_TestTexture);
 	renderCore.DestroyPipeline(m_Pipeline);
 	renderCore.DestroyParameterSet(m_ParametrSet);
 
@@ -377,51 +313,9 @@ void vk::Presentation::Unload(vk::RenderCore& renderCore) {
 		renderCore.DestroyRenderPass(renderPass);
 	}
 	m_RenderPasses.clear();
-
-#if 0
-	for (auto& fb : m_Framebuffers) {
-		renderCore.GetAPIData().ReleaseFramebuffer(&fb);
-	}
-	m_Framebuffers.clear();
-
-	for (auto& ds : m_DescriptorSets) {
-		renderCore.DestroyDescriptorSet(ds);
-	}
-	m_DescriptorSets.clear();
-
-	renderCore.DestroyPipelineStateObject(m_PipelineId);
-	m_PipelineId = nullptr;
-
-	renderCore.DestroyPipelineLayout(m_PipelineLayoutId);
-	m_PipelineLayoutId = nullptr;
-
-	renderCore.DestroyDescriptorSetLayout(m_ShaderDescriptorSetLayoutId);
-	m_ShaderDescriptorSetLayoutId = nullptr;
-
-	renderCore.GetAPIData().ReleaseRenderPass(&m_RenderPass);
-
-	renderCore.DestroyShaderModule(m_FragmentShaderId);
-	renderCore.DestroyShaderModule(m_VertexShaderId);
-#endif
 }
 
 bool vk::Presentation::RecreateSwapchain(vk::RenderCore& /*renderCore*/, VkDevice /*device*/, VkPhysicalDevice /*physicalDevice*/, VkExtent2D /*extent*/, bool /*vSyncEnabled*/, uint32 /*graphicsFamilyIndex*/, uint32 /*presentFamilyIndex*/) {
-#if 0
-	for (auto& fb : m_Framebuffers) {
-		renderCore.GetAPIData().ReleaseFramebuffer(&fb);
-	}
-
-	DestroySwapchain(device);
-	if (!CreateSwapchain(device, physicalDevice, extent, vSyncEnabled, graphicsFamilyIndex, presentFamilyIndex)) {
-		return false;
-	}
-
-	m_Framebuffers.resize(m_ImagesCount);
-	for (uint32 i = 0; i < m_ImagesCount; ++i) {
-		const df::Vector<VkImageView> rt = { m_ImageViews[i] };
-		renderCore.GetAPIData().InitFramebuffer(&m_Framebuffers[i], g_StageDebugName, &m_RenderPass, rt, m_VkExtent.width, m_VkExtent.height);
-	}
-#endif
 	return true;
 }
 
@@ -432,40 +326,14 @@ bool vk::Presentation::RecreateSwapchain(vk::RenderCore& renderCore, VkDevice de
 void vk::Presentation::PresentTexture(vk::CommandBuffer& rcb, vk::Texture* texture) {
 	DFScopedRenderEvent(rcb, "Present Render Stage");
 
-	struct Color {
-		uint8 R;
-		uint8 G;
-		uint8 B;
-		uint8 A;
-	};
-
-	const uint32 width = m_TestTexture->GetWidth();
-	const uint32 height = m_TestTexture->GetHeight();
-
-	df::Vector<Color> texData(width * height);
-	for (uint32 x = 0; x < width; ++x) {
-		for (uint32 y = 0; y < height; ++y) {
-			const uint32 idx = x + y * width;
-
-			auto& c = texData[idx];
-
-			c.A = 255;
-			c.R = rand() % 255;
-			c.G = rand() % 255;
-			c.B = rand() % 255;
-		}
-	}
-
-	m_TestTexture->SetData(texData.data(), uint32(texData.size() * sizeof(Color)));
-	rcb.GenerateMips(m_TestTexture);
-
-	m_ParametrSet->SetTexture("texSampler", texture);
-	//m_ParametrSet->Update();
+	m_ParametrSet->SetTexture("Texture", texture);
+	m_ParametrSet->SetFilter("Texture", df::EFilter::Nearest);
+	m_ParametrSet->Update();
 
 	rcb.BeginRenderPass(m_RenderPasses[m_AvailableImageIndex]);
-	//rcb.SetPipeline(m_Pipeline);
-	//rcb.BindParameterSet(m_ParametrSet);
-	//rcb.Draw(3);
+	rcb.BindPipeline(m_Pipeline);
+	rcb.BindParameterSet(m_ParametrSet);
+	rcb.Draw(3);
 
 	rcb.EndRenderPass();
 

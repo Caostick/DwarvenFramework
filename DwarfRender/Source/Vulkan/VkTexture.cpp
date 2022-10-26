@@ -132,11 +132,12 @@ void vk::Texture::SetData(void* data, uint32 size) {
 void vk::Texture::GenerateMips() {
 	// @TODO: Check if image format supports linear blitting
 	/*VkFormatProperties formatProperties;
-	vk::API::GetPhysicalDeviceFormatProperties(physicalDevice, imageFormat, &formatProperties);
+	vk::API::GetPhysicalDeviceFormatProperties(physicalDevice, m_VkFormat, &formatProperties);
 
 	if (!(formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT)) {
 		DFAssert(false, "Texture image format does not support linear blitting!");
 	}*/
+	m_RenderCore.GenerateMips(this);
 }
 
 auto vk::Texture::GetWidth() const->uint32 {
@@ -181,4 +182,8 @@ auto vk::Texture::GetVkImageView() const->VkImageView {
 
 auto vk::Texture::GetVkDeviceMemory() const->VkDeviceMemory {
 	return m_VkMemory;
+}
+
+auto vk::Texture::GetVkFormat() const->VkFormat {
+	return m_VkFormat;
 }

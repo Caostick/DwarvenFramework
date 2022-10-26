@@ -104,6 +104,8 @@ namespace vk {
 		void SetBufferData(VkBuffer buffer, const void* data, uint32 dataSize, uint32 offset = 0);
 		void SetImageData(VkImage image, const void* data, uint32 dataSize, uint32 width, uint32 height, int32 widthOffset = 0, int32 heightOffset = 0);
 
+		void GenerateMips(vk::Texture* texture);
+
 	private:
 		bool InitInstance();
 		bool InitPhysicalDevice();
@@ -146,6 +148,7 @@ namespace vk {
 		df::ObjectPool<vk::Texture> m_Textures;
 
 		df::Vector<vk::Texture*> m_TexturesToInitLayout;
+		df::Vector<vk::Texture*> m_TexturesToGenerateMips;
 
 		df::HashMap<df::String, vk::ParameterSetDefinition*> m_ParameterSetDefinitionRegistry;
 		df::HashMap<df::String, df::String> m_ShaderIncludes;

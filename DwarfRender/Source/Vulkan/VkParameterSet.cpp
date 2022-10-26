@@ -492,7 +492,7 @@ void vk::ParameterSet::UpdateDescriptorSet() {
 	}
 
 	// Constant Buffer
-	{
+	if(m_Definition.GetConstantBufferSize() > 0) {
 		VkDescriptorBufferInfo& bufferInfo = m_ConstantBuffer.m_DescriptorInfo;
 		bufferInfo.buffer = m_ConstantBuffer.m_Buffer->GetVkBuffer();
 		bufferInfo.offset = 0;
@@ -506,6 +506,8 @@ void vk::ParameterSet::UpdateDescriptorSet() {
 		writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		writeDescriptorSet.descriptorCount = 1;
 		writeDescriptorSet.pBufferInfo = &m_ConstantBuffer.m_DescriptorInfo;
+
+		m_Writes.emplace_back(writeDescriptorSet);
 	}
 
 	// Buffers
@@ -523,13 +525,13 @@ void vk::ParameterSet::UpdateDescriptorSet() {
 		writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 		writeDescriptorSet.descriptorCount = 1;
 		writeDescriptorSet.pBufferInfo = &buffer.m_DescriptorInfo;
+
+		m_Writes.emplace_back(writeDescriptorSet);
 	}
 
 	// Textures
 	for (auto& texture : m_Textures) {
-
-
-		if (*texture.m_Sampler != texture.m_CurrentState) {
+		if (!texture.m_Sampler || (*texture.m_Sampler != texture.m_CurrentState)) {
 			texture.m_Sampler = m_RenderCore.RequestSampler(texture.m_CurrentState);
 		}
 		const bool isDepthStencil = texture.m_Texture->IsDepthStencil();
@@ -550,6 +552,8 @@ void vk::ParameterSet::UpdateDescriptorSet() {
 		writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		writeDescriptorSet.descriptorCount = 1;
 		writeDescriptorSet.pImageInfo = &texture.m_DescriptorInfo;
+
+		m_Writes.emplace_back(writeDescriptorSet);
 	}
 
 	vk::API::UpdateDescriptorSets(vkDevice, uint32(m_Writes.size()), m_Writes.data(), 0, nullptr);

@@ -107,8 +107,8 @@ void vk::CommandBuffer::EndRenderPass() {
 	vk::API::CmdEndRenderPass(m_VkCommandBuffer);
 }
 
-void vk::CommandBuffer::SetPipeline(df::Pipeline* pipeline) {
-	SetPipeline(static_cast<vk::Pipeline*>(pipeline));
+void vk::CommandBuffer::BindPipeline(df::Pipeline* pipeline) {
+	BindPipeline(static_cast<vk::Pipeline*>(pipeline));
 }
 
 bool vk::CommandBuffer::BindParameterSet(df::ParameterSet* parameterSet) {
@@ -191,7 +191,7 @@ void vk::CommandBuffer::ImageLayoutTransition(VkImage image, uint32 mipCount, vk
 	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.image = image;
 	barrier.subresourceRange.baseMipLevel = (mip < 0) ? 0 : mip;
-	barrier.subresourceRange.levelCount = (mip < 0) ? mipCount : mip;
+	barrier.subresourceRange.levelCount = (mip < 0) ? mipCount : 1;
 	barrier.subresourceRange.baseArrayLayer = 0;
 	barrier.subresourceRange.layerCount = 1;
 	barrier.srcAccessMask = 0;
@@ -389,8 +389,12 @@ void vk::CommandBuffer::BeginRenderPass(vk::RenderPass* renderPass) {
 	vk::API::CmdSetScissor(m_VkCommandBuffer, 0, 1, &scissor);
 }
 
-void vk::CommandBuffer::SetPipeline(vk::Pipeline* pipeline) {
+void vk::CommandBuffer::BindPipeline(vk::Pipeline* pipeline) {
+	DFAssert(m_CurrentRenderPass != nullptr, "Can't bind graphics pipeline - Render pass is not set!");
+
 	m_CurrentPipeline = pipeline;
+
+	vk::API::CmdBindPipeline(m_VkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_CurrentPipeline->GetPipelineForState(m_CurrentRenderPass));
 }
 
 bool vk::CommandBuffer::BindParameterSet(vk::ParameterSet* parameterSet) {

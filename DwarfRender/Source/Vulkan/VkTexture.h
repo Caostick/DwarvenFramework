@@ -38,6 +38,7 @@ namespace vk {
 		auto GetVkImage() const->VkImage;
 		auto GetVkImageView() const->VkImageView;
 		auto GetVkDeviceMemory() const->VkDeviceMemory;
+		auto GetVkFormat() const->VkFormat;
 
 	private:
 
