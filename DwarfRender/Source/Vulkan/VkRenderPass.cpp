@@ -23,7 +23,8 @@ namespace {
 
 vk::RenderPass::RenderPass(vk::RenderCore& renderCore) 
 	: m_RenderCore(renderCore)
-	, m_IsBuilt(false)
+	, m_RenderPassIsBuilt(false)
+	, m_FramebufferIsBuilt(false)
 	, m_VkRenderPass(VK_NULL_HANDLE)
 	, m_VkFramebuffer(VK_NULL_HANDLE)
 	, m_VkExtents({ 0, 0 })
@@ -86,11 +87,13 @@ void vk::RenderPass::SetDepthStencilTarget(df::Texture* texture, df::ERenderTarg
 }
 
 void vk::RenderPass::Validate() {
-	if (m_IsBuilt) {
-		return;
+	if (!m_RenderPassIsBuilt) {
+		BuildRenderPass();
 	}
 
-	Build();
+	if (!m_FramebufferIsBuilt) {
+		BuildFramebuffer();
+	}
 }
 
 void vk::RenderPass::SetExtents(uint32 width, uint32 height) {
@@ -107,7 +110,7 @@ void vk::RenderPass::SetColorTarget(uint32 index, VkImageView imageView, const V
 	m_ColorAttachmnets[index].Description = description;
 	m_ColorAttachmnets[index].ClearValue = clearValue;
 
-	m_IsBuilt = false;
+	m_FramebufferIsBuilt = false;
 }
 
 void vk::RenderPass::SetDepthStencilTarget(VkImageView imageView, const VkAttachmentDescription& description, const VkClearValue& clearValue) {
@@ -115,7 +118,7 @@ void vk::RenderPass::SetDepthStencilTarget(VkImageView imageView, const VkAttach
 	m_DepthStencilAttachment.Description = description;
 	m_DepthStencilAttachment.ClearValue = clearValue;
 
-	m_IsBuilt = false;
+	m_FramebufferIsBuilt = false;
 }
 
 bool vk::RenderPass::HasDepthStencil() const {
@@ -123,13 +126,13 @@ bool vk::RenderPass::HasDepthStencil() const {
 }
 
 auto vk::RenderPass::GetVkRenderPass() const->VkRenderPass {
-	DFAssert(m_IsBuilt, "Render pass is not built!");
+	DFAssert(m_RenderPassIsBuilt, "Render pass is not built!");
 
 	return m_VkRenderPass;
 }
 
 auto vk::RenderPass::GetVkFramebuffer() const->VkFramebuffer {
-	DFAssert(m_IsBuilt, "Render pass is not built!");
+	DFAssert(m_FramebufferIsBuilt, "Render pass is not built!");
 
 	return m_VkFramebuffer;
 }
@@ -149,8 +152,6 @@ auto vk::RenderPass::GetColorAttachmentCount() const -> uint32 {
 void vk::RenderPass::Build() {
 	BuildRenderPass();
 	BuildFramebuffer();
-
-	m_IsBuilt = true;
 }
 
 void vk::RenderPass::BuildRenderPass() {
@@ -223,6 +224,8 @@ void vk::RenderPass::BuildRenderPass() {
 	}
 
 	DFVkDebugName(vkDevice, m_VkRenderPass, m_Name);
+
+	m_RenderPassIsBuilt = true;
 }
 
 void vk::RenderPass::BuildFramebuffer() {
@@ -267,4 +270,6 @@ void vk::RenderPass::BuildFramebuffer() {
 	}
 
 	DFVkDebugName(vkDevice, m_VkFramebuffer, m_Name);
+
+	m_FramebufferIsBuilt = true;
 }

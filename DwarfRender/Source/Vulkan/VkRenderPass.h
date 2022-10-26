@@ -85,7 +85,9 @@ namespace vk {
 
 		vk::RenderCore& m_RenderCore;
 		df::String m_Name;
-		bool m_IsBuilt;
+
+		bool m_FramebufferIsBuilt;
+		bool m_RenderPassIsBuilt;
 
 		VkRenderPass m_VkRenderPass;
 		VkFramebuffer m_VkFramebuffer;
