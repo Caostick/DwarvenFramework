@@ -36,7 +36,7 @@ namespace df {
 		virtual auto RegisterVertexAttribute(const df::StringView& name, df::EVertexAttributeFormat format, uint32 index) -> const df::VertexAttribute* = 0;
 		virtual auto FindVertexAttribute(const df::StringView& name) const -> const df::VertexAttribute* = 0;
 
-		virtual auto CreateParameterSet(const df::StringView& name)->df::ParameterSet* = 0;
+		virtual auto CreateParameterSet(const df::StringView& className)->df::ParameterSet* = 0;
 		virtual void DestroyParameterSet(df::ParameterSet* parameterSet) = 0;
 
 		virtual void AddShaderInclude(const df::StringView& name, const df::StringView& content) = 0;

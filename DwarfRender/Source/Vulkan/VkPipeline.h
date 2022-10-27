@@ -43,7 +43,7 @@ namespace vk {
 		Pipeline(vk::RenderCore& renderCore);
 		virtual ~Pipeline() override;
 
-		virtual void DeclareName(const df::StringView& name) override;
+		virtual void SetName(const df::StringView& name) override;
 		virtual void DeclareVertexShader(const df::StringView& code) override;
 		virtual void DeclareFragmentShader(const df::StringView& code) override;
 		virtual bool Build() override;
@@ -81,7 +81,7 @@ namespace vk {
 		auto CreateShaderModule(const uint32* data, uint32 length) -> VkShaderModule;
 		auto CreateLayout()->VkPipelineLayout;
 		void CreateVertexDescription();
-
+		void UpdateDebugNames();
 
 		auto CreatePipelineStateObject()->VkPipeline;
 

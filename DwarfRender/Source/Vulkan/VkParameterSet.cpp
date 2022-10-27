@@ -67,6 +67,11 @@ vk::ParameterSet::~ParameterSet() {
 		m_RenderCore.RemoveDescriptorSet(m_RenderCore.GetVkDescriptorPool(), vkDescriptorSet);
 	}
 
+	if (m_ConstantBuffer.m_Buffer) {
+		m_RenderCore.DestroyBuffer(m_ConstantBuffer.m_Buffer);
+		m_ConstantBuffer.m_Buffer = nullptr;
+	}
+
 	DFDelete[] m_ConstandBufferData;
 }
 
@@ -165,6 +170,9 @@ void vk::ParameterSet::Build() {
 			auto data = reinterpret_cast<Mat4*>(m_ConstandBufferDataPtr + c.m_Offset);
 			*data = c.m_DefaultValue;
 		}
+
+		m_ConstantBuffer.m_Buffer = m_RenderCore.CreateBuffer();
+		m_ConstantBuffer.m_Buffer->CreateBuffer(constantBufferSize, vk::EBufferUsageFlag::Uniform);
 	}
 
 	m_IsBuilt = true;
@@ -260,7 +268,7 @@ void vk::ParameterSet::Update() {
 	DFAssert(m_IsBuilt, "Can't update parameter set - parameter set is not build yet!");
 
 	if (m_UpdateConstantBuffer) {
-
+		UpdateConstantBuffer();
 	}
 
 	if (m_UpdateDescriptorSet) {
@@ -270,6 +278,7 @@ void vk::ParameterSet::Update() {
 
 void vk::ParameterSet::SetFloatByOffset(uint32 constOffset, float value) {
 	DFAssert(m_IsBuilt, "Can't set parameter - parameter set is not build yet!");
+	m_UpdateConstantBuffer = true;
 
 	float* ptr = reinterpret_cast<float*>(m_ConstandBufferDataPtr + constOffset);
 	*ptr = value;
@@ -287,6 +296,7 @@ bool vk::ParameterSet::SetFloatByName(const df::StringView& name, float value) {
 
 void vk::ParameterSet::SetVec2ByOffset(uint32 constOffset, const Vec2& value) {
 	DFAssert(m_IsBuilt, "Can't set parameter - parameter set is not build yet!");
+	m_UpdateConstantBuffer = true;
 
 	Vec2* ptr = reinterpret_cast<Vec2*>(m_ConstandBufferDataPtr + constOffset);
 	*ptr = value;
@@ -304,6 +314,7 @@ bool vk::ParameterSet::SetVec2ByName(const df::StringView& name, const Vec2& val
 
 void vk::ParameterSet::SetVec3ByOffset(uint32 constOffset, const Vec3& value) {
 	DFAssert(m_IsBuilt, "Can't set parameter - parameter set is not build yet!");
+	m_UpdateConstantBuffer = true;
 
 	Vec3* ptr = reinterpret_cast<Vec3*>(m_ConstandBufferDataPtr + constOffset);
 	*ptr = value;
@@ -321,6 +332,7 @@ bool vk::ParameterSet::SetVec3ByName(const df::StringView& name, const Vec3& val
 
 void vk::ParameterSet::SetVec4ByOffset(uint32 constOffset, const Vec4& value) {
 	DFAssert(m_IsBuilt, "Can't set parameter - parameter set is not build yet!");
+	m_UpdateConstantBuffer = true;
 
 	Vec4* ptr = reinterpret_cast<Vec4*>(m_ConstandBufferDataPtr + constOffset);
 	*ptr = value;
@@ -338,6 +350,7 @@ bool vk::ParameterSet::SetVec4ByName(const df::StringView& name, const Vec4& val
 
 void vk::ParameterSet::SetMat3ByOffset(uint32 constOffset, const Mat3& value) {
 	DFAssert(m_IsBuilt, "Can't set parameter - parameter set is not build yet!");
+	m_UpdateConstantBuffer = true;
 
 	Vec4* ptr = reinterpret_cast<Vec4*>(m_ConstandBufferDataPtr + constOffset);
 
@@ -364,6 +377,7 @@ bool vk::ParameterSet::SetMat3ByName(const df::StringView& name, const Mat3& val
 
 void vk::ParameterSet::SetMat4ByOffset(uint32 constOffset, const Mat4& value) {
 	DFAssert(m_IsBuilt, "Can't set parameter - parameter set is not build yet!");
+	m_UpdateConstantBuffer = true;
 
 	Mat4* ptr = reinterpret_cast<Mat4*>(m_ConstandBufferDataPtr + constOffset);
 	*ptr = value;
@@ -381,6 +395,7 @@ bool vk::ParameterSet::SetMat4ByName(const df::StringView& name, const Mat4& val
 
 void vk::ParameterSet::SetBufferByIndex(uint32 index, vk::Buffer* buffer) {
 	DFAssert(m_IsBuilt, "Can't set parameter - parameter set is not build yet!");
+	m_UpdateDescriptorSet = true;
 
 	m_Buffers[index].m_Buffer = buffer;
 }
@@ -400,6 +415,7 @@ bool vk::ParameterSet::SetBufferByName(const df::StringView& name, vk::Buffer* b
 
 void vk::ParameterSet::SetTextureByIndex(uint32 index, vk::Texture* texture) {
 	DFAssert(m_IsBuilt, "Can't set parameter - parameter set is not build yet!");
+	m_UpdateDescriptorSet = true;
 
 	m_Textures[index].m_Texture = texture;
 }
@@ -419,6 +435,7 @@ bool vk::ParameterSet::SetTextureByName(const df::StringView& name, vk::Texture*
 
 void vk::ParameterSet::SetFilterByIndex(uint32 index, df::EFilter filter) {
 	DFAssert(m_IsBuilt, "Can't set parameter - parameter set is not build yet!");
+	m_UpdateDescriptorSet = true;
 
 	m_Textures[index].m_CurrentState.m_VkFilter = ToVk(filter);
 }
@@ -438,6 +455,7 @@ bool vk::ParameterSet::SetFilterByName(const df::StringView& textureName, df::EF
 
 void vk::ParameterSet::SetMipMapModeByIndex(uint32 index, df::EMipmapMode mipMapMode) {
 	DFAssert(m_IsBuilt, "Can't set parameter - parameter set is not build yet!");
+	m_UpdateDescriptorSet = true;
 
 	m_Textures[index].m_CurrentState.m_VkMipMapMode = ToVk(mipMapMode);
 }
@@ -457,6 +475,7 @@ bool vk::ParameterSet::SetMipMapModeByName(const df::StringView& textureName, df
 
 void vk::ParameterSet::SetAddressModeByIndex(uint32 index, df::EAddressMode addressMode) {
 	DFAssert(m_IsBuilt, "Can't set parameter - parameter set is not build yet!");
+	m_UpdateDescriptorSet = true;
 
 	m_Textures[index].m_CurrentState.m_VkAddressMode = ToVk(addressMode);
 }
@@ -475,6 +494,9 @@ bool vk::ParameterSet::SetAddressModeByName(const df::StringView& textureName, d
 }
 
 void vk::ParameterSet::UpdateConstantBuffer() {
+	if (m_ConstantBuffer.m_Buffer) {
+		m_ConstantBuffer.m_Buffer->SetData(m_ConstandBufferDataPtr, m_Definition.GetConstantBufferSize(), 0);
+	}
 
 	m_UpdateConstantBuffer = false;
 }

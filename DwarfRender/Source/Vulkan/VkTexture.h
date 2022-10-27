@@ -41,6 +41,7 @@ namespace vk {
 		auto GetVkFormat() const->VkFormat;
 
 	private:
+		void UpdateDebugNames();
 
 	private:
 		vk::RenderCore& m_RenderCore;

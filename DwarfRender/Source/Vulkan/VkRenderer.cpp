@@ -77,8 +77,8 @@ auto vk::Renderer::FindVertexAttribute(const df::StringView& name) const -> cons
 	return m_RenderCore.FindVertexAttribute(name);
 }
 
-auto vk::Renderer::CreateParameterSet(const df::StringView& name)->df::ParameterSet* {
-	return m_RenderCore.CreateParameterSet(name);
+auto vk::Renderer::CreateParameterSet(const df::StringView& className)->df::ParameterSet* {
+	return m_RenderCore.CreateParameterSet(className);
 }
 
 void vk::Renderer::DestroyParameterSet(df::ParameterSet* parameterSet) {

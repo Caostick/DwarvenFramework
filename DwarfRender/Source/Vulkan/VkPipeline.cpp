@@ -269,10 +269,12 @@ vk::Pipeline::~Pipeline() {
 	}
 }
 
-void vk::Pipeline::DeclareName(const df::StringView& name) {
+void vk::Pipeline::SetName(const df::StringView& name) {
 	DFAssert(!m_IsBuilt, "Casn't set pipeline name - pipeline is already built!");
 
 	m_Name = name;
+
+	UpdateDebugNames();
 }
 
 void vk::Pipeline::DeclareVertexShader(const df::StringView& code) {
@@ -402,218 +404,6 @@ void vk::Pipeline::SetDstColorBlendFactor(df::EBlendFactor value) {
 	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_BlendState.m_DstColorBlendFactor = value;
-}
-
-auto vk::Pipeline::CreatePipelineStateObject()->VkPipeline {
-	DFAssert(m_IsBuilt, "Can't create pipeline state object - pipeline is not built yet!");
-	DFAssert(m_State.m_RenderPass != nullptr, "There is no active render pass to build pipeline state object!");
-
-	const VkDevice vkDevice = m_RenderCore.GetVkDevice();
-
-	df::Vector<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos;
-	if (m_VkVertexShaderModule != VK_NULL_HANDLE) {
-		VkPipelineShaderStageCreateInfo pipelineShaderStageCreateInfo = {};
-		pipelineShaderStageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		pipelineShaderStageCreateInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-		pipelineShaderStageCreateInfo.module = m_VkVertexShaderModule;
-		pipelineShaderStageCreateInfo.pName = "main";
-
-		shaderStageCreateInfos.emplace_back(pipelineShaderStageCreateInfo);
-	}
-	if (m_VkFragmentShaderModule != VK_NULL_HANDLE) {
-		VkPipelineShaderStageCreateInfo pipelineShaderStageCreateInfo = {};
-		pipelineShaderStageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		pipelineShaderStageCreateInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-		pipelineShaderStageCreateInfo.module = m_VkFragmentShaderModule;
-		pipelineShaderStageCreateInfo.pName = "main";
-
-		shaderStageCreateInfos.emplace_back(pipelineShaderStageCreateInfo);
-	}
-
-	df::Vector<VkDynamicState> dynamicStates = {
-		VK_DYNAMIC_STATE_VIEWPORT,
-		VK_DYNAMIC_STATE_SCISSOR
-	};
-
-	const uint32 colorAttachmentCount = m_State.m_RenderPass->GetColorAttachmentCount();
-
-	VkPipelineColorBlendStateCreateInfo blendStateCreateInfo;
-	df::Vector<VkPipelineColorBlendAttachmentState> blendAttachmentStates;
-	ToVkPipelineColorBlendStateCreateInfo(blendStateCreateInfo, blendAttachmentStates, m_State.m_BlendState, colorAttachmentCount);
-
-	const auto& vertexInputBindingDescriptions = m_BindingDescriptions;
-	const auto& vertexInputAttributeDescriptions = m_AttributeDescriptions;
-
-	const VkPipelineDepthStencilStateCreateInfo depthStencilStateCreateInfo = ToVkPipelineDepthStencilStateCreateInfo(m_State.m_DepthState);
-	const VkPipelineRasterizationStateCreateInfo rasterizationStateCreateInfo = ToVkPipelineRasterizationStateCreateInfo(m_State.m_RasterizationState);
-
-	const uint32 defaultWidth = 4;
-	const uint32 defaultHidth = 4;
-
-	VkPipelineVertexInputStateCreateInfo vertexInputStateCreateInfo = {};
-	vertexInputStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-	vertexInputStateCreateInfo.vertexBindingDescriptionCount = uint32(vertexInputBindingDescriptions.size());
-	vertexInputStateCreateInfo.vertexAttributeDescriptionCount = uint32(vertexInputAttributeDescriptions.size());
-	vertexInputStateCreateInfo.pVertexBindingDescriptions = vertexInputBindingDescriptions.data();
-	vertexInputStateCreateInfo.pVertexAttributeDescriptions = vertexInputAttributeDescriptions.data();
-
-	VkPipelineInputAssemblyStateCreateInfo inputAssemblyStateCreateInfo = {};
-	inputAssemblyStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-	inputAssemblyStateCreateInfo.topology = ToVkPrimitiveTopology(m_State.m_PrimitiveTopology);
-	inputAssemblyStateCreateInfo.primitiveRestartEnable = VK_FALSE;
-
-	VkViewport viewport = {};
-	viewport.x = 0.0f;
-	viewport.y = 0.0f;
-	viewport.width = float(defaultWidth);
-	viewport.height = float(defaultHidth);
-	viewport.minDepth = 0.0f;
-	viewport.maxDepth = 1.0f;
-
-	VkRect2D scissor = {};
-	scissor.offset = { 0, 0 };
-	scissor.extent.width = defaultWidth;
-	scissor.extent.height = defaultHidth;
-
-	VkPipelineViewportStateCreateInfo viewportStateCreateInfo = {};
-	viewportStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-	viewportStateCreateInfo.viewportCount = 1;
-	viewportStateCreateInfo.pViewports = &viewport;
-	viewportStateCreateInfo.scissorCount = 1;
-	viewportStateCreateInfo.pScissors = &scissor;
-
-	VkPipelineMultisampleStateCreateInfo multisampleStateCreateInfo = {};
-	multisampleStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-	multisampleStateCreateInfo.sampleShadingEnable = VK_FALSE;
-	multisampleStateCreateInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-
-	VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo = {};
-	dynamicStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-	dynamicStateCreateInfo.dynamicStateCount = uint32(dynamicStates.size());
-	dynamicStateCreateInfo.pDynamicStates = dynamicStates.data();
-
-	VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo = {};
-	graphicsPipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-	graphicsPipelineCreateInfo.stageCount = uint32(shaderStageCreateInfos.size());
-	graphicsPipelineCreateInfo.pStages = shaderStageCreateInfos.data();
-	graphicsPipelineCreateInfo.pVertexInputState = &vertexInputStateCreateInfo;
-	graphicsPipelineCreateInfo.pInputAssemblyState = &inputAssemblyStateCreateInfo;
-	graphicsPipelineCreateInfo.pViewportState = &viewportStateCreateInfo;
-	graphicsPipelineCreateInfo.pRasterizationState = &rasterizationStateCreateInfo;
-	graphicsPipelineCreateInfo.pMultisampleState = &multisampleStateCreateInfo;
-	graphicsPipelineCreateInfo.pColorBlendState = &blendStateCreateInfo;
-	graphicsPipelineCreateInfo.pDepthStencilState = &depthStencilStateCreateInfo;
-	graphicsPipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
-	graphicsPipelineCreateInfo.layout = m_VkPipelineLayout;
-	graphicsPipelineCreateInfo.renderPass = m_State.m_RenderPass->GetVkRenderPass();
-	graphicsPipelineCreateInfo.subpass = 0;
-	graphicsPipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
-
-	VkPipeline vkPipeline = VK_NULL_HANDLE;
-	if (vk::API::CreateGraphicsPipelines(vkDevice, VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, vk::Allocator(), &vkPipeline) != VK_SUCCESS) {
-		DFAssert(false, "Can't create GraphicsPipeline!");
-	}
-
-	DFVkDebugName(vkDevice, vkPipeline, m_Name);
-
-	m_PipelineStateObjects.push_back(PipelineStateObjectSlot(m_State, vkPipeline));
-	return vkPipeline;
-}
-
-auto vk::Pipeline::ParseShader(const df::StringView& code)->df::String {
-	using namespace vk_shader_parsing;
-
-	df::String outCode;
-	outCode.reserve(1024);
-
-	for (auto&& line : df::Tokenize(code, "\n\r")) {
-		if (line.empty()) {
-			continue;
-		}
-
-		bool parsed = false;
-
-		if (const auto vertexAttribute =  FetchVertexAttribute(line, m_RenderCore)) {
-			df::AddUnique(m_VertexAttributes, vertexAttribute.Get());
-
-			parsed = true;
-		} else if (const auto parameterSet = FetchParameterSet(line, m_RenderCore)) {
-			df::AddUnique(m_ParameterSetDefinitions, parameterSet.Get());
-
-			parsed = true;
-		} else if (const auto depthTest = FetchDepthTest(line)) {
-			m_State.m_DepthState.m_DepthTestEnable = depthTest.Get();
-
-			parsed = true;
-		} else if (const auto depthWrite = FetchDepthWrite(line)) {
-			m_State.m_DepthState.m_DepthWriteEnable = depthWrite.Get();
-
-			parsed = true;
-		} else if (const auto stencilTest = FetchStencilTest(line)) {
-			m_State.m_DepthState.m_StencilTestEnable = stencilTest.Get();
-
-			parsed = true;
-		} else if (const auto depthCompareOp = FetchDepthCompareOp(line)) {
-			m_State.m_DepthState.m_DepthCompareOp = depthCompareOp.Get();
-
-			parsed = true;
-		} else if (const auto stencilOp = FetchStencilOp(line)) {
-			m_State.m_DepthState.m_StencilOp = stencilOp.Get();
-
-			parsed = true;
-		} else if (const auto polygonMode = FetchPolygonMode(line)) {
-			m_State.m_RasterizationState.m_PolygonMode = polygonMode.Get();
-
-			parsed = true;
-		} else if (const auto frontFace = FetchFrontFace(line)) {
-			m_State.m_RasterizationState.m_FrontFace = frontFace.Get();
-
-			parsed = true;
-		} else if (const auto cullMode = FetchCullMode(line)) {
-			m_State.m_RasterizationState.m_CullMode = cullMode.Get();
-
-			parsed = true;
-		} else if (const auto blendEnable = FetchBlendEnable(line)) {
-			m_State.m_BlendState.m_BlendEnable = blendEnable.Get();
-
-			parsed = true;
-		} else if (const auto colorBlendOp = FetchColorBlendOp(line)) {
-			m_State.m_BlendState.m_ColorBlendOp = colorBlendOp.Get();
-
-			parsed = true;
-		} else if (const auto alphaBlendOp = FetchAlphaBlendOp(line)) {
-			m_State.m_BlendState.m_AlphaBlendOp = alphaBlendOp.Get();
-
-			parsed = true;
-		} else if (const auto srcColorBlendFactor = FetchSrcColorBlendFactor(line)) {
-			m_State.m_BlendState.m_SrcColorBlendFactor = srcColorBlendFactor.Get();
-
-			parsed = true;
-		} else if (const auto dstColorBlendFactor = FetchDstColorBlendFactor(line)) {
-			m_State.m_BlendState.m_DstColorBlendFactor = dstColorBlendFactor.Get();
-
-			parsed = true;
-		} else if (const auto srcAlphaBlendFactor = FetchSrcAlphaBlendFactor(line)) {
-			m_State.m_BlendState.m_SrcAlphaBlendFactor = srcAlphaBlendFactor.Get();
-
-			parsed = true;
-		} else if (const auto dstAlphaBlendFactor = FetchDstAlphaBlendFactor(line)) {
-			m_State.m_BlendState.m_DstAlphaBlendFactor = dstAlphaBlendFactor.Get();
-
-			parsed = true;
-		} else if (const auto blendState = FetchBlendState(line)) {
-			m_State.m_BlendState = blendState.Get();
-
-			parsed = true;
-		}
-
-		if (!parsed) {
-			outCode += line;
-		}
-		outCode += "\n";
-	}
-
-	return outCode;
 }
 
 void vk::Pipeline::SetDstAlphaBlendFactor(df::EBlendFactor value) {
@@ -790,4 +580,237 @@ void vk::Pipeline::CreateVertexDescription() {
 		m_AttributeDescriptions[i].format = df::ToVkFormat(m_VertexAttributes[i]->m_Format);
 		m_AttributeDescriptions[i].offset = 0;
 	}
+}
+
+void vk::Pipeline::UpdateDebugNames() {
+	const VkDevice vkDevice = m_RenderCore.GetVkDevice();
+
+	if (m_VkVertexShaderModule != VK_NULL_HANDLE) {
+		DFVkDebugName(vkDevice, m_VkVertexShaderModule, m_Name);
+	}
+
+	if (m_VkFragmentShaderModule != VK_NULL_HANDLE) {
+		DFVkDebugName(vkDevice, m_VkFragmentShaderModule, m_Name);
+	}
+
+	if (m_VkPipelineLayout != VK_NULL_HANDLE) {
+		DFVkDebugName(vkDevice, m_VkPipelineLayout, m_Name);
+	}
+
+	for (auto&& pso : m_PipelineStateObjects) {
+		DFVkDebugName(vkDevice, pso.m_PipelineStateObject, m_Name);
+	}
+}
+
+
+auto vk::Pipeline::CreatePipelineStateObject()->VkPipeline {
+	DFAssert(m_IsBuilt, "Can't create pipeline state object - pipeline is not built yet!");
+	DFAssert(m_State.m_RenderPass != nullptr, "There is no active render pass to build pipeline state object!");
+
+	const VkDevice vkDevice = m_RenderCore.GetVkDevice();
+
+	df::Vector<VkPipelineShaderStageCreateInfo> shaderStageCreateInfos;
+	if (m_VkVertexShaderModule != VK_NULL_HANDLE) {
+		VkPipelineShaderStageCreateInfo pipelineShaderStageCreateInfo = {};
+		pipelineShaderStageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+		pipelineShaderStageCreateInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+		pipelineShaderStageCreateInfo.module = m_VkVertexShaderModule;
+		pipelineShaderStageCreateInfo.pName = "main";
+
+		shaderStageCreateInfos.emplace_back(pipelineShaderStageCreateInfo);
+	}
+	if (m_VkFragmentShaderModule != VK_NULL_HANDLE) {
+		VkPipelineShaderStageCreateInfo pipelineShaderStageCreateInfo = {};
+		pipelineShaderStageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+		pipelineShaderStageCreateInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+		pipelineShaderStageCreateInfo.module = m_VkFragmentShaderModule;
+		pipelineShaderStageCreateInfo.pName = "main";
+
+		shaderStageCreateInfos.emplace_back(pipelineShaderStageCreateInfo);
+	}
+
+	df::Vector<VkDynamicState> dynamicStates = {
+		VK_DYNAMIC_STATE_VIEWPORT,
+		VK_DYNAMIC_STATE_SCISSOR
+	};
+
+	const uint32 colorAttachmentCount = m_State.m_RenderPass->GetColorAttachmentCount();
+
+	VkPipelineColorBlendStateCreateInfo blendStateCreateInfo;
+	df::Vector<VkPipelineColorBlendAttachmentState> blendAttachmentStates;
+	ToVkPipelineColorBlendStateCreateInfo(blendStateCreateInfo, blendAttachmentStates, m_State.m_BlendState, colorAttachmentCount);
+
+	const auto& vertexInputBindingDescriptions = m_BindingDescriptions;
+	const auto& vertexInputAttributeDescriptions = m_AttributeDescriptions;
+
+	const VkPipelineDepthStencilStateCreateInfo depthStencilStateCreateInfo = ToVkPipelineDepthStencilStateCreateInfo(m_State.m_DepthState);
+	const VkPipelineRasterizationStateCreateInfo rasterizationStateCreateInfo = ToVkPipelineRasterizationStateCreateInfo(m_State.m_RasterizationState);
+
+	const uint32 defaultWidth = 4;
+	const uint32 defaultHidth = 4;
+
+	VkPipelineVertexInputStateCreateInfo vertexInputStateCreateInfo = {};
+	vertexInputStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+	vertexInputStateCreateInfo.vertexBindingDescriptionCount = uint32(vertexInputBindingDescriptions.size());
+	vertexInputStateCreateInfo.vertexAttributeDescriptionCount = uint32(vertexInputAttributeDescriptions.size());
+	vertexInputStateCreateInfo.pVertexBindingDescriptions = vertexInputBindingDescriptions.data();
+	vertexInputStateCreateInfo.pVertexAttributeDescriptions = vertexInputAttributeDescriptions.data();
+
+	VkPipelineInputAssemblyStateCreateInfo inputAssemblyStateCreateInfo = {};
+	inputAssemblyStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+	inputAssemblyStateCreateInfo.topology = ToVkPrimitiveTopology(m_State.m_PrimitiveTopology);
+	inputAssemblyStateCreateInfo.primitiveRestartEnable = VK_FALSE;
+
+	VkViewport viewport = {};
+	viewport.x = 0.0f;
+	viewport.y = 0.0f;
+	viewport.width = float(defaultWidth);
+	viewport.height = float(defaultHidth);
+	viewport.minDepth = 0.0f;
+	viewport.maxDepth = 1.0f;
+
+	VkRect2D scissor = {};
+	scissor.offset = { 0, 0 };
+	scissor.extent.width = defaultWidth;
+	scissor.extent.height = defaultHidth;
+
+	VkPipelineViewportStateCreateInfo viewportStateCreateInfo = {};
+	viewportStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+	viewportStateCreateInfo.viewportCount = 1;
+	viewportStateCreateInfo.pViewports = &viewport;
+	viewportStateCreateInfo.scissorCount = 1;
+	viewportStateCreateInfo.pScissors = &scissor;
+
+	VkPipelineMultisampleStateCreateInfo multisampleStateCreateInfo = {};
+	multisampleStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+	multisampleStateCreateInfo.sampleShadingEnable = VK_FALSE;
+	multisampleStateCreateInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+
+	VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo = {};
+	dynamicStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+	dynamicStateCreateInfo.dynamicStateCount = uint32(dynamicStates.size());
+	dynamicStateCreateInfo.pDynamicStates = dynamicStates.data();
+
+	VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo = {};
+	graphicsPipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+	graphicsPipelineCreateInfo.stageCount = uint32(shaderStageCreateInfos.size());
+	graphicsPipelineCreateInfo.pStages = shaderStageCreateInfos.data();
+	graphicsPipelineCreateInfo.pVertexInputState = &vertexInputStateCreateInfo;
+	graphicsPipelineCreateInfo.pInputAssemblyState = &inputAssemblyStateCreateInfo;
+	graphicsPipelineCreateInfo.pViewportState = &viewportStateCreateInfo;
+	graphicsPipelineCreateInfo.pRasterizationState = &rasterizationStateCreateInfo;
+	graphicsPipelineCreateInfo.pMultisampleState = &multisampleStateCreateInfo;
+	graphicsPipelineCreateInfo.pColorBlendState = &blendStateCreateInfo;
+	graphicsPipelineCreateInfo.pDepthStencilState = &depthStencilStateCreateInfo;
+	graphicsPipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
+	graphicsPipelineCreateInfo.layout = m_VkPipelineLayout;
+	graphicsPipelineCreateInfo.renderPass = m_State.m_RenderPass->GetVkRenderPass();
+	graphicsPipelineCreateInfo.subpass = 0;
+	graphicsPipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
+
+	VkPipeline vkPipeline = VK_NULL_HANDLE;
+	if (vk::API::CreateGraphicsPipelines(vkDevice, VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, vk::Allocator(), &vkPipeline) != VK_SUCCESS) {
+		DFAssert(false, "Can't create GraphicsPipeline!");
+	}
+
+	DFVkDebugName(vkDevice, vkPipeline, m_Name);
+
+	m_PipelineStateObjects.push_back(PipelineStateObjectSlot(m_State, vkPipeline));
+	return vkPipeline;
+}
+
+auto vk::Pipeline::ParseShader(const df::StringView& code)->df::String {
+	using namespace vk_shader_parsing;
+
+	df::String outCode;
+	outCode.reserve(1024);
+
+	for (auto&& line : df::Tokenize(code, "\n\r")) {
+		if (line.empty()) {
+			continue;
+		}
+
+		bool parsed = false;
+
+		if (const auto vertexAttribute = FetchVertexAttribute(line, m_RenderCore)) {
+			df::AddUnique(m_VertexAttributes, vertexAttribute.Get());
+
+			parsed = true;
+		} else if (const auto parameterSet = FetchParameterSet(line, m_RenderCore)) {
+			df::AddUnique(m_ParameterSetDefinitions, parameterSet.Get());
+
+			parsed = true;
+		} else if (const auto depthTest = FetchDepthTest(line)) {
+			m_State.m_DepthState.m_DepthTestEnable = depthTest.Get();
+
+			parsed = true;
+		} else if (const auto depthWrite = FetchDepthWrite(line)) {
+			m_State.m_DepthState.m_DepthWriteEnable = depthWrite.Get();
+
+			parsed = true;
+		} else if (const auto stencilTest = FetchStencilTest(line)) {
+			m_State.m_DepthState.m_StencilTestEnable = stencilTest.Get();
+
+			parsed = true;
+		} else if (const auto depthCompareOp = FetchDepthCompareOp(line)) {
+			m_State.m_DepthState.m_DepthCompareOp = depthCompareOp.Get();
+
+			parsed = true;
+		} else if (const auto stencilOp = FetchStencilOp(line)) {
+			m_State.m_DepthState.m_StencilOp = stencilOp.Get();
+
+			parsed = true;
+		} else if (const auto polygonMode = FetchPolygonMode(line)) {
+			m_State.m_RasterizationState.m_PolygonMode = polygonMode.Get();
+
+			parsed = true;
+		} else if (const auto frontFace = FetchFrontFace(line)) {
+			m_State.m_RasterizationState.m_FrontFace = frontFace.Get();
+
+			parsed = true;
+		} else if (const auto cullMode = FetchCullMode(line)) {
+			m_State.m_RasterizationState.m_CullMode = cullMode.Get();
+
+			parsed = true;
+		} else if (const auto blendEnable = FetchBlendEnable(line)) {
+			m_State.m_BlendState.m_BlendEnable = blendEnable.Get();
+
+			parsed = true;
+		} else if (const auto colorBlendOp = FetchColorBlendOp(line)) {
+			m_State.m_BlendState.m_ColorBlendOp = colorBlendOp.Get();
+
+			parsed = true;
+		} else if (const auto alphaBlendOp = FetchAlphaBlendOp(line)) {
+			m_State.m_BlendState.m_AlphaBlendOp = alphaBlendOp.Get();
+
+			parsed = true;
+		} else if (const auto srcColorBlendFactor = FetchSrcColorBlendFactor(line)) {
+			m_State.m_BlendState.m_SrcColorBlendFactor = srcColorBlendFactor.Get();
+
+			parsed = true;
+		} else if (const auto dstColorBlendFactor = FetchDstColorBlendFactor(line)) {
+			m_State.m_BlendState.m_DstColorBlendFactor = dstColorBlendFactor.Get();
+
+			parsed = true;
+		} else if (const auto srcAlphaBlendFactor = FetchSrcAlphaBlendFactor(line)) {
+			m_State.m_BlendState.m_SrcAlphaBlendFactor = srcAlphaBlendFactor.Get();
+
+			parsed = true;
+		} else if (const auto dstAlphaBlendFactor = FetchDstAlphaBlendFactor(line)) {
+			m_State.m_BlendState.m_DstAlphaBlendFactor = dstAlphaBlendFactor.Get();
+
+			parsed = true;
+		} else if (const auto blendState = FetchBlendState(line)) {
+			m_State.m_BlendState = blendState.Get();
+
+			parsed = true;
+		}
+
+		if (!parsed) {
+			outCode += line;
+		}
+		outCode += "\n";
+	}
+
+	return outCode;
 }

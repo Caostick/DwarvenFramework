@@ -16,7 +16,7 @@ namespace df {
 	public:
 		virtual ~Pipeline() {}
 
-		virtual void DeclareName(const df::StringView& name) = 0;
+		virtual void SetName(const df::StringView& name) = 0;
 		virtual void DeclareVertexShader(const df::StringView& code) = 0;
 		virtual void DeclareFragmentShader(const df::StringView& code) = 0;
 		virtual bool Build() = 0;

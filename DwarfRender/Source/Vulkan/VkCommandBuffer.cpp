@@ -405,6 +405,8 @@ bool vk::CommandBuffer::BindParameterSet(vk::ParameterSet* parameterSet) {
 		return false;
 	}
 
+	parameterSet->Update();
+
 	const VkPipelineLayout vkPipelineLayout = m_CurrentPipeline->GetVkPipelineLayout();
 	const VkDescriptorSet vkDescriptorSet = parameterSet->GetVkDescriptorSet();
 

@@ -7,6 +7,7 @@
 #include "VkPresentation.h"
 #include "VkVertexAttribute.h"
 #include "VkSampler.h"
+#include "VkBuffer.h"
 
 #include <DwarvenCore/Types.h>
 #include <DwarvenCore/String.h>
@@ -70,7 +71,7 @@ namespace vk {
 		void DestroyParameterSetDefinition(vk::ParameterSetDefinition* parameterSetDefinition);
 		auto FindParameterSetDefinition(const df::StringView& name) const -> const vk::ParameterSetDefinition*;
 
-		auto CreateParameterSet(const df::StringView& name)->vk::ParameterSet*;
+		auto CreateParameterSet(const df::StringView& className)->vk::ParameterSet*;
 		auto CreateParameterSet(vk::ParameterSetDefinition* parameterSetDefinition)->vk::ParameterSet*;
 		void DestroyParameterSet(vk::ParameterSet* parameterSet);
 
@@ -105,6 +106,8 @@ namespace vk {
 		void SetImageData(VkImage image, const void* data, uint32 dataSize, uint32 width, uint32 height, int32 widthOffset = 0, int32 heightOffset = 0);
 
 		void GenerateMips(vk::Texture* texture);
+
+		auto GetBufferAlignment(const BufferUsageFlags& usage)const->uint32;
 
 	private:
 		bool InitInstance();

@@ -372,8 +372,8 @@ auto vk::RenderCore::FindParameterSetDefinition(const df::StringView& name) cons
 	return it->second;
 }
 
-auto vk::RenderCore::CreateParameterSet(const df::StringView& name)->vk::ParameterSet* {
-	auto parameterSetDefinition = CreateParameterSetDefinition(name);
+auto vk::RenderCore::CreateParameterSet(const df::StringView& className)->vk::ParameterSet* {
+	auto parameterSetDefinition = CreateParameterSetDefinition(className);
 	return CreateParameterSet(parameterSetDefinition);
 }
 
@@ -538,6 +538,42 @@ void vk::RenderCore::SetImageData(VkImage image, const void* data, uint32 dataSi
 
 void vk::RenderCore::GenerateMips(vk::Texture* texture) {
 	m_TexturesToGenerateMips.push_back(texture);
+}
+
+auto vk::RenderCore::GetBufferAlignment(const BufferUsageFlags& usage)const->uint32 {
+	uint32 alignment = 0;
+
+	if (usage.Has(EBufferUsageFlag::Storage)) {
+		alignment = std::max(alignment, uint32(m_DeviceLimits.minStorageBufferOffsetAlignment));
+	}
+
+	if (usage.Has(EBufferUsageFlag::Uniform)) {
+		alignment = std::max(alignment, uint32(m_DeviceLimits.minUniformBufferOffsetAlignment));
+	}
+
+	if (usage.Has(EBufferUsageFlag::Vertex)) {
+		alignment = std::max(alignment, uint32(sizeof(float)));
+	}
+
+	if (usage.Has(EBufferUsageFlag::Index)) {
+		alignment = std::max(alignment, uint32(sizeof(uint32)));
+	}
+
+	if (usage.Has(EBufferUsageFlag::Indirect)) {
+		alignment = std::max(alignment, uint32(sizeof(uint32)));
+	}
+
+	if (usage.Has(EBufferUsageFlag::StorageTexel)) {
+		alignment = std::max(alignment, uint32(m_DeviceLimits.minStorageBufferOffsetAlignment));
+		alignment = std::max(alignment, uint32(m_DeviceLimits.minTexelBufferOffsetAlignment));
+	}
+
+	if (usage.Has(EBufferUsageFlag::UniformTexel)) {
+		alignment = std::max(alignment, uint32(m_DeviceLimits.minUniformBufferOffsetAlignment));
+		alignment = std::max(alignment, uint32(m_DeviceLimits.minTexelBufferOffsetAlignment));
+	}
+
+	return alignment;
 }
 
 bool vk::RenderCore::InitInstance() {

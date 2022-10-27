@@ -86,19 +86,7 @@ vk::Texture::~Texture() {
 void vk::Texture::SetName(const df::StringView& name) {
 	m_Name = df::String(name);
 
-	const VkDevice vkDevice = m_RenderCore.GetVkDevice();
-
-	if (m_VkImage != VK_NULL_HANDLE) {
-		DFVkDebugName(vkDevice, m_VkImage, m_Name);
-	}
-
-	if (m_VkImageView != VK_NULL_HANDLE) {
-		DFVkDebugName(vkDevice, m_VkImageView, m_Name);
-	}
-
-	if (m_VkMemory != VK_NULL_HANDLE) {
-		DFVkDebugName(vkDevice, m_VkMemory, m_Name);
-	}
+	UpdateDebugNames();
 }
 
 void vk::Texture::Create(uint32 width, uint32 height, df::ETextureFormat format, df::ImageUsageFlags usage) {
@@ -114,14 +102,13 @@ void vk::Texture::Create(uint32 width, uint32 height, df::ETextureFormat format,
 	m_VkFormat = ToVkFormat(m_Format);
 
 	m_VkImage = vk::CreateImage2D(vkDevice, m_Width, m_Height, m_VkFormat, m_VkUsageFlags, m_Mips);
-	DFVkDebugName(vkDevice, m_VkImage, m_Name);
 
 	m_VkMemory = vk::AllocateMemory(vkDevice, m_VkImage, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-	DFVkDebugName(vkDevice, m_VkMemory, m_Name);
 
 	vk::BindImageMemory(vkDevice, m_VkImage, m_VkMemory);
 	m_VkImageView = vk::CreateImageView(vkDevice, m_VkImage, m_VkFormat, m_Mips);
-	DFVkDebugName(vkDevice, m_VkImageView, m_Name);
+
+	UpdateDebugNames();
 }
 
 void vk::Texture::SetData(void* data, uint32 size) {
@@ -186,4 +173,20 @@ auto vk::Texture::GetVkDeviceMemory() const->VkDeviceMemory {
 
 auto vk::Texture::GetVkFormat() const->VkFormat {
 	return m_VkFormat;
+}
+
+void vk::Texture::UpdateDebugNames() {
+	const VkDevice vkDevice = m_RenderCore.GetVkDevice();
+
+	if (m_VkImage != VK_NULL_HANDLE) {
+		DFVkDebugName(vkDevice, m_VkImage, m_Name);
+	}
+
+	if (m_VkImageView != VK_NULL_HANDLE) {
+		DFVkDebugName(vkDevice, m_VkImageView, m_Name);
+	}
+
+	if (m_VkMemory != VK_NULL_HANDLE) {
+		DFVkDebugName(vkDevice, m_VkMemory, m_Name);
+	}
 }

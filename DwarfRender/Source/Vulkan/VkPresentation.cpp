@@ -296,7 +296,7 @@ bool vk::Presentation::Load(vk::RenderCore& renderCore) {
 		m_ParametrSet->Build();
 
 		m_Pipeline = renderCore.CreatePipeline();
-		m_Pipeline->DeclareName("Present");
+		m_Pipeline->SetName("Present");
 		m_Pipeline->DeclareVertexShader(vsCode);
 		m_Pipeline->DeclareFragmentShader(fsCode);
 		m_Pipeline->Build();
@@ -352,8 +352,7 @@ void vk::Presentation::PresentTexture(vk::CommandBuffer& rcb, vk::Texture* textu
 	DFScopedRenderEvent(rcb, "Present Render Stage");
 
 	m_ParametrSet->SetTexture("Texture", texture);
-	m_ParametrSet->SetFilter("Texture", df::EFilter::Nearest);
-	m_ParametrSet->Update();
+	m_ParametrSet->SetFilter("Texture", df::EFilter::Linear);
 
 	rcb.BeginRenderPass(m_RenderPasses[m_AvailableImageIndex]);
 	rcb.BindPipeline(m_Pipeline);
