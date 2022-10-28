@@ -4,7 +4,7 @@
 
 #include <DwarfRender/VertexAttribute.h>
 
-namespace df {
+namespace vk {
 	enum class EShaderInOutType {
 		Float,
 		Vec2,
@@ -24,12 +24,12 @@ namespace df {
 		COUNT
 	};
 
-	auto ToShaderInOutType(df::EVertexAttributeFormat format)->df::EShaderInOutType;
-	auto ToStride(df::EVertexAttributeFormat format)->uint32;
+	auto ToShaderInOutType(df::EVertexAttributeFormat format)->EShaderInOutType;
+	auto ToDataStride(df::EVertexAttributeFormat format)->uint32;
 	auto ToVkFormat(df::EVertexAttributeFormat format)->VkFormat;
 	auto ToAttributeSize(df::EVertexAttributeFormat format)->uint32;
-	auto ToAttributeSize(df::EShaderInOutType type)->uint32;
-	auto ToShaderInOutString(df::EShaderInOutType type) -> const char*;
+	auto ToAttributeSize(EShaderInOutType type)->uint32;
+	auto ToShaderInOutString(EShaderInOutType type) -> const char*;
 }
 
 namespace vk {

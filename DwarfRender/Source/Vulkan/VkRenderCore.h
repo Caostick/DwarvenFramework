@@ -28,6 +28,7 @@ namespace vk {
 	class ParameterSet;
 	class ShaderCompiler;
 	class Buffer;
+	class Mesh;
 	class Texture;
 }
 
@@ -63,6 +64,9 @@ namespace vk {
 
 		auto CreateBuffer()->vk::Buffer*;
 		void DestroyBuffer(vk::Buffer* buffer);
+
+		auto CreateMesh()->vk::Mesh*;
+		void DestroyMesh(vk::Mesh* mesh);
 
 		auto CreateTexture()->vk::Texture*;
 		void DestroyTexture(vk::Texture* texture);
@@ -149,6 +153,7 @@ namespace vk {
 		df::ObjectPool<vk::VertexAttribute> m_VertexAttributes;
 		df::ObjectPool<vk::Sampler> m_Samplers;
 		df::ObjectPool<vk::Buffer> m_Buffers;
+		df::ObjectPool<vk::Mesh> m_Meshes;
 		df::ObjectPool<vk::Texture> m_Textures;
 
 		df::Vector<vk::Texture*> m_TexturesToInitLayout;

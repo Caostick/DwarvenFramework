@@ -38,11 +38,11 @@ void vk::Renderer::Release() {
 }
 
 auto vk::Renderer::CreateMesh()->df::Mesh* {
-	return DFNew vk::Mesh;
+	return m_RenderCore.CreateMesh();
 }
 
 void vk::Renderer::DestroyMesh(df::Mesh* mesh) {
-	DFDelete mesh;
+	m_RenderCore.DestroyMesh(static_cast<vk::Mesh*>(mesh));
 }
 
 auto vk::Renderer::CreateBuffer()->df::Buffer* {

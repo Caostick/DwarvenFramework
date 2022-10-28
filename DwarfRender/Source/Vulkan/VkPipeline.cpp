@@ -571,13 +571,13 @@ void vk::Pipeline::CreateVertexDescription() {
 	for (size_t i = 0; i < m_VertexAttributes.size(); ++i) {
 		m_BindingDescriptions[i] = {};
 		m_BindingDescriptions[i].binding = m_VertexAttributes[i]->m_Index;
-		m_BindingDescriptions[i].stride = df::ToStride(m_VertexAttributes[i]->m_Format);
+		m_BindingDescriptions[i].stride = ToDataStride(m_VertexAttributes[i]->m_Format);
 		m_BindingDescriptions[i].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
 		m_AttributeDescriptions[i] = {};
 		m_AttributeDescriptions[i].binding = uint32(i);
 		m_AttributeDescriptions[i].location = uint32(i);
-		m_AttributeDescriptions[i].format = df::ToVkFormat(m_VertexAttributes[i]->m_Format);
+		m_AttributeDescriptions[i].format = ToVkFormat(m_VertexAttributes[i]->m_Format);
 		m_AttributeDescriptions[i].offset = 0;
 	}
 }

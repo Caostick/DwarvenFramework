@@ -10,6 +10,7 @@
 #include "VkParameterSet.h"
 #include "VkShaderCompiler.h"
 #include "VkBuffer.h"
+#include "VkMesh.h"
 #include "VkTexture.h"
 
 #include <DwarfWindow/Window.h>
@@ -325,6 +326,14 @@ void vk::RenderCore::DestroyBuffer(vk::Buffer* buffer) {
 	m_Buffers.Destroy(buffer);
 }
 
+auto vk::RenderCore::CreateMesh()->vk::Mesh* {
+	return m_Meshes.Create(*this);
+}
+
+void vk::RenderCore::DestroyMesh(vk::Mesh* mesh) {
+	m_Meshes.Destroy(mesh);
+}
+
 auto vk::RenderCore::CreateTexture()->vk::Texture* {
 	auto texture = m_Textures.Create(*this);
 
@@ -404,7 +413,7 @@ auto vk::RenderCore::RegisterVertexAttribute(const df::StringView& name, df::EVe
 	attr->m_Index = index;
 
 	const auto strLocation = std::to_string(attr->m_Index);
-	const auto strType = df::ToShaderInOutString(df::ToShaderInOutType(attr->m_Format));
+	const auto strType = ToShaderInOutString(ToShaderInOutType(attr->m_Format));
 	const auto& strName = attr->m_Name;
 
 	attr->m_ShaderString = df::String("layout(location = ") + strLocation + ") in " + strType + df::String(" ") + strName + df::String(";\n");
