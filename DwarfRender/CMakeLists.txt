@@ -38,11 +38,6 @@ find_library(DwarfWindowmaker_LIB DwarfWindow)
 target_link_libraries(${PROJECT_NAME} DwarfWindow)
 include_directories(../DwarfWindow/Include)
 
-# DwarfResourcer
-find_library(DwarfResourcer_LIB DwarfResources)
-target_link_libraries(${PROJECT_NAME} DwarfResources)
-include_directories(../DwarfResources/Include)
-
 include(../ThirdParty/conanbuildinfo.cmake)
 conan_basic_setup(NO_OUTPUT_DIRS TARGETS)
 
