@@ -46,6 +46,11 @@ void vk::RenderPass::SetName(const df::StringView& name) {
 	m_Name = name;
 }
 
+void vk::RenderPass::SetExtents(uint32 width, uint32 height) {
+	m_VkExtents.width = width;
+	m_VkExtents.height = height;
+}
+
 void vk::RenderPass::SetTarget(uint32 index, df::Texture* texture, df::ERenderTargetOp operation, const df::ClearColor& clearValue) {
 	vk::Texture* vkTexture = static_cast<vk::Texture*>(texture);
 
@@ -96,11 +101,6 @@ void vk::RenderPass::Validate() {
 	if (!m_FramebufferIsBuilt) {
 		BuildFramebuffer();
 	}
-}
-
-void vk::RenderPass::SetExtents(uint32 width, uint32 height) {
-	m_VkExtents.width = width;
-	m_VkExtents.height = height;
 }
 
 void vk::RenderPass::SetColorTarget(uint32 index, VkImageView imageView, const VkAttachmentDescription& description, const VkClearValue& clearValue) {

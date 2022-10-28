@@ -39,7 +39,7 @@ namespace {
 		case vk::EImageLayout::DepthStencilReadOnly:
 			vkLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 			accessFlags = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
-			stageFlags = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+			stageFlags = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 			break;
 		case vk::EImageLayout::DepthReadOnlyStencilAttachment:
 			vkLayout = VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_STENCIL_ATTACHMENT_OPTIMAL;
@@ -49,7 +49,7 @@ namespace {
 		case vk::EImageLayout::DepthAttachmentStencilReadOnly:
 			vkLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL;
 			accessFlags = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-			stageFlags = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+			stageFlags = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 			break;
 		case vk::EImageLayout::DepthAttachment:
 			vkLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;

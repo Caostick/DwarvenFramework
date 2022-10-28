@@ -58,13 +58,11 @@ namespace vk {
 		~RenderPass() override;
 
 		virtual void SetName(const df::StringView& name) override;
-
+		virtual void SetExtents(uint32 width, uint32 height) override;
 		virtual void SetTarget(uint32 index, df::Texture* texture, df::ERenderTargetOp operation, const df::ClearColor& clearValue) override;
 		virtual void SetDepthStencilTarget(df::Texture* texture, df::ERenderTargetOp operation, const df::ClearDepth& clearValue) override;
 
 		void Validate();
-
-		void SetExtents(uint32 width, uint32 height);
 
 		void SetColorTarget(uint32 index, VkImageView imageView, const VkAttachmentDescription& description, const VkClearValue& clearValue);
 		void SetDepthStencilTarget(VkImageView imageView, const VkAttachmentDescription& description, const VkClearValue& clearValue);

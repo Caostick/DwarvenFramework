@@ -1,6 +1,7 @@
 #pragma once
 
 #include <DwarvenCore/StringView.h>
+#include <DwarvenCore/Types.h>
 #include <DwarvenCore/Math/Math.h>
 
 namespace df {
@@ -33,9 +34,8 @@ namespace df {
 		virtual ~RenderPass() {}
 
 		virtual void SetName(const df::StringView& name) = 0;
+		virtual void SetExtents(uint32 width, uint32 height) = 0;
 		virtual void SetTarget(uint32 index, df::Texture* texture, df::ERenderTargetOp operation = df::ERenderTargetOp::Clear, const ClearColor& clearValue = ClearColor()) = 0;
 		virtual void SetDepthStencilTarget(df::Texture* texture, df::ERenderTargetOp operation = df::ERenderTargetOp::Clear, const ClearDepth& clearValue = ClearDepth()) = 0;
-
-	private:
 	};
 }
