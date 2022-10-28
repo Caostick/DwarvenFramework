@@ -41,8 +41,8 @@ namespace vk {
 
 		virtual void AddShaderInclude(const df::StringView& name, const df::StringView& content) override;
 
-		virtual auto CreatePipeline()->df::Pipeline* override;
-		virtual void DestroyPipeline(df::Pipeline* pipeline) override;
+		virtual auto CreateGraphicsPipeline()->df::GraphicsPipeline* override;
+		virtual void DestroyGraphicsPipeline(df::GraphicsPipeline* pipeline) override;
 
 		virtual auto BeginFrame()->df::CommandBuffer* override;
 		virtual void EndFrame() override;

@@ -5,7 +5,7 @@
 #include "VkRenderCore.h"
 #include "VkRenderPass.h"
 #include "VkParameterSet.h"
-#include "VkPipeline.h"
+#include "VkGraphicsPipeline.h"
 #include "VkTexture.h"
 
 #include "Generated/Presentation.generated.h"
@@ -295,7 +295,7 @@ bool vk::Presentation::Load(vk::RenderCore& renderCore) {
 		m_ParametrSet->DeclareTextureParameter("Texture");
 		m_ParametrSet->Build();
 
-		m_Pipeline = renderCore.CreatePipeline();
+		m_Pipeline = renderCore.CreateGraphicsPipeline();
 		m_Pipeline->SetName("Present");
 		m_Pipeline->DeclareVertexShader(vsCode);
 		m_Pipeline->DeclareFragmentShader(fsCode);
@@ -306,7 +306,7 @@ bool vk::Presentation::Load(vk::RenderCore& renderCore) {
 }
 
 void vk::Presentation::Unload(vk::RenderCore& renderCore) {
-	renderCore.DestroyPipeline(m_Pipeline);
+	renderCore.DestroyGraphicsPipeline(m_Pipeline);
 	renderCore.DestroyParameterSet(m_ParametrSet);
 
 	for (auto& renderPass : m_RenderPasses) {

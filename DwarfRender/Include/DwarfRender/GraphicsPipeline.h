@@ -12,9 +12,9 @@ namespace df {
 }
 
 namespace df {
-	class Pipeline {
+	class GraphicsPipeline {
 	public:
-		virtual ~Pipeline() {}
+		virtual ~GraphicsPipeline() {}
 
 		virtual void SetName(const df::StringView& name) = 0;
 		virtual void DeclareVertexShader(const df::StringView& code) = 0;

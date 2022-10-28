@@ -23,7 +23,7 @@ namespace vk {
 	struct RenderContext;
 
 	class RenderPass;
-	class Pipeline;
+	class GraphicsPipeline;
 	class ParameterSetDefinition;
 	class ParameterSet;
 	class ShaderCompiler;
@@ -59,8 +59,8 @@ namespace vk {
 		auto CreateRenderPass()->vk::RenderPass*;
 		void DestroyRenderPass(vk::RenderPass* renderPass);
 
-		auto CreatePipeline()->vk::Pipeline*;
-		void DestroyPipeline(vk::Pipeline* pipeline);
+		auto CreateGraphicsPipeline()->vk::GraphicsPipeline*;
+		void DestroyGraphicsPipeline(vk::GraphicsPipeline* pipeline);
 
 		auto CreateBuffer()->vk::Buffer*;
 		void DestroyBuffer(vk::Buffer* buffer);
@@ -147,7 +147,7 @@ namespace vk {
 		vk::ShaderCompiler* m_ShaderCompiler;
 
 		df::ObjectPool<vk::RenderPass> m_RenderPasses;
-		df::ObjectPool<vk::Pipeline> m_Pipelines;
+		df::ObjectPool<vk::GraphicsPipeline> m_GraphicsPipelines;
 		df::ObjectPool<vk::ParameterSetDefinition> m_ParameterSetDefinitions;
 		df::ObjectPool<vk::ParameterSet> m_ParameterSets;
 		df::ObjectPool<vk::VertexAttribute> m_VertexAttributes;

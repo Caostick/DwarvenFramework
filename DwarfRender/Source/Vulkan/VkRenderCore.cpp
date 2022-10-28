@@ -5,7 +5,7 @@
 #include "VkDebug.h"
 #include "VkHelper.h"
 #include "VkRenderPass.h"
-#include "VkPipeline.h"
+#include "VkGraphicsPipeline.h"
 #include "VkParameterSetDefinition.h"
 #include "VkParameterSet.h"
 #include "VkShaderCompiler.h"
@@ -310,12 +310,12 @@ void vk::RenderCore::DestroyRenderPass(vk::RenderPass* renderPass) {
 	m_RenderPasses.Destroy(renderPass);
 }
 
-auto vk::RenderCore::CreatePipeline()->vk::Pipeline* {
-	return m_Pipelines.Create(*this);
+auto vk::RenderCore::CreateGraphicsPipeline()->vk::GraphicsPipeline* {
+	return m_GraphicsPipelines.Create(*this);
 }
 
-void vk::RenderCore::DestroyPipeline(vk::Pipeline* pipeline) {
-	m_Pipelines.Destroy(pipeline);
+void vk::RenderCore::DestroyGraphicsPipeline(vk::GraphicsPipeline* pipeline) {
+	m_GraphicsPipelines.Destroy(pipeline);
 }
 
 auto vk::RenderCore::CreateBuffer()->vk::Buffer* {

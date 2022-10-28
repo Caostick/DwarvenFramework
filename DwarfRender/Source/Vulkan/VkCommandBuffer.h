@@ -9,7 +9,7 @@
 
 namespace vk {
 	class RenderPass;
-	class Pipeline;
+	class GraphicsPipeline;
 	class ParameterSet;
 	class Texture;
 }
@@ -44,7 +44,7 @@ namespace vk {
 		virtual void BeginRenderPass(df::RenderPass* renderPass) override;
 		virtual void EndRenderPass() override;
 
-		virtual void BindPipeline(df::Pipeline* pipeline) override;
+		virtual void BindPipeline(df::GraphicsPipeline* pipeline) override;
 		virtual bool BindParameterSet(df::ParameterSet* parameterSet) override;
 
 		virtual void Draw(uint32 vertexCount) override;
@@ -72,7 +72,7 @@ namespace vk {
 
 		void BeginRenderPass(vk::RenderPass* renderPass);
 
-		void BindPipeline(vk::Pipeline* pipeline);
+		void BindPipeline(vk::GraphicsPipeline* pipeline);
 		bool BindParameterSet(vk::ParameterSet* parameterSet);
 
 		void ValidateState();
@@ -81,7 +81,7 @@ namespace vk {
 		VkCommandBuffer m_VkCommandBuffer;
 
 		vk::RenderPass* m_CurrentRenderPass;
-		vk::Pipeline* m_CurrentPipeline;
+		vk::GraphicsPipeline* m_CurrentPipeline;
 	};
 }
 

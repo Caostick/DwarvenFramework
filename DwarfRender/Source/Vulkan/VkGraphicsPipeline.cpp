@@ -1,4 +1,4 @@
-#include "VkPipeline.h"
+#include "VkGraphicsPipeline.h"
 #include "VkRenderCore.h"
 #include "VkDebug.h"
 #include "VkParameterSetDefinition.h"
@@ -238,12 +238,12 @@ bool vk::PipelineState::operator != (const PipelineState& other) const {
 }
 
 
-vk::Pipeline::PipelineStateObjectSlot::PipelineStateObjectSlot(const vk::PipelineState& state, const VkPipeline vkPipeline) 
+vk::GraphicsPipeline::PipelineStateObjectSlot::PipelineStateObjectSlot(const vk::PipelineState& state, const VkPipeline vkPipeline) 
 	: m_State(state)
 	, m_PipelineStateObject(vkPipeline) {
 }
 
-vk::Pipeline::Pipeline(vk::RenderCore& renderCore)
+vk::GraphicsPipeline::GraphicsPipeline(vk::RenderCore& renderCore)
 	: m_RenderCore(renderCore) 
 	, m_VkVertexShaderModule(VK_NULL_HANDLE)
 	, m_VkFragmentShaderModule(VK_NULL_HANDLE) 
@@ -251,7 +251,7 @@ vk::Pipeline::Pipeline(vk::RenderCore& renderCore)
 	, m_IsBuilt(false) {
 }
 
-vk::Pipeline::~Pipeline() {
+vk::GraphicsPipeline::~GraphicsPipeline() {
 	for (auto&& state : m_PipelineStateObjects) {
 		m_RenderCore.RemovePipeline(state.m_PipelineStateObject);
 	}
@@ -269,7 +269,7 @@ vk::Pipeline::~Pipeline() {
 	}
 }
 
-void vk::Pipeline::SetName(const df::StringView& name) {
+void vk::GraphicsPipeline::SetName(const df::StringView& name) {
 	DFAssert(!m_IsBuilt, "Casn't set pipeline name - pipeline is already built!");
 
 	m_Name = name;
@@ -277,19 +277,19 @@ void vk::Pipeline::SetName(const df::StringView& name) {
 	UpdateDebugNames();
 }
 
-void vk::Pipeline::DeclareVertexShader(const df::StringView& code) {
+void vk::GraphicsPipeline::DeclareVertexShader(const df::StringView& code) {
 	DFAssert(!m_IsBuilt, "Casn't set pipeline shader - pipeline is already built!");
 
 	m_VertexShaderCode = df::String(code);
 }
 
-void vk::Pipeline::DeclareFragmentShader(const df::StringView& code) {
+void vk::GraphicsPipeline::DeclareFragmentShader(const df::StringView& code) {
 	DFAssert(!m_IsBuilt, "Casn't set pipeline shader - pipeline is already built!");
 
 	m_FragmentShaderCode = df::String(code);
 }
 
-bool vk::Pipeline::Build() {
+bool vk::GraphicsPipeline::Build() {
 	auto shaderCompiler = m_RenderCore.GetShaderCompiler();
 
 	const df::String vsCode = ParseShader(m_VertexShaderCode);
@@ -370,127 +370,127 @@ bool vk::Pipeline::Build() {
 	return true;
 }
 
-void vk::Pipeline::SetBlendEnabled(bool value) {
+void vk::GraphicsPipeline::SetBlendEnabled(bool value) {
 	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_BlendState.m_BlendEnable = value;
 }
 
-void vk::Pipeline::SetColorBlendOp(df::EBlendOp value) {
+void vk::GraphicsPipeline::SetColorBlendOp(df::EBlendOp value) {
 	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_BlendState.m_ColorBlendOp = value;
 }
 
-void vk::Pipeline::SetAlphaBlendOp(df::EBlendOp value) {
+void vk::GraphicsPipeline::SetAlphaBlendOp(df::EBlendOp value) {
 	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_BlendState.m_AlphaBlendOp = value;
 }
 
-void vk::Pipeline::SetSrcColorBlendFactor(df::EBlendFactor value) {
+void vk::GraphicsPipeline::SetSrcColorBlendFactor(df::EBlendFactor value) {
 	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_BlendState.m_SrcColorBlendFactor = value;
 }
 
-void vk::Pipeline::SetSrcAlphaBlendFactor(df::EBlendFactor value) {
+void vk::GraphicsPipeline::SetSrcAlphaBlendFactor(df::EBlendFactor value) {
 	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_BlendState.m_SrcAlphaBlendFactor = value;
 }
 
-void vk::Pipeline::SetDstColorBlendFactor(df::EBlendFactor value) {
+void vk::GraphicsPipeline::SetDstColorBlendFactor(df::EBlendFactor value) {
 	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_BlendState.m_DstColorBlendFactor = value;
 }
 
-void vk::Pipeline::SetDstAlphaBlendFactor(df::EBlendFactor value) {
+void vk::GraphicsPipeline::SetDstAlphaBlendFactor(df::EBlendFactor value) {
 	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_BlendState.m_DstAlphaBlendFactor = value;
 }
 
-void vk::Pipeline::SetBlendState(df::EBlendState value) {
+void vk::GraphicsPipeline::SetBlendState(df::EBlendState value) {
 	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_BlendState = value;
 }
 
-void vk::Pipeline::SetDepthTestEnabled(bool value) {
+void vk::GraphicsPipeline::SetDepthTestEnabled(bool value) {
 	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_DepthState.m_DepthTestEnable = value;
 }
 
-void vk::Pipeline::SetDepthWriteEnabled(bool value) {
+void vk::GraphicsPipeline::SetDepthWriteEnabled(bool value) {
 	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_DepthState.m_DepthWriteEnable = value;
 }
 
-void vk::Pipeline::SetStencilTestEnabled(bool value) {
+void vk::GraphicsPipeline::SetStencilTestEnabled(bool value) {
 	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_DepthState.m_StencilTestEnable = value;
 }
 
-void vk::Pipeline::SetDepthCompareOp(df::EDepthCompareOp value) {
+void vk::GraphicsPipeline::SetDepthCompareOp(df::EDepthCompareOp value) {
 	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_DepthState.m_DepthCompareOp = value;
 }
 
-void vk::Pipeline::SetStencilOp(df::EStencilOp value) {
+void vk::GraphicsPipeline::SetStencilOp(df::EStencilOp value) {
 	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_DepthState.m_StencilOp = value;
 }
 
-void vk::Pipeline::SetDepthStencilState(df::EDepthStencilState value) {
+void vk::GraphicsPipeline::SetDepthStencilState(df::EDepthStencilState value) {
 	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_DepthState = value;
 }
 
-void vk::Pipeline::SetRasterizerDiscardEnabled(bool value) {
+void vk::GraphicsPipeline::SetRasterizerDiscardEnabled(bool value) {
 	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_RasterizationState.m_RasterizerDiscardEnable = value;
 }
 
-void vk::Pipeline::SetPolygonMode(df::EPolygonMode value) {
+void vk::GraphicsPipeline::SetPolygonMode(df::EPolygonMode value) {
 	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_RasterizationState.m_PolygonMode = value;
 }
 
-void vk::Pipeline::SetFrontFace(df::EFrontFace value) {
+void vk::GraphicsPipeline::SetFrontFace(df::EFrontFace value) {
 	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_RasterizationState.m_FrontFace = value;
 }
 
-void vk::Pipeline::SetCullMode(df::ECullMode value) {
+void vk::GraphicsPipeline::SetCullMode(df::ECullMode value) {
 	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_RasterizationState.m_CullMode = value;
 }
 
-void vk::Pipeline::SetRasterizationState(df::ERasterizationState value) {
+void vk::GraphicsPipeline::SetRasterizationState(df::ERasterizationState value) {
 	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_RasterizationState = value;
 }
 
-void vk::Pipeline::SetPrimitiveTopology(df::EPrimitiveTopology value) {
+void vk::GraphicsPipeline::SetPrimitiveTopology(df::EPrimitiveTopology value) {
 	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_PrimitiveTopology = value;
 }
 
-auto vk::Pipeline::GetParameterSetSlot(vk::ParameterSet* parameterSet) const -> int32 {
+auto vk::GraphicsPipeline::GetParameterSetSlot(vk::ParameterSet* parameterSet) const -> int32 {
 	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
 
 	const auto* definition = &parameterSet->GetDefinition();
@@ -505,7 +505,7 @@ auto vk::Pipeline::GetParameterSetSlot(vk::ParameterSet* parameterSet) const -> 
 	return -1;
 }
 
-auto vk::Pipeline::GetPipelineForState(const vk::RenderPass* renderPass)->VkPipeline {
+auto vk::GraphicsPipeline::GetPipelineForState(const vk::RenderPass* renderPass)->VkPipeline {
 	m_State.m_RenderPass = renderPass;
 
 	for (const auto& psoState : m_PipelineStateObjects) {
@@ -517,11 +517,11 @@ auto vk::Pipeline::GetPipelineForState(const vk::RenderPass* renderPass)->VkPipe
 	return CreatePipelineStateObject();
 }
 
-auto vk::Pipeline::GetVkPipelineLayout() const->VkPipelineLayout {
+auto vk::GraphicsPipeline::GetVkPipelineLayout() const->VkPipelineLayout {
 	return m_VkPipelineLayout;
 }
 
-auto vk::Pipeline::CreateShaderModule(const uint32* data, uint32 length) -> VkShaderModule {
+auto vk::GraphicsPipeline::CreateShaderModule(const uint32* data, uint32 length) -> VkShaderModule {
 	VkDevice vkDevice = m_RenderCore.GetVkDevice();
 
 	VkShaderModuleCreateInfo shaderModuleCreateInfo = {};
@@ -539,7 +539,7 @@ auto vk::Pipeline::CreateShaderModule(const uint32* data, uint32 length) -> VkSh
 	return vkShaderModule;
 }
 
-auto vk::Pipeline::CreateLayout()->VkPipelineLayout {
+auto vk::GraphicsPipeline::CreateLayout()->VkPipelineLayout {
 	VkDevice vkDevice = m_RenderCore.GetVkDevice();
 
 	const uint32 descriptorSetLayoutCount = uint32(m_ParameterSetDefinitions.size());
@@ -564,7 +564,7 @@ auto vk::Pipeline::CreateLayout()->VkPipelineLayout {
 	return vkPipelineLayout;
 }
 
-void vk::Pipeline::CreateVertexDescription() {
+void vk::GraphicsPipeline::CreateVertexDescription() {
 	m_BindingDescriptions.resize(m_VertexAttributes.size());
 	m_AttributeDescriptions.resize(m_VertexAttributes.size());
 
@@ -582,7 +582,7 @@ void vk::Pipeline::CreateVertexDescription() {
 	}
 }
 
-void vk::Pipeline::UpdateDebugNames() {
+void vk::GraphicsPipeline::UpdateDebugNames() {
 	const VkDevice vkDevice = m_RenderCore.GetVkDevice();
 
 	if (m_VkVertexShaderModule != VK_NULL_HANDLE) {
@@ -603,7 +603,7 @@ void vk::Pipeline::UpdateDebugNames() {
 }
 
 
-auto vk::Pipeline::CreatePipelineStateObject()->VkPipeline {
+auto vk::GraphicsPipeline::CreatePipelineStateObject()->VkPipeline {
 	DFAssert(m_IsBuilt, "Can't create pipeline state object - pipeline is not built yet!");
 	DFAssert(m_State.m_RenderPass != nullptr, "There is no active render pass to build pipeline state object!");
 
@@ -719,7 +719,7 @@ auto vk::Pipeline::CreatePipelineStateObject()->VkPipeline {
 	return vkPipeline;
 }
 
-auto vk::Pipeline::ParseShader(const df::StringView& code)->df::String {
+auto vk::GraphicsPipeline::ParseShader(const df::StringView& code)->df::String {
 	using namespace vk_shader_parsing;
 
 	df::String outCode;

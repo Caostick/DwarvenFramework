@@ -8,7 +8,7 @@ namespace df {
 	class Buffer;
 	class Texture;
 	class RenderPass;
-	class Pipeline;
+	class GraphicsPipeline;
 	class ParameterSet;
 	class CommandBuffer;
 }
@@ -41,8 +41,8 @@ namespace df {
 
 		virtual void AddShaderInclude(const df::StringView& name, const df::StringView& content) = 0;
 
-		virtual auto CreatePipeline()->df::Pipeline* = 0;
-		virtual void DestroyPipeline(df::Pipeline* pipeline) = 0;
+		virtual auto CreateGraphicsPipeline()->df::GraphicsPipeline* = 0;
+		virtual void DestroyGraphicsPipeline(df::GraphicsPipeline* pipeline) = 0;
 
 		virtual auto BeginFrame()->df::CommandBuffer* = 0;
 		virtual void EndFrame() = 0;

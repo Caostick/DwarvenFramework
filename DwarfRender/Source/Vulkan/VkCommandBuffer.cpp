@@ -1,7 +1,7 @@
 #include "VkCommandBuffer.h"
 #include "VkRenderPass.h"
 #include "VkParameterSet.h"
-#include "VkPipeline.h"
+#include "VkGraphicsPipeline.h"
 #include "VkTexture.h"
 #include "VkDebug.h"
 #include "VkScopedRenderEvent.h"
@@ -107,8 +107,8 @@ void vk::CommandBuffer::EndRenderPass() {
 	vk::API::CmdEndRenderPass(m_VkCommandBuffer);
 }
 
-void vk::CommandBuffer::BindPipeline(df::Pipeline* pipeline) {
-	BindPipeline(static_cast<vk::Pipeline*>(pipeline));
+void vk::CommandBuffer::BindPipeline(df::GraphicsPipeline* pipeline) {
+	BindPipeline(static_cast<vk::GraphicsPipeline*>(pipeline));
 }
 
 bool vk::CommandBuffer::BindParameterSet(df::ParameterSet* parameterSet) {
@@ -389,7 +389,7 @@ void vk::CommandBuffer::BeginRenderPass(vk::RenderPass* renderPass) {
 	vk::API::CmdSetScissor(m_VkCommandBuffer, 0, 1, &scissor);
 }
 
-void vk::CommandBuffer::BindPipeline(vk::Pipeline* pipeline) {
+void vk::CommandBuffer::BindPipeline(vk::GraphicsPipeline* pipeline) {
 	DFAssert(m_CurrentRenderPass != nullptr, "Can't bind graphics pipeline - Render pass is not set!");
 
 	m_CurrentPipeline = pipeline;

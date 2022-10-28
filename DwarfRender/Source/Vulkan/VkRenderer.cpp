@@ -6,7 +6,7 @@
 #include "VkParameterSet.h"
 #include "VkParameterSetDefinition.h"
 #include "VkRenderPass.h"
-#include "VkPipeline.h"
+#include "VkGraphicsPipeline.h"
 #include "VkCommandBuffer.h"
 
 #include <DwarvenCore/New.h>
@@ -89,12 +89,12 @@ void vk::Renderer::AddShaderInclude(const df::StringView& name, const df::String
 	m_RenderCore.AddShaderInclude(name, content);
 }
 
-auto vk::Renderer::CreatePipeline()->df::Pipeline* {
-	return m_RenderCore.CreatePipeline();
+auto vk::Renderer::CreateGraphicsPipeline()->df::GraphicsPipeline* {
+	return m_RenderCore.CreateGraphicsPipeline();
 }
 
-void vk::Renderer::DestroyPipeline(df::Pipeline* pipeline) {
-	m_RenderCore.DestroyPipeline(static_cast<vk::Pipeline*>(pipeline));
+void vk::Renderer::DestroyGraphicsPipeline(df::GraphicsPipeline* pipeline) {
+	m_RenderCore.DestroyGraphicsPipeline(static_cast<vk::GraphicsPipeline*>(pipeline));
 }
 
 auto vk::Renderer::BeginFrame()->df::CommandBuffer* {

@@ -15,7 +15,7 @@ namespace vk {
 	class RenderPass;
 	class Texture;
 	class ParameterSet;
-	class Pipeline;
+	class GraphicsPipeline;
 }
 
 namespace vk {
@@ -56,7 +56,7 @@ namespace vk {
 
 		df::Vector<VkImageView> m_ImageViews;
 		df::Vector<vk::RenderPass*> m_RenderPasses;
-		vk::Pipeline* m_Pipeline;
+		vk::GraphicsPipeline* m_Pipeline;
 		vk::ParameterSet* m_ParametrSet;
 	};
 }

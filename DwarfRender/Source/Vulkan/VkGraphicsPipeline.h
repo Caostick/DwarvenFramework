@@ -2,7 +2,7 @@
 
 #include "VkAPI.h"
 
-#include <DwarfRender/Pipeline.h>
+#include <DwarfRender/GraphicsPipeline.h>
 
 #include <DwarvenCore/String.h>
 #include <DwarvenCore/Vector.h>
@@ -38,10 +38,10 @@ namespace vk {
 }
 
 namespace vk {
-	class Pipeline : public df::Pipeline {
+	class GraphicsPipeline : public df::GraphicsPipeline {
 	public:
-		Pipeline(vk::RenderCore& renderCore);
-		virtual ~Pipeline() override;
+		GraphicsPipeline(vk::RenderCore& renderCore);
+		virtual ~GraphicsPipeline() override;
 
 		virtual void SetName(const df::StringView& name) override;
 		virtual void DeclareVertexShader(const df::StringView& code) override;
