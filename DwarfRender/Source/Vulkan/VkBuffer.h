@@ -41,7 +41,7 @@ namespace vk {
 		virtual void SetName(const df::StringView& name) override;
 
 		virtual void Create(uint32 size) override;
-		virtual void SetData(void* data, uint32 size, uint32 offset) override;
+		virtual void SetData(void* data, uint32 size, uint32 offset = 0) override;
 
 	public:
 		auto GetVkBuffer() const->VkBuffer;

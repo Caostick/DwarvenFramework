@@ -22,7 +22,7 @@ namespace vk {
 
 		virtual void SetName(const df::StringView& name) override;
 		virtual void Create(uint32 vertexCount, uint32 indexCount) override;
-		virtual bool EnableAttribute(const df::StringView& attributeName) override;
+		virtual bool EnableAttribute(const df::StringView& attributeName, void* data, uint32 size) override;
 		virtual bool SetAttributeData(const df::StringView& attributeName, void* data, uint32 size, uint32 offset) override;
 		virtual bool SetIndexData(uint32* data, uint32 size, uint32 offset) override;
 

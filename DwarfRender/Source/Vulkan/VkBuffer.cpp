@@ -72,7 +72,7 @@ void vk::Buffer::Create(uint32 size) {
 	CreateBuffer(size, vk::EBufferUsageFlag::Storage);
 }
 
-void vk::Buffer::SetData(void* data, uint32 size, uint32 offset) {
+void vk::Buffer::SetData(void* data, uint32 size, uint32 offset /*= 0*/) {
 	if (m_AccessType == vk::EBufferAccessType::Transfer) {
 		m_RenderCore.SetBufferData(m_VkBuffer, data, size, offset);
 	} else {

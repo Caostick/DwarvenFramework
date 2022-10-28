@@ -10,7 +10,15 @@ vk::Mesh::Mesh(vk::RenderCore& renderCore)
 
 }
 
-vk::Mesh::~Mesh() {}
+vk::Mesh::~Mesh() {
+	if (m_IndexBuffer) {
+		m_RenderCore.DestroyBuffer(m_IndexBuffer);
+	}
+
+	for (auto& slot : m_Attributes) {
+		m_RenderCore.DestroyBuffer(slot.m_Buffer);
+	}
+}
 
 void vk::Mesh::SetName(const df::StringView& name) {
 	m_Name = df::String(name);
@@ -29,7 +37,7 @@ void vk::Mesh::Create(uint32 vertexCount, uint32 indexCount) {
 	}
 }
 
-bool vk::Mesh::EnableAttribute(const df::StringView& attributeName) {
+bool vk::Mesh::EnableAttribute(const df::StringView& attributeName, void* data, uint32 size) {
 	const auto attr = m_RenderCore.FindVertexAttribute(attributeName);
 	if (!attr) {
 		return false;
@@ -46,6 +54,9 @@ bool vk::Mesh::EnableAttribute(const df::StringView& attributeName) {
 	slot.m_Buffer = m_RenderCore.CreateBuffer();
 	slot.m_Buffer->CreateBuffer(m_VertexCount * ToDataStride(attr->m_Format), EBufferUsageFlag::Vertex);
 	slot.m_Buffer->SetName(m_Name);
+	if (data != nullptr) {
+		slot.m_Buffer->SetData(data, size);
+	}
 
 	m_Attributes.emplace_back(slot);
 
