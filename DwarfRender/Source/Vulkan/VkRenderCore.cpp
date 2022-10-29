@@ -466,6 +466,8 @@ auto vk::RenderCore::RequestSampler(const vk::SamplerState& state)->vk::Sampler*
 	samplerCreateInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
 	samplerCreateInfo.compareOp = VK_COMPARE_OP_ALWAYS;
 	samplerCreateInfo.mipmapMode = state.m_VkMipMapMode;
+	samplerCreateInfo.minLod = 0;
+	samplerCreateInfo.maxLod = 12;
 
 	VkSampler vkSampler = VK_NULL_HANDLE;
 	if (vk::API::CreateSampler(m_VkDevice, &samplerCreateInfo, vk::Allocator(), &vkSampler) != VK_SUCCESS) {
