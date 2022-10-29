@@ -12,6 +12,7 @@ namespace vk {
 	class GraphicsPipeline;
 	class ParameterSet;
 	class Texture;
+	class Buffer;
 }
 
 namespace vk {
@@ -29,9 +30,7 @@ namespace vk {
 		StencilAttachment,
 		StencilReadOnly,
 		TransferSrc,
-		TransferDst,
-
-		COUNT
+		TransferDst
 	};
 }
 
@@ -48,6 +47,7 @@ namespace vk {
 		virtual bool BindParameterSet(df::ParameterSet* parameterSet) override;
 
 		virtual void Draw(uint32 vertexCount) override;
+		virtual void Draw(df::Mesh* mesh, uint32 instanceCount = 1) override;
 
 	public:
 		auto Get() const->VkCommandBuffer;
@@ -64,7 +64,7 @@ namespace vk {
 		void ImageLayoutTransition(VkImage image, uint32 mipCount, vk::EImageLayout oldLayout, vk::EImageLayout newLayout, int32 mip = -1, bool isDepth = false, bool isStencil = false);
 		void ImageLayoutTransition(vk::Texture* texture, vk::EImageLayout oldLayout, vk::EImageLayout newLayout, int32 mip = -1);
 		void CopyBuffer(VkBuffer src, VkBuffer dst, uint32 range, uint32 srcOffset = 0, uint32 dstOffset = 0);
-		void CopyBufferToImage(VkBuffer src, VkImage dst, uint32 width, uint32 height, int32 widthOffset = 0, int32 heightOffset = 0);
+		void CopyBufferToImage(VkBuffer src, VkImage dst, uint32 width, uint32 height, uint32 srcBufferOffset = 0, int32 widthOffset = 0, int32 heightOffset = 0);
 
 		void GenerateMips(vk::Texture* texture);
 
@@ -74,6 +74,9 @@ namespace vk {
 
 		void BindPipeline(vk::GraphicsPipeline* pipeline);
 		bool BindParameterSet(vk::ParameterSet* parameterSet);
+
+		void BindVertexBuffer(const vk::Buffer* buffer, uint32 binding, uint32 offset = 0);
+		void BindIndexBuffer(const vk::Buffer* buffer);
 
 		void ValidateState();
 

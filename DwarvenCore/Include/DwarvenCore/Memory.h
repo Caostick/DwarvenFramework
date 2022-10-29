@@ -6,6 +6,9 @@ namespace df {
 	void MemCpy(void* dst, const void* src, size_t bytes);
 
 	template<typename T>
+	auto MemAlign(T offset, T alignment)->T;
+
+	template<typename T>
 	void TMemCpy(T* dst, const T* src, size_t amount);
 
 	template<typename T>

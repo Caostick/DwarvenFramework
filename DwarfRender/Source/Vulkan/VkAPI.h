@@ -117,6 +117,7 @@ namespace vk {
         VK_FUNCTION(GetImageMemoryRequirements);
         VK_FUNCTION(GetSwapchainImagesKHR);
         VK_FUNCTION(MapMemory);
+        VK_FUNCTION(FlushMappedMemoryRanges);
         VK_FUNCTION(QueuePresentKHR);
         VK_FUNCTION(QueueSubmit);
         VK_FUNCTION(QueueWaitIdle);

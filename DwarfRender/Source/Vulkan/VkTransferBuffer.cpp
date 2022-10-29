@@ -5,6 +5,7 @@
 #include "VkCommandBuffer.h"
 
 #include <DwarvenCore/Assert.h>
+#include <DwarvenCore/Memory.h>
 
 vk::TransferBuffer::TransferBuffer() 
 	: m_Device(VK_NULL_HANDLE)
@@ -20,6 +21,8 @@ void vk::TransferBuffer::Init(VkDevice device, VkDeviceSize size) {
 	m_MemorySize = uint32(size);
 	m_FreeMemory = m_MemorySize;
 
+	m_Data = DFNew uint8[m_MemorySize];
+
 	m_Buffer = vk::CreateBuffer(m_Device, size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_SHARING_MODE_EXCLUSIVE);
 	DFVkDebugName(m_Device, m_Buffer, "Transfer Buffer");
 
@@ -32,6 +35,8 @@ void vk::TransferBuffer::Init(VkDevice device, VkDeviceSize size) {
 void vk::TransferBuffer::Release(vk::ObjectManager& objectManager) {
 	objectManager.RemoveBuffer(m_Device, m_Buffer);
 	objectManager.RemoveDeviceMemory(m_Device, m_Memory);
+
+	DFDelete [] m_Data;
 }
 
 void vk::TransferBuffer::SetBufferData(VkBuffer buffer, const void* data, uint32 dataSize, uint32 offset /*= 0*/) {
@@ -44,7 +49,8 @@ void vk::TransferBuffer::SetBufferData(VkBuffer buffer, const void* data, uint32
 	transaction.m_DstBuffer = buffer;
 	m_CopyToBufferTransactions.emplace_back(transaction);
 
-	vk::SetData(m_Device, m_Memory, data, dataSize, m_MemorySize - m_FreeMemory);
+	SetData(data, dataSize, m_MemorySize - m_FreeMemory);
+
 	m_FreeMemory -= dataSize;
 }
 
@@ -63,12 +69,17 @@ void vk::TransferBuffer::SetImageData(VkImage image, const void* data, uint32 da
 
 	m_CopyToImageTransactions.emplace_back(transaction);
 
-	vk::SetData(m_Device, m_Memory, data, dataSize, m_MemorySize - m_FreeMemory);
+	SetData(data, dataSize, m_MemorySize - m_FreeMemory);
+
 	m_FreeMemory -= dataSize;
 }
 
 void vk::TransferBuffer::Execute(vk::CommandBuffer& rcb) {
 	DFScopedRenderEvent(rcb, "Execute Data Transfer");
+
+	if ((m_MemorySize - m_FreeMemory) > 0) {
+		vk::SetData(m_Device, m_Memory, m_Data, m_MemorySize - m_FreeMemory, 0);
+	}
 
 	for (const auto& transaction : m_CopyToBufferTransactions) {
 		rcb.CopyBuffer(m_Buffer, transaction.m_DstBuffer, transaction.m_DataSize, transaction.m_SrcBufferOffset, transaction.m_DstBufferOffset);
@@ -76,11 +87,15 @@ void vk::TransferBuffer::Execute(vk::CommandBuffer& rcb) {
 
 	for (const auto& transaction : m_CopyToImageTransactions) {
 		rcb.ImageLayoutTransition(transaction.m_DstImage, 1, vk::EImageLayout::ColorReadOnly, vk::EImageLayout::TransferDst, transaction.m_DstMip);
-		rcb.CopyBufferToImage(m_Buffer, transaction.m_DstImage, transaction.m_DstWidth, transaction.m_DstHeight, transaction.m_DstWidthOffset, transaction.m_DstHeightOffset);
+		rcb.CopyBufferToImage(m_Buffer, transaction.m_DstImage, transaction.m_DstWidth, transaction.m_DstHeight, transaction.m_SrcBufferOffset, transaction.m_DstWidthOffset, transaction.m_DstHeightOffset);
 		rcb.ImageLayoutTransition(transaction.m_DstImage, 1, vk::EImageLayout::TransferDst, vk::EImageLayout::ColorReadOnly, transaction.m_DstMip);
 	}
 
 	m_CopyToBufferTransactions.clear();
 	m_CopyToImageTransactions.clear();
 	m_FreeMemory = m_MemorySize;
+}
+
+void vk::TransferBuffer::SetData(const void* data, uint32 size, uint32 offset) {
+	df::MemCpy(m_Data + offset, data, size);
 }

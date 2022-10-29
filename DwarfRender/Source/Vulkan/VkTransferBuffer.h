@@ -22,7 +22,10 @@ namespace vk {
 		void SetImageData(VkImage image, const void* data, uint32 dataSize, uint32 width, uint32 height, int32 widthOffset = 0, int32 heightOffset = 0, uint32 mip = 0);
 
 		void Execute(vk::CommandBuffer& rcb);
+
 	private:
+		void SetData(const void* data, uint32 size, uint32 offset);
+
 		struct CopyToBufferTransaction {
 			uint32 m_SrcBufferOffset;
 			uint32 m_DstBufferOffset;
@@ -46,6 +49,8 @@ namespace vk {
 		VkDevice m_Device;
 		VkBuffer m_Buffer;
 		VkDeviceMemory m_Memory;
+
+		uint8* m_Data;
 
 		uint32 m_MemorySize;
 		uint32 m_FreeMemory;

@@ -142,6 +142,7 @@ bool vk::API::LoadDeviceFunctions(VkDevice device) {
     LOAD_DEVICE_FUNCTION(GetImageMemoryRequirements);
     LOAD_DEVICE_FUNCTION(GetSwapchainImagesKHR);
     LOAD_DEVICE_FUNCTION(MapMemory);
+    LOAD_DEVICE_FUNCTION(FlushMappedMemoryRanges);
     LOAD_DEVICE_FUNCTION(QueuePresentKHR);
     LOAD_DEVICE_FUNCTION(QueueSubmit);
     LOAD_DEVICE_FUNCTION(QueueWaitIdle);
@@ -256,6 +257,7 @@ VK_FUNCTION(GetDeviceQueue);
 VK_FUNCTION(GetImageMemoryRequirements);
 VK_FUNCTION(GetSwapchainImagesKHR);
 VK_FUNCTION(MapMemory);
+VK_FUNCTION(FlushMappedMemoryRanges);
 VK_FUNCTION(QueuePresentKHR);
 VK_FUNCTION(QueueSubmit);
 VK_FUNCTION(QueueWaitIdle);

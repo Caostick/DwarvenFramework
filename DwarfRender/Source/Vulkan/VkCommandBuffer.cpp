@@ -3,7 +3,10 @@
 #include "VkParameterSet.h"
 #include "VkGraphicsPipeline.h"
 #include "VkTexture.h"
+#include "VkMesh.h"
+#include "VkBuffer.h"
 #include "VkDebug.h"
+#include "VkVertexAttribute.h"
 #include "VkScopedRenderEvent.h"
 
 #include <DwarvenCore/Assert.h>
@@ -121,6 +124,30 @@ void vk::CommandBuffer::Draw(uint32 vertexCount) {
 	vk::API::CmdDraw(m_VkCommandBuffer, vertexCount, 1, 0, 0);
 }
 
+void vk::CommandBuffer::Draw(df::Mesh* mesh, uint32 instanceCount /*= 1*/) {
+	vk::Mesh* vkMesh = static_cast<vk::Mesh*>(mesh);
+
+	const uint32 indexCount = vkMesh->GetIndexCount();
+	const uint32 vertexCount = vkMesh->GetVertexCount();
+
+	const uint32 firstVertex = 0;
+	const uint32 firstIndex = 0;
+	const uint32 firstInstance = 0;
+	const uint32 vertexOffset = 0;
+
+	for (const auto& attr : vkMesh->GetAttributes()) {
+		BindVertexBuffer(attr.m_Buffer, attr.m_Attribute->m_Index);
+	}
+
+	if (indexCount > 0) {
+		BindIndexBuffer(vkMesh->GetIndexBuffer());
+
+		vk::API::CmdDrawIndexed(m_VkCommandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
+	} else {
+		vk::API::CmdDraw(m_VkCommandBuffer, vertexCount, instanceCount, firstVertex, firstInstance);
+	}
+}
+
 auto vk::CommandBuffer::Get() const->VkCommandBuffer {
 	return m_VkCommandBuffer;
 }
@@ -221,17 +248,15 @@ void vk::CommandBuffer::ImageLayoutTransition(vk::Texture* texture, vk::EImageLa
 void vk::CommandBuffer::CopyBuffer(VkBuffer src, VkBuffer dst, uint32 range, uint32 srcOffset /*= 0*/, uint32 dstOffset /*= 0*/) {
 	VkBufferCopy copyRegion = {};
 	copyRegion.size = range;
-	copyRegion.srcOffset = 0;
-	copyRegion.dstOffset = 0;
 	copyRegion.srcOffset = srcOffset;
 	copyRegion.dstOffset = dstOffset;
 
 	vk::API::CmdCopyBuffer(m_VkCommandBuffer, src, dst, 1, &copyRegion);
 }
 
-void vk::CommandBuffer::CopyBufferToImage(VkBuffer src, VkImage dst, uint32 width, uint32 height, int32 widthOffset /*= 0*/, int32 heightOffset /*= 0*/) {
+void vk::CommandBuffer::CopyBufferToImage(VkBuffer src, VkImage dst, uint32 width, uint32 height, uint32 srcBufferOffset /*= 0*/, int32 widthOffset /*= 0*/, int32 heightOffset /*= 0*/) {
 	VkBufferImageCopy copyRegion = {};
-	copyRegion.bufferOffset = 0;
+	copyRegion.bufferOffset = srcBufferOffset;
 	copyRegion.bufferRowLength = 0;
 	copyRegion.bufferImageHeight = 0;
 	copyRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -413,6 +438,16 @@ bool vk::CommandBuffer::BindParameterSet(vk::ParameterSet* parameterSet) {
 	vk::API::CmdBindDescriptorSets(m_VkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipelineLayout, uint32(slotIdx), 1, &vkDescriptorSet, 0, nullptr);
 
 	return true;
+}
+
+void vk::CommandBuffer::BindVertexBuffer(const vk::Buffer* buffer, uint32 binding, uint32 offset /*= 0*/) {
+	VkBuffer vertexBuffers[] = { buffer->GetVkBuffer()};
+	VkDeviceSize offsets[] = { offset };
+	vk::API::CmdBindVertexBuffers(m_VkCommandBuffer, binding, 1, vertexBuffers, offsets);
+}
+
+void vk::CommandBuffer::BindIndexBuffer(const vk::Buffer* buffer) {
+	vk::API::CmdBindIndexBuffer(m_VkCommandBuffer, buffer->GetVkBuffer(), 0, VK_INDEX_TYPE_UINT32);
 }
 
 void vk::CommandBuffer::ValidateState() {

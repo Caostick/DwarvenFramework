@@ -3,6 +3,8 @@
 #include "VkHelper.h"
 #include "VkDebug.h"
 
+#include <DwarvenCore/Memory.h>
+
 namespace {
 	auto ToVkBufferUsageFlags(vk::BufferUsageFlags flags)->VkBufferUsageFlags {
 		VkBufferUsageFlags bufferUsageFlags = 0;
@@ -124,9 +126,7 @@ void vk::Buffer::CreateBuffer(uint32 size, const BufferUsageFlags& usageFlags) {
 		break;
 	}
 
-	const uint32 alignment = m_RenderCore.GetBufferAlignment(usageFlags);
-	const uint32 count = m_Size / alignment;
-	const uint32 dataStride = (alignment * count == m_Size) ? m_Size : (alignment * (count + 1));
+	const uint32 dataStride = df::MemAlign(m_Size, m_RenderCore.GetBufferAlignment(usageFlags));
 
 	m_Stride = dataStride;
 	m_UpdateSize = size;

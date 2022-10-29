@@ -13,5 +13,7 @@ namespace df {
 		virtual bool EnableAttribute(const df::StringView& attributeName, void* data = nullptr, uint32 size = 0) = 0;
 		virtual bool SetAttributeData(const df::StringView& attributeName, void* data, uint32 size, uint32 offset = 0) = 0;
 		virtual bool SetIndexData(uint32* data, uint32 size, uint32 offset = 0) = 0;
+		virtual auto GetVertexCount() const->uint32 = 0;
+		virtual auto GetIndexCount() const->uint32 = 0;
 	};
 }

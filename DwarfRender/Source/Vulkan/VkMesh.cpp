@@ -88,6 +88,22 @@ bool vk::Mesh::SetIndexData(uint32* data, uint32 size, uint32 offset) {
 	return true;
 }
 
+auto vk::Mesh::GetAttributes() const->const df::Vector<AttributeSlot>& {
+	return m_Attributes;
+}
+
+auto vk::Mesh::GetIndexBuffer() const -> const vk::Buffer* {
+	return m_IndexBuffer;
+}
+
+auto vk::Mesh::GetVertexCount() const->uint32 {
+	return m_VertexCount;
+}
+
+auto vk::Mesh::GetIndexCount() const->uint32 {
+	return m_IndexCount;
+}
+
 void vk::Mesh::UpdateDebugNames() {
 	if (m_IndexBuffer) {
 		m_IndexBuffer->SetName(m_Name);

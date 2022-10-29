@@ -6,6 +6,7 @@ namespace df {
 	class RenderPass;
 	class GraphicsPipeline;
 	class ParameterSet;
+	class Mesh;
 }
 
 namespace df {
@@ -20,5 +21,6 @@ namespace df {
 		virtual bool BindParameterSet(df::ParameterSet* parameterSet) = 0;
 
 		virtual void Draw(uint32 vertexCount) = 0;
+		virtual void Draw(Mesh* mesh, uint32 instanceCount = 1) = 0;
 	};
 }

@@ -294,7 +294,7 @@ auto vk_shader_parsing::FetchParameterSet(const df::StringView& line, const vk::
 }
 
 auto vk_shader_parsing::FetchVertexAttribute(const df::StringView& line, const vk::RenderCore& renderCore) -> VertexAttributeResult {
-	constexpr df::StringView token = "Attribute:";
+	constexpr df::StringView token = "#Attribute";
 	if (!df::EqualPart(line, token)) {
 		return VertexAttributeResult();
 	}

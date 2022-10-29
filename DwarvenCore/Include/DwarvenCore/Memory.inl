@@ -3,6 +3,12 @@
 #include <memory.h>
 
 template<typename T>
+auto df::MemAlign(T offset, T alignment)->T {
+	const T count = offset / alignment;
+	return (alignment * count == offset) ? offset : (alignment * (count + T(1)));
+}
+
+template<typename T>
 void df::TMemCpy(T* dst, const T* src, size_t amount) {
 	df::MemCpy(dst, src, sizeof(T) * amount);
 }

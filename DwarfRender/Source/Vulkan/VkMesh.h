@@ -25,9 +25,8 @@ namespace vk {
 		virtual bool EnableAttribute(const df::StringView& attributeName, void* data, uint32 size) override;
 		virtual bool SetAttributeData(const df::StringView& attributeName, void* data, uint32 size, uint32 offset) override;
 		virtual bool SetIndexData(uint32* data, uint32 size, uint32 offset) override;
-
-	private:
-		void UpdateDebugNames();
+		virtual auto GetVertexCount() const->uint32 override;
+		virtual auto GetIndexCount() const->uint32 override;
 
 	private:
 		struct AttributeSlot {
@@ -35,6 +34,14 @@ namespace vk {
 			vk::Buffer* m_Buffer = nullptr;
 		};
 
+	public:
+		auto GetAttributes() const->const df::Vector<AttributeSlot>&;
+		auto GetIndexBuffer() const -> const vk::Buffer*;
+
+	private:
+		void UpdateDebugNames();
+
+	private:
 		vk::RenderCore& m_RenderCore;
 
 		df::String m_Name;

@@ -12,8 +12,6 @@
 
 #include <DwarfWindow/Window.h>
 
-//#include <DwarfRender/GlobalObjects.h>
-
 #include <DwarvenCore/Assert.h>
 #include <DwarvenCore/DebugName.h>
 
