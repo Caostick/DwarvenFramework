@@ -35,6 +35,7 @@ namespace vk {
 		};
 
 	public:
+		auto GetAttributeBits() const -> const df::Bitset<64>&;
 		auto GetAttributes() const->const df::Vector<AttributeSlot>&;
 		auto GetIndexBuffer() const -> const vk::Buffer*;
 

@@ -79,7 +79,7 @@ namespace vk {
 		auto CreateParameterSet(vk::ParameterSetDefinition* parameterSetDefinition)->vk::ParameterSet*;
 		void DestroyParameterSet(vk::ParameterSet* parameterSet);
 
-		auto RegisterVertexAttribute(const df::StringView& name, df::EVertexAttributeFormat format, uint32 index) -> const vk::VertexAttribute*;
+		auto RegisterVertexAttribute(const df::StringView& name, df::EVertexAttributeFormat format) -> const vk::VertexAttribute*;
 		auto FindVertexAttribute(const df::StringView& name) const -> const vk::VertexAttribute*;
 
 		void AddShaderInclude(const df::StringView& name, const df::StringView& content);

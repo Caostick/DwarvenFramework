@@ -69,8 +69,8 @@ void vk::Renderer::DestroyRenderPass(df::RenderPass* renderPass) {
 	m_RenderCore.DestroyRenderPass(static_cast<vk::RenderPass*>(renderPass));
 }
 
-auto vk::Renderer::RegisterVertexAttribute(const df::StringView& name, df::EVertexAttributeFormat format, uint32 index) -> const df::VertexAttribute* {
-	return m_RenderCore.RegisterVertexAttribute(name, format, index);
+auto vk::Renderer::RegisterVertexAttribute(const df::StringView& name, df::EVertexAttributeFormat format) -> const df::VertexAttribute* {
+	return m_RenderCore.RegisterVertexAttribute(name, format);
 }
 
 auto vk::Renderer::FindVertexAttribute(const df::StringView& name) const -> const df::VertexAttribute* {

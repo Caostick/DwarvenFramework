@@ -58,6 +58,7 @@ bool vk::Mesh::EnableAttribute(const df::StringView& attributeName, void* data, 
 		slot.m_Buffer->SetData(data, size);
 	}
 
+	m_VertexAttributeBits[attr->m_Index] = true;
 	m_Attributes.emplace_back(slot);
 
 	return true;
@@ -86,6 +87,10 @@ bool vk::Mesh::SetIndexData(uint32* data, uint32 size, uint32 offset) {
 	m_IndexBuffer->SetData(data, size, offset);
 
 	return true;
+}
+
+auto vk::Mesh::GetAttributeBits() const -> const df::Bitset<64>& {
+	return m_VertexAttributeBits;
 }
 
 auto vk::Mesh::GetAttributes() const->const df::Vector<AttributeSlot>& {

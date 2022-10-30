@@ -453,3 +453,11 @@ auto vk::ToShaderInOutString(EShaderInOutType type) -> const char* {
 		return "";
 	}
 }
+
+auto vk::VertexAttribute::MakeShaderSnippet(uint32 idx) const->df::String {
+	const auto strLocation = std::to_string(idx);
+	const auto strType = ToShaderInOutString(ToShaderInOutType(m_Format));
+	const auto& strName = m_Name;
+
+	return df::String("layout(location = ") + strLocation + ") in " + strType + df::String(" ") + strName + df::String(";\n");
+}

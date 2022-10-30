@@ -394,29 +394,20 @@ void vk::RenderCore::DestroyParameterSet(vk::ParameterSet* parameterSet) {
 	m_ParameterSets.Destroy(parameterSet);
 }
 
-auto vk::RenderCore::RegisterVertexAttribute(const df::StringView& name, df::EVertexAttributeFormat format, uint32 index) -> const vk::VertexAttribute* {
+auto vk::RenderCore::RegisterVertexAttribute(const df::StringView& name, df::EVertexAttributeFormat format) -> const vk::VertexAttribute* {
 	for (auto attr : m_VertexAttributes) {
 		if (attr->m_Name == name) {
-			DFAssert(false, "Vertex attribute with given name is already registered!");
-			return nullptr;
-		}
-
-		if (attr->m_Index == index) {
-			DFAssert(false, "Vertex attribute with given index is already registered!");
-			return nullptr;
+			DFAssert(attr->m_Format == format, "Vertext attribure is already registered with different format!");
+			return attr;
 		}
 	}
+
+	const uint32 index = m_VertexAttributes.Count();
 
 	auto attr = m_VertexAttributes.Create();
 	attr->m_Name = df::String(name);
 	attr->m_Format = format;
 	attr->m_Index = index;
-
-	const auto strLocation = std::to_string(attr->m_Index);
-	const auto strType = ToShaderInOutString(ToShaderInOutType(attr->m_Format));
-	const auto& strName = attr->m_Name;
-
-	attr->m_ShaderString = df::String("layout(location = ") + strLocation + ") in " + strType + df::String(" ") + strName + df::String(";\n");
 
 	return attr;
 }

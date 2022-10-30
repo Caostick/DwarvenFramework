@@ -73,6 +73,7 @@ namespace vk {
 		virtual void SetPrimitiveTopology(df::EPrimitiveTopology value) override;
 
 	public:
+		auto GetVertexAttributeBits() const -> const df::Bitset<64>&;
 		auto GetParameterSetSlot(vk::ParameterSet* parameterSet) const -> int32;
 		auto GetPipelineForState(const vk::RenderPass* renderPass)->VkPipeline;
 		auto GetVkPipelineLayout() const->VkPipelineLayout;
@@ -115,7 +116,7 @@ namespace vk {
 		df::Vector<PipelineStateObjectSlot> m_PipelineStateObjects;
 		df::Vector<const vk::ParameterSetDefinition*> m_ParameterSetDefinitions;
 		df::Vector<const vk::VertexAttribute*> m_VertexAttributes;
-		df::Bitset<64> m_RequiredVertexAttributes;
+		df::Bitset<64> m_RequiredVertexAttributeBits;
 
 		bool m_IsBuilt;
 	};

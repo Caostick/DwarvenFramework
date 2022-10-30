@@ -33,7 +33,7 @@ namespace df {
 		virtual auto CreateRenderPass()->df::RenderPass* = 0;
 		virtual void DestroyRenderPass(df::RenderPass* renderPass) = 0;
 
-		virtual auto RegisterVertexAttribute(const df::StringView& name, df::EVertexAttributeFormat format, uint32 index) -> const df::VertexAttribute* = 0;
+		virtual auto RegisterVertexAttribute(const df::StringView& name, df::EVertexAttributeFormat format) -> const df::VertexAttribute* = 0;
 		virtual auto FindVertexAttribute(const df::StringView& name) const -> const df::VertexAttribute* = 0;
 
 		virtual auto CreateParameterSet(const df::StringView& className)->df::ParameterSet* = 0;

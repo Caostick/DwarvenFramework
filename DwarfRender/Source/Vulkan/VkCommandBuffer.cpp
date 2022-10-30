@@ -127,6 +127,12 @@ void vk::CommandBuffer::Draw(uint32 vertexCount) {
 void vk::CommandBuffer::Draw(df::Mesh* mesh, uint32 instanceCount /*= 1*/) {
 	vk::Mesh* vkMesh = static_cast<vk::Mesh*>(mesh);
 
+	const auto& reqAttrBits = m_CurrentPipeline->GetVertexAttributeBits();
+	const auto& hasAttrBits = vkMesh->GetAttributeBits();
+	if ((hasAttrBits & reqAttrBits) != reqAttrBits) {
+		DFAssert(false, "Mesh has no required vertex attributes to draw!");
+	}
+
 	const uint32 indexCount = vkMesh->GetIndexCount();
 	const uint32 vertexCount = vkMesh->GetVertexCount();
 

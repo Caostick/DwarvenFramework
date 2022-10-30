@@ -308,7 +308,9 @@ bool vk::GraphicsPipeline::Build() {
 
 		for (uint32 i = 0; i < uint32(m_VertexAttributes.size()); ++i) {
 			const auto& attr = m_VertexAttributes[i];
-			generated.push_back(attr->m_ShaderString);
+			generated.emplace_back(attr->MakeShaderSnippet(i));
+
+			m_RequiredVertexAttributeBits[attr->m_Index] = true;
 		}
 
 		for (auto& str : generated) {
@@ -490,6 +492,10 @@ void vk::GraphicsPipeline::SetPrimitiveTopology(df::EPrimitiveTopology value) {
 	m_State.m_PrimitiveTopology = value;
 }
 
+auto vk::GraphicsPipeline::GetVertexAttributeBits() const -> const df::Bitset<64>& {
+	return m_RequiredVertexAttributeBits;
+}
+
 auto vk::GraphicsPipeline::GetParameterSetSlot(vk::ParameterSet* parameterSet) const -> int32 {
 	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
 
@@ -575,7 +581,7 @@ void vk::GraphicsPipeline::CreateVertexDescription() {
 		m_BindingDescriptions[i].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
 		m_AttributeDescriptions[i] = {};
-		m_AttributeDescriptions[i].binding = uint32(i);
+		m_AttributeDescriptions[i].binding = m_VertexAttributes[i]->m_Index;
 		m_AttributeDescriptions[i].location = uint32(i);
 		m_AttributeDescriptions[i].format = ToVkFormat(m_VertexAttributes[i]->m_Format);
 		m_AttributeDescriptions[i].offset = 0;

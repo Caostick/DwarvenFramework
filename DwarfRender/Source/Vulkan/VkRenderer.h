@@ -33,7 +33,7 @@ namespace vk {
 		virtual auto CreateRenderPass()->df::RenderPass* override;
 		virtual void DestroyRenderPass(df::RenderPass* renderPass) override;
 
-		virtual auto RegisterVertexAttribute(const df::StringView& name, df::EVertexAttributeFormat format, uint32 index) -> const df::VertexAttribute* override;
+		virtual auto RegisterVertexAttribute(const df::StringView& name, df::EVertexAttributeFormat format) -> const df::VertexAttribute* override;
 		virtual auto FindVertexAttribute(const df::StringView& name) const -> const df::VertexAttribute* override;
 
 		virtual auto CreateParameterSet(const df::StringView& className)->df::ParameterSet* override;
