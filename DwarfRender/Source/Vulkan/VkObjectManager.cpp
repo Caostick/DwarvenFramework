@@ -185,6 +185,26 @@ vk::RemovedObject_CommandPool::~RemovedObject_CommandPool() {
 
 
 
+vk::RemovedObject_Semaphore::RemovedObject_Semaphore(VkDevice device, VkSemaphore semaphore)
+	: RemovedObject(device)
+	, m_Semaphore(semaphore) {}
+
+vk::RemovedObject_Semaphore::~RemovedObject_Semaphore() {
+	DebugDestroyOutput("Semaphore", m_Semaphore);
+	vk::API::DestroySemaphore(m_Device, m_Semaphore, vk::Allocator());
+}
+
+
+
+vk::RemovedObject_Fence::RemovedObject_Fence(VkDevice device, VkFence fence)
+	: RemovedObject(device)
+	, m_Fence(fence) {}
+
+vk::RemovedObject_Fence::~RemovedObject_Fence() {
+	DebugDestroyOutput("Fence", m_Fence);
+	vk::API::DestroyFence(m_Device, m_Fence, vk::Allocator());
+}
+
 
 
 
@@ -247,6 +267,14 @@ void vk::ObjectManager::RemoveDescriptorPool(VkDevice device, VkDescriptorPool d
 
 void vk::ObjectManager::RemoveCommandPool(VkDevice device, VkCommandPool commandPool) {
 	m_RemovedObjects.push_back(DFNew RemovedObject_CommandPool(device, commandPool));
+}
+
+void vk::ObjectManager::RemoveSemaphore(VkDevice device, VkSemaphore semaphore) {
+	m_RemovedObjects.push_back(DFNew RemovedObject_Semaphore(device, semaphore));
+}
+
+void vk::ObjectManager::RemoveFence(VkDevice device, VkFence fence) {
+	m_RemovedObjects.push_back(DFNew RemovedObject_Fence(device, fence));
 }
 
 bool vk::ObjectManager::Update() {

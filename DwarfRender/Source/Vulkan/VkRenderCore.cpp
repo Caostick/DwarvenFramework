@@ -278,8 +278,8 @@ void vk::RenderCore::Present(vk::Texture* texture) {
 	m_Presentation.PresentTexture(frameData.m_CommandBuffer, texture);
 }
 
-
 void vk::RenderCore::CompleteAllCommands() {
+	vk::API::QueueWaitIdle(m_GraphicsQueue);
 	for (int i = 0; i < m_FrameData.size(); ++i) {
 		vk::API::WaitForFences(m_VkDevice, 1, &m_FrameData[i].m_InFlightFence, VK_TRUE, std::numeric_limits<uint64_t>::max());
 	}
@@ -902,10 +902,10 @@ bool vk::RenderCore::InitFrameData(vk::FrameData& frameData) {
 }
 
 void vk::RenderCore::ReleaseFrameData(vk::FrameData& frameData) {
-	vk::DestroyFence(m_VkDevice, frameData.m_InFlightFence);
+	m_VulkanObjectManager.RemoveFence(m_VkDevice, frameData.m_InFlightFence);
 
-	vk::DestroySemaphore(m_VkDevice, frameData.m_RenderFinishedSemaphore);
-	vk::DestroySemaphore(m_VkDevice, frameData.m_ImageAvailableSemaphore);
+	m_VulkanObjectManager.RemoveSemaphore(m_VkDevice, frameData.m_RenderFinishedSemaphore);
+	m_VulkanObjectManager.RemoveSemaphore(m_VkDevice, frameData.m_ImageAvailableSemaphore);
 
 	ReleaseCommandBuffers(frameData);
 }
