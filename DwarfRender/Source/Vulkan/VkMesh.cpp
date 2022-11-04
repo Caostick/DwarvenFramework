@@ -37,7 +37,7 @@ void vk::Mesh::Create(uint32 vertexCount, uint32 indexCount) {
 	}
 }
 
-bool vk::Mesh::EnableAttribute(const df::StringView& attributeName, void* data, uint32 size) {
+bool vk::Mesh::EnableAttribute(const df::StringView& attributeName, const void* data, uint32 size) {
 	const auto attr = m_RenderCore.FindVertexAttribute(attributeName);
 	if (!attr) {
 		return false;
@@ -64,7 +64,7 @@ bool vk::Mesh::EnableAttribute(const df::StringView& attributeName, void* data, 
 	return true;
 }
 
-bool vk::Mesh::SetAttributeData(const df::StringView& attributeName, void* data, uint32 size, uint32 offset) {
+bool vk::Mesh::SetAttributeData(const df::StringView& attributeName, const void* data, uint32 size, uint32 offset) {
 	for (auto& slot : m_Attributes) {
 		if (slot.m_Attribute->m_Name == attributeName) {
 			slot.m_Buffer->SetData(data, size, offset);
@@ -75,7 +75,7 @@ bool vk::Mesh::SetAttributeData(const df::StringView& attributeName, void* data,
 	return false;
 }
 
-bool vk::Mesh::SetIndexData(uint32* data, uint32 size, uint32 offset) {
+bool vk::Mesh::SetIndexData(const uint32* data, uint32 size, uint32 offset) {
 	if (!m_IndexBuffer) {
 		return false;
 	}
