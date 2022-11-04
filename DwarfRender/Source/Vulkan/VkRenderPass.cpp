@@ -54,6 +54,8 @@ void vk::RenderPass::SetExtents(uint32 width, uint32 height) {
 void vk::RenderPass::SetTarget(uint32 index, df::Texture* texture, df::ERenderTargetOp operation, const df::ClearColor& clearValue) {
 	vk::Texture* vkTexture = static_cast<vk::Texture*>(texture);
 
+	DFAssert(vkTexture->GetWidth() == m_VkExtents.width && vkTexture->GetHeight() == m_VkExtents.height, "Target extensions don't match framebuffer!");
+
 	const VkFormat vkFormat = vkTexture->GetVkFormat();
 	const VkImageView vkImageView = vkTexture->GetVkImageView();
 	VkClearValue vkClearValue = {};
@@ -74,6 +76,8 @@ void vk::RenderPass::SetTarget(uint32 index, df::Texture* texture, df::ERenderTa
 
 void vk::RenderPass::SetDepthStencilTarget(df::Texture* texture, df::ERenderTargetOp operation, const df::ClearDepth& clearValue) {
 	vk::Texture* vkTexture = static_cast<vk::Texture*>(texture);
+
+	DFAssert(vkTexture->GetWidth() == m_VkExtents.width && vkTexture->GetHeight() == m_VkExtents.height, "Target extensions don't match framebuffer!");
 
 	const VkFormat vkFormat = vkTexture->GetVkFormat();
 	const VkImageView vkImageView = vkTexture->GetVkImageView();

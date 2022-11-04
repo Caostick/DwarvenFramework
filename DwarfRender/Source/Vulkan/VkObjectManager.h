@@ -142,6 +142,22 @@ namespace vk {
 		VkCommandPool m_CommandPool;
 	};
 
+	class RemovedObject_Semaphore : public RemovedObject {
+	public:
+		RemovedObject_Semaphore(VkDevice device, VkSemaphore semaphore);
+		~RemovedObject_Semaphore() override;
+	private:
+		VkSemaphore m_Semaphore;
+	};
+
+	class RemovedObject_Fence : public RemovedObject {
+	public:
+		RemovedObject_Fence(VkDevice device, VkFence fence);
+		~RemovedObject_Fence() override;
+	private:
+		VkFence m_Fence;
+	};
+
 
 
 
@@ -164,6 +180,8 @@ namespace vk {
 		void RemovePipeline(VkDevice device, VkPipeline pipeline);
 		void RemoveDescriptorPool(VkDevice device, VkDescriptorPool descriptorPool);
 		void RemoveCommandPool(VkDevice device, VkCommandPool commandPool);
+		void RemoveSemaphore(VkDevice device, VkSemaphore semaphore);
+		void RemoveFence(VkDevice device, VkFence fence);
 
 		bool Update();
 
