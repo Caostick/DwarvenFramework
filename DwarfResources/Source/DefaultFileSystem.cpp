@@ -9,13 +9,15 @@
 #include <filesystem>
 
 auto df::DefaultFileSystem::GetFilesRecursive(const df::StringView& directory) const->df::Vector<df::String> {
+	const df::String actualPath = df::String(directory);
+
 	df::Vector<df::String> files;
 
-	if (!std::filesystem::exists(directory.data())) {
+	if (!std::filesystem::exists(actualPath.c_str())) {
 		return files;
 	}
 
-	for (auto& file : std::filesystem::recursive_directory_iterator(directory.data())) {
+	for (auto& file : std::filesystem::recursive_directory_iterator(actualPath.c_str())) {
 		if (file.is_directory()) {
 			continue;
 		}
@@ -53,4 +55,9 @@ auto df::DefaultFileSystem::OpenFile(const df::StringView& filePath, EFileAccess
 
 void df::DefaultFileSystem::CloseFile(df::IFile* file) const {
 	DFDelete file;
+}
+
+bool df::DefaultFileSystem::CreateDirectory(const df::StringView& dirPath) const {
+	const df::String actualPath = df::String(dirPath);
+	return std::filesystem::create_directory(actualPath.c_str());
 }
