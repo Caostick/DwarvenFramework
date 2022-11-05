@@ -2,6 +2,8 @@
 
 #include <DwarvenCore/New.h>
 #include <DwarvenCore/Assert.h>
+#include <DwarvenCore/StringView.h>
+#include <DwarvenCore/StringOperations.h>
 
 #include <iostream>
 
@@ -60,7 +62,7 @@ void df_private::ResourceTypeContainer<T>::ResetResources() {
 template<typename T>
 void df_private::ResourceTypeContainer<T>::PushResource(const df::StringView& name, const df::StringView& extension, int moduleIndex) {
 	for (int i = 0; i < m_Loaders.size(); ++i) {
-		const bool fitsExtension = (m_Loaders[i]->GetResourceExtension() == extension);
+		const bool fitsExtension = df::CompareNoCase<char>(m_Loaders[i]->GetResourceExtension(), extension);
 		if (!fitsExtension) {
 			continue;
 		}
