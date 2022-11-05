@@ -23,6 +23,21 @@ auto df::CountOf(const TStringView<T>& string, const T* symbols) -> size_t {
 }
 
 template<typename T>
+bool df::CompareNoCase(const TStringView<T>& a, const TStringView<T>& b) {
+	if (a.length() != b.length()) {
+		return false;
+	}
+
+	for (size_t i = 0; i < a.length(); ++i) {
+		if (std::tolower(static_cast<int>(a[i])) != std::tolower(static_cast<int>(b[i]))) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+template<typename T>
 auto df::Find(const TStringView<T>& string, T symbol) -> int {
 	int idx = 0;
 	for (auto c : string) {

@@ -16,6 +16,9 @@ namespace df {
 	auto CountOf(const TStringView<T>& string, const T* symbols) -> size_t;
 
 	template<typename T>
+	bool CompareNoCase(const TStringView<T>& a, const TStringView<T>& b);
+
+	template<typename T>
 	auto Find(const TStringView<T>& string, T symbol) -> int;
 
 	template<typename T>
