@@ -248,6 +248,10 @@ auto df::ResourceManager::GetResourceId(const df::StringView& name) const->df::R
 		return df::ResourceId::Invalid;
 	}
 
+	if (resTypeId >= m_ResourceTypeContainers.size()) {
+		return df::ResourceId::Invalid;
+	}
+
 	auto* resourceTypeContainer = m_ResourceTypeContainers[resTypeId];
 	if (!resourceTypeContainer) {
 		return df::ResourceId::Invalid;
