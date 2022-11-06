@@ -44,6 +44,6 @@ class glslangConan(ConanFile):
     def package_info(self):
         self.cpp_info.includedirs = [os.path.join("include", "assimp", "include")]
         if self.settings.build_type == "Debug":
-            self.cpp_info.libs = ["assimp-vc143-mtd"]
+            self.cpp_info.libs = ["assimp-vc142-mtd", "zlibstaticd"]
         else:
-            self.cpp_info.libs = ["assimp-vc143-mt"]
+            self.cpp_info.libs = ["assimp-vc142-mt", "zlibstatic"]
