@@ -6,6 +6,10 @@
 #include <glfw/glfw3.h>
 #endif
 
+auto df::CreateWindow()->Window* {
+	return new Window();
+}
+
 df::Window::Window()
 	: m_Window(nullptr)
 	, m_Width(0)
@@ -23,6 +27,7 @@ bool df::Window::Init(uint32 width, uint32 height) {
 	}
 
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+	//glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
 
 	const char* windowName = "Game";
 	const bool isFullscreen = false;

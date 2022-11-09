@@ -11,7 +11,6 @@ namespace df {
 }
 #endif
 
-
 namespace df {
 	class Window {
 	public:
@@ -62,4 +61,8 @@ namespace df {
 		// count, files
 		Signal<int, const char**> OnDropFilesSignal;
 	};
+}
+
+namespace df {
+	auto CreateWindow()->Window*;
 }
