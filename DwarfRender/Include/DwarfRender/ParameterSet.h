@@ -35,6 +35,7 @@ namespace df {
 		virtual void DeclareTextureParameter(const df::StringView& name) = 0;
 		virtual void DeclareBufferParameter(const df::StringView& name, EShaderConstantType dataType) = 0;
 		virtual void Build() = 0;
+		virtual auto Clone() const->df::ParameterSet* = 0;
 
 		virtual bool HasFloatParameter(const df::StringView& name) = 0;
 		virtual bool HasVec2Parameter(const df::StringView& name) = 0;

@@ -16,20 +16,25 @@ namespace vk {
 	class Texture;
 	class ParameterSet;
 	class GraphicsPipeline;
+	class PresentationPipeline;
 }
 
 namespace vk {
 	class Presentation {
 	public:
-		Presentation(const df::Window& window);
+		Presentation(const df::Window& window, const vk::PresentationPipeline& pipeline);
 
 		auto GetWindow() const -> const df::Window&;
+
+		bool IsValid() const;
 
 		bool CreateSurface(VkInstance instance);
 		void DestroySurface(VkInstance instance);
 
 		bool CreateSwapchain(VkDevice device, VkPhysicalDevice physicalDevice, bool vSyncEnabled, uint32 graphicsFamilyIndex, uint32 presentFamilyIndex);
 		void DestroySwapchain(vk::RenderCore& renderCore);
+		auto GetSwapchain() const->VkSwapchainKHR;
+		auto GeiAvailableImageIndex() const->uint32;
 
 		auto GetPhysicalDeviceSurfaceSupport(VkPhysicalDevice physicalDevice, uint32 queueFamilyIndex)->VkBool32;
 		auto AquireNextImage(VkDevice device)->VkResult;
@@ -57,6 +62,7 @@ namespace vk {
 		uint32 m_AvailableImageIndex;
 
 		const df::Window& m_Window;
+		const vk::PresentationPipeline& m_Pipeline;
 
 		df::Vector<VkImage> m_Images;
 		df::Vector<VkSemaphore> m_ImageAvailableSemaphores;
@@ -64,7 +70,6 @@ namespace vk {
 
 		df::Vector<VkImageView> m_ImageViews;
 		df::Vector<vk::RenderPass*> m_RenderPasses;
-		vk::GraphicsPipeline* m_Pipeline;
 		vk::ParameterSet* m_ParametrSet;
 		vk::Texture* m_PresentTexture;
 	};

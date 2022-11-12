@@ -8,6 +8,7 @@
 #include "VkGraphicsPipeline.h"
 #include "VkTexture.h"
 #include "VkObjectManager.h"
+#include "VkPresentationPipeline.h"
 
 #include "Generated/Presentation.generated.h"
 
@@ -76,7 +77,7 @@ namespace /*anonymous*/ {
 
 
 
-vk::Presentation::Presentation(const df::Window& window)
+vk::Presentation::Presentation(const df::Window& window, const vk::PresentationPipeline& pipeline)
 	: m_VkSurface(VK_NULL_HANDLE)
 	, m_VkSwapchain(VK_NULL_HANDLE)
 	, m_VkExtent({ 0,0 })
@@ -84,7 +85,7 @@ vk::Presentation::Presentation(const df::Window& window)
 	, m_VkFormat(VK_FORMAT_UNDEFINED)
 	, m_VSyncEnabled(true)
 	, m_ParametrSet(nullptr)
-	, m_Pipeline(nullptr)
+	, m_Pipeline(pipeline)
 	, m_PresentTexture(nullptr)
 	, m_MinImagesCount(0)
 	, m_ImagesCount(0)
@@ -92,6 +93,15 @@ vk::Presentation::Presentation(const df::Window& window)
 
 auto vk::Presentation::GetWindow() const -> const df::Window& {
 	return m_Window;
+}
+
+bool vk::Presentation::IsValid() const {
+	const uint32 w = m_Window.GetWidth();
+	const uint32 h = m_Window.GetHeight();
+
+	return 
+		w == m_VkExtent.width &&
+		h == m_VkExtent.height;
 }
 
 bool vk::Presentation::CreateSurface(VkInstance instance) {
@@ -228,6 +238,14 @@ void vk::Presentation::DestroySwapchain(vk::RenderCore& renderCore) {
 	m_ImagesCount = 0;
 }
 
+auto vk::Presentation::GetSwapchain() const->VkSwapchainKHR {
+	return m_VkSwapchain;
+}
+
+auto vk::Presentation::GeiAvailableImageIndex() const->uint32 {
+	return m_AvailableImageIndex;
+}
+
 auto vk::Presentation::GetPhysicalDeviceSurfaceSupport(VkPhysicalDevice physicalDevice, uint32 queueFamilyIndex)->VkBool32 {
 	VkBool32 presentSupport;
 	vk::API::GetPhysicalDeviceSurfaceSupportKHR(physicalDevice, queueFamilyIndex, m_VkSurface, &presentSupport);
@@ -285,55 +303,12 @@ bool vk::Presentation::Load(vk::RenderCore& renderCore) {
 		}
 	}
 
-	// Shaders
-	{
-		const char* vsCode =
-			"layout(location = 0) out vec2 outTexcoord;\n"
-			"\n"
-			"vec2 positions[3] = vec2[](\n"
-			"    vec2(-1.0, -1.0),\n"
-			"    vec2(-1.0, 3.0),\n"
-			"    vec2(3.0, -1.0)\n"
-			");\n"
-			"\n"
-			"vec2 tcs[3] = vec2[](\n"
-			"    vec2(0.0, 0.0),\n"
-			"    vec2(0.0, 2.0),\n"
-			"    vec2(2.0, 0.0)\n"
-			");\n"
-			"\n"
-			"void main() {\n"
-			"    gl_Position = vec4(positions[gl_VertexIndex], 0.0, 1.0);\n"
-			"    outTexcoord = tcs[gl_VertexIndex];\n"
-			"}";
-
-		const char* fsCode =
-			"#ParameterSet Present\n"
-			"\n"
-			"layout(location = 0) in vec2 inTexcoord;\n"
-			"\n"
-			"layout(location = 0) out vec4 outColor;\n"
-			"\n"
-			"void main() {\n"
-			"    outColor = texture(Texture, inTexcoord);\n"
-			"}";
-
-		m_ParametrSet = renderCore.CreateParameterSet("Present");
-		m_ParametrSet->DeclareTextureParameter("Texture");
-		m_ParametrSet->Build();
-
-		m_Pipeline = renderCore.CreateGraphicsPipeline();
-		m_Pipeline->SetName("Present");
-		m_Pipeline->DeclareVertexShader(vsCode);
-		m_Pipeline->DeclareFragmentShader(fsCode);
-		m_Pipeline->Build();
-	}
+	m_ParametrSet = static_cast<vk::ParameterSet*>(m_Pipeline.GetParameterSet()->Clone());
 
 	return true;
 }
 
 void vk::Presentation::Unload(vk::RenderCore& renderCore) {
-	renderCore.DestroyGraphicsPipeline(m_Pipeline);
 	renderCore.DestroyParameterSet(m_ParametrSet);
 
 	for (auto& renderPass : m_RenderPasses) {
@@ -344,6 +319,7 @@ void vk::Presentation::Unload(vk::RenderCore& renderCore) {
 
 bool vk::Presentation::RecreateSwapchain(vk::RenderCore& renderCore, VkDevice device, VkPhysicalDevice physicalDevice, bool vSyncEnabled, uint32 graphicsFamilyIndex, uint32 presentFamilyIndex) {
 	DestroySwapchain(renderCore);
+	renderCore.CompleteAllCommands();
 	if (!CreateSwapchain(device, physicalDevice, vSyncEnabled, graphicsFamilyIndex, presentFamilyIndex)) {
 		return false;
 	}
@@ -390,7 +366,7 @@ void vk::Presentation::PresentTexture(vk::CommandBuffer& rcb) {
 	m_ParametrSet->SetFilter("Texture", df::EFilter::Linear);
 
 	rcb.BeginRenderPass(m_RenderPasses[m_AvailableImageIndex]);
-	rcb.BindPipeline(m_Pipeline);
+	rcb.BindPipeline(m_Pipeline.GetPipeline());
 	rcb.BindParameterSet(m_ParametrSet);
 	rcb.Draw(3);
 

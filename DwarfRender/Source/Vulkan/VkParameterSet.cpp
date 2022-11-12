@@ -178,6 +178,15 @@ void vk::ParameterSet::Build() {
 	m_IsBuilt = true;
 }
 
+auto vk::ParameterSet::Clone() const->df::ParameterSet* {
+	DFAssert(m_IsBuilt, "Can't clone parameter set - parameter set is not build yet!");
+
+	auto paramSet = m_RenderCore.CreateParameterSet(&m_Definition);
+	paramSet->Build();
+
+	return paramSet;
+}
+
 bool vk::ParameterSet::HasFloatParameter(const df::StringView& name) {
 	return m_Definition.HasFloatParameter(name);
 }

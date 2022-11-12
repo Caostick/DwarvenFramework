@@ -110,10 +110,15 @@ bool vk::RenderCore::Init() {
 
 	m_TransferBuffer.Init(m_VkDevice, 1024 * 1024 * 32);
 
+	m_PresentationPipiline.Init(*this);
+
 	return true;
 }
 
 void vk::RenderCore::Release() {
+
+	m_PresentationPipiline.Release(*this);
+
 	m_TransferBuffer.Release(m_VulkanObjectManager);
 	EmptyTrashCan();
 
@@ -161,7 +166,7 @@ void vk::RenderCore::SetWindowSource(df::Window* window, vk::Texture* texture) {
 		}
 	}
 
-	auto presentation = m_Presentations.Create(*window);
+	auto presentation = m_Presentations.Create(*window, m_PresentationPipiline);
 	presentation->SetPresentTexture(texture);
 
 	if (!presentation->CreateSurface(m_VkInstance)) {
@@ -198,12 +203,18 @@ auto vk::RenderCore::BeginFrame() ->vk::CommandBuffer* {
 			continue;
 		}
 
-		const VkResult result = presentation->AquireNextImage(m_VkDevice);
-		if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-			presentation->RecreateSwapchain(
+		if (!presentation->IsValid()) {
+			if (!presentation->RecreateSwapchain(
 				*this, m_VkDevice, m_VkPhysicalDevice,
 				m_GraphicsFamilyIndex, m_PresentFamilyIndex
-			);
+			)) {
+				continue;
+			}
+		}
+
+		const VkResult result = presentation->AquireNextImage(m_VkDevice);
+		if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+			continue;
 		} else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
 			DFAssert(false, "Failed to aquire swap chain image!");
 		} else {
@@ -278,14 +289,29 @@ void vk::RenderCore::EndFrame() {
 		DFAssert(false, "Failed to submit render command buffer!");
 	}
 
-	for (auto presentation : m_ValidPresentations) {
-		const VkResult result = presentation->Present(frame.m_RenderFinishedSemaphore, m_PresentQueue);
+	// Present
+	{
+		df::Vector<VkSwapchainKHR> swapchains(m_ValidPresentations.size());
+		df::Vector<uint32> imageIndexes(m_ValidPresentations.size());
+		for (size_t i = 0; i < m_ValidPresentations.size(); ++i) {
+			swapchains[i] = m_ValidPresentations[i]->GetSwapchain();
+			imageIndexes[i] = m_ValidPresentations[i]->GeiAvailableImageIndex();
+		}
+
+		const VkSemaphore waitSemaphores[] = { frame.m_RenderFinishedSemaphore };
+
+		VkPresentInfoKHR presentInfo = {};
+		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+		presentInfo.swapchainCount = uint32(m_ValidPresentations.size());
+		presentInfo.pSwapchains = swapchains.data();
+		presentInfo.waitSemaphoreCount = 1;
+		presentInfo.pWaitSemaphores = waitSemaphores;
+		presentInfo.pImageIndices = imageIndexes.data();
+
+		const VkResult result = vk::API::QueuePresentKHR(m_PresentQueue, &presentInfo);
 
 		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
-			presentation->RecreateSwapchain(
-				*this, m_VkDevice, m_VkPhysicalDevice,
-				m_GraphicsFamilyIndex, m_PresentFamilyIndex
-			);
+			DFAssert(false, "Failed to present swap chain image!");
 		} else if (result != VK_SUCCESS) {
 			DFAssert(false, "Failed to present swap chain image!");
 		}

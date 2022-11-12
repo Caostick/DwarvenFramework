@@ -28,6 +28,7 @@ namespace vk {
 		virtual void DeclareTextureParameter(const df::StringView& name) override;
 		virtual void DeclareBufferParameter(const df::StringView& name, df::EShaderConstantType dataType) override;
 		virtual void Build() override;
+		virtual auto Clone() const->df::ParameterSet* override;
 
 		virtual bool HasFloatParameter(const df::StringView& name) override;
 		virtual bool HasVec2Parameter(const df::StringView& name) override;

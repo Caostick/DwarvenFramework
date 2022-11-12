@@ -4,6 +4,7 @@
 #include "VkObjectManager.h"
 #include "VkTransferBuffer.h"
 #include "VkFrameData.h"
+#include "VkPresentationPipeline.h"
 #include "VkPresentation.h"
 #include "VkVertexAttribute.h"
 #include "VkSampler.h"
@@ -136,6 +137,7 @@ namespace vk {
 
 		df::Vector<vk::FrameData> m_FrameData;
 
+		vk::PresentationPipeline m_PresentationPipiline;
 		vk::CommandBuffer m_TransferCommandBuffer;
 		vk::ShaderCompiler* m_ShaderCompiler;
 
