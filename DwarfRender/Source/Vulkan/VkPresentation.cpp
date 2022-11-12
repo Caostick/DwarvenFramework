@@ -76,10 +76,11 @@ namespace /*anonymous*/ {
 
 
 
-vk::Presentation::Presentation()
+vk::Presentation::Presentation(const df::Window& window)
 	: m_VkSurface(VK_NULL_HANDLE)
 	, m_VkSwapchain(VK_NULL_HANDLE)
 	, m_VkExtent({ 0,0 })
+	, m_Window(window)
 	, m_VkFormat(VK_FORMAT_UNDEFINED)
 	, m_VSyncEnabled(true)
 	, m_ParametrSet(nullptr)
@@ -89,11 +90,15 @@ vk::Presentation::Presentation()
 	, m_ImagesCount(0)
 	, m_AvailableImageIndex(0) {}
 
-bool vk::Presentation::CreateSurface(VkInstance instance, const df::Window& window) {
+auto vk::Presentation::GetWindow() const -> const df::Window& {
+	return m_Window;
+}
+
+bool vk::Presentation::CreateSurface(VkInstance instance) {
 	DFAssert(m_VkSurface == VK_NULL_HANDLE, "Surface already created!");
 
 #ifdef GLFW_WINDOW_IMPLEMENTATION
-	if (glfwCreateWindowSurface(instance, window.GetPtr(), vk::Allocator(), &m_VkSurface) != VK_SUCCESS) {
+	if (glfwCreateWindowSurface(instance, m_Window.GetPtr(), vk::Allocator(), &m_VkSurface) != VK_SUCCESS) {
 		DFAssert(false, "Can't create Surface!");
 
 		return false;
@@ -112,9 +117,14 @@ void vk::Presentation::DestroySurface(VkInstance instance) {
 	m_VkSurface = VK_NULL_HANDLE;
 }
 
-bool vk::Presentation::CreateSwapchain(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D extent, bool vSyncEnabled, uint32 graphicsFamilyIndex, uint32 presentFamilyIndex) {
+bool vk::Presentation::CreateSwapchain(VkDevice device, VkPhysicalDevice physicalDevice, bool vSyncEnabled, uint32 graphicsFamilyIndex, uint32 presentFamilyIndex) {
 	DFAssert(m_VkSurface != VK_NULL_HANDLE, "Surface wasn't created!");
 	DFAssert(m_VkSwapchain == VK_NULL_HANDLE, "Swapchain already created!");
+
+	const VkExtent2D extent = {
+		m_Window.GetWidth(),
+		m_Window.GetHeight()
+	};
 
 	m_VSyncEnabled = vSyncEnabled;
 
@@ -188,11 +198,21 @@ bool vk::Presentation::CreateSwapchain(VkDevice device, VkPhysicalDevice physica
 		m_ImageViews[i] = vk::CreateImageView(device, m_Images[i], m_VkFormat, 1);
 	}
 
+	m_ImageAvailableSemaphores.resize(m_ImagesCount);
+	for (uint32 i = 0; i < m_ImagesCount; ++i) {
+		m_ImageAvailableSemaphores[i] = vk::CreateSemaphore(device, 0);
+	}
+
 	return true;
 }
 
 void vk::Presentation::DestroySwapchain(vk::RenderCore& renderCore) {
 	DFAssert(m_VkSwapchain != VK_NULL_HANDLE, "Swapchain not created!");
+
+	for (uint32 i = 0; i < m_ImagesCount; ++i) {
+		renderCore.RemoveSemaphore(m_ImageAvailableSemaphores[i]);
+	}
+	m_ImageAvailableSemaphores.clear();
 
 	for (uint32 i = 0; i < m_ImagesCount; ++i) {
 		renderCore.RemoveImageView(m_ImageViews[i]);
@@ -215,8 +235,15 @@ auto vk::Presentation::GetPhysicalDeviceSurfaceSupport(VkPhysicalDevice physical
 	return presentSupport;
 }
 
-auto vk::Presentation::AquireNextImage(VkDevice device, VkSemaphore semaphore) -> VkResult {
-	return vk::API::AcquireNextImageKHR(device, m_VkSwapchain, std::numeric_limits<uint64_t>::max(), semaphore, VK_NULL_HANDLE, &m_AvailableImageIndex);
+auto vk::Presentation::AquireNextImage(VkDevice device) -> VkResult {
+	m_CurrentSemaphoreIndex = (m_CurrentSemaphoreIndex + 1) % m_ImagesCount;
+	VkSemaphore vkSemaphore = m_ImageAvailableSemaphores[m_CurrentSemaphoreIndex];
+
+	return vk::API::AcquireNextImageKHR(device, m_VkSwapchain, std::numeric_limits<uint64_t>::max(), vkSemaphore, VK_NULL_HANDLE, &m_AvailableImageIndex);
+}
+
+auto vk::Presentation::GetImageAvailableSemaphore()const->VkSemaphore {
+	return m_ImageAvailableSemaphores[m_CurrentSemaphoreIndex];
 }
 
 auto vk::Presentation::Present(VkSemaphore semaphore, VkQueue presentQueue)->VkResult {
@@ -315,9 +342,9 @@ void vk::Presentation::Unload(vk::RenderCore& renderCore) {
 	m_RenderPasses.clear();
 }
 
-bool vk::Presentation::RecreateSwapchain(vk::RenderCore& renderCore, VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D extent, bool vSyncEnabled, uint32 graphicsFamilyIndex, uint32 presentFamilyIndex) {
+bool vk::Presentation::RecreateSwapchain(vk::RenderCore& renderCore, VkDevice device, VkPhysicalDevice physicalDevice, bool vSyncEnabled, uint32 graphicsFamilyIndex, uint32 presentFamilyIndex) {
 	DestroySwapchain(renderCore);
-	if (!CreateSwapchain(device, physicalDevice, extent, vSyncEnabled, graphicsFamilyIndex, presentFamilyIndex)) {
+	if (!CreateSwapchain(device, physicalDevice, vSyncEnabled, graphicsFamilyIndex, presentFamilyIndex)) {
 		return false;
 	}
 
@@ -345,7 +372,7 @@ bool vk::Presentation::RecreateSwapchain(vk::RenderCore& renderCore, VkDevice de
 }
 
 bool vk::Presentation::RecreateSwapchain(vk::RenderCore& renderCore, VkDevice device, VkPhysicalDevice physicalDevice, uint32 graphicsFamilyIndex, uint32 presentFamilyIndex) {
-	return RecreateSwapchain(renderCore, device, physicalDevice, m_VkExtent, m_VSyncEnabled, graphicsFamilyIndex, presentFamilyIndex);
+	return RecreateSwapchain(renderCore, device, physicalDevice, m_VSyncEnabled, graphicsFamilyIndex, presentFamilyIndex);
 }
 
 void vk::Presentation::SetPresentTexture(vk::Texture* texture) {

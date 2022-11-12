@@ -154,19 +154,24 @@ void vk::RenderCore::Release() {
 }
 
 void vk::RenderCore::SetWindowSource(df::Window* window, vk::Texture* texture) {
+	for (auto presentation : m_Presentations) {
+		if (&presentation->GetWindow() == window) {
+			presentation->SetPresentTexture(texture);
+			return;
+		}
+	}
 
-	auto presentation = m_Presentations.Create();
+	auto presentation = m_Presentations.Create(*window);
 	presentation->SetPresentTexture(texture);
 
-	if (!presentation->CreateSurface(m_VkInstance, *window)) {
+	if (!presentation->CreateSurface(m_VkInstance)) {
 		DFAssert(false, "Can't create window surface!");
 	}
 	// Destroy surface
 	//presentation->DestroySurface(m_VkInstance);
 	
 	if (!presentation->CreateSwapchain(
-		m_VkDevice, m_VkPhysicalDevice,
-		{ window->GetWidth(), window->GetHeight() }, true,
+		m_VkDevice, m_VkPhysicalDevice, true,
 		m_GraphicsFamilyIndex, m_PresentFamilyIndex)) {
 		DFAssert(false, "Can't create swapchain!");
 	}
@@ -188,7 +193,12 @@ auto vk::RenderCore::BeginFrame() ->vk::CommandBuffer* {
 
 	m_ValidPresentations.clear();
 	for (auto presentation : m_Presentations) {
-		const VkResult result = presentation->AquireNextImage(m_VkDevice, frame.m_ImageAvailableSemaphore);
+		if (presentation->GetWindow().GetWidth() == 0 || 
+			presentation->GetWindow().GetHeight() == 0) {
+			continue;
+		}
+
+		const VkResult result = presentation->AquireNextImage(m_VkDevice);
 		if (result == VK_ERROR_OUT_OF_DATE_KHR) {
 			presentation->RecreateSwapchain(
 				*this, m_VkDevice, m_VkPhysicalDevice,
@@ -241,20 +251,28 @@ void vk::RenderCore::EndFrame() {
 
 	frame.m_CommandBuffer.End();
 
-	const VkSemaphore waitSemaphores[] = { frame.m_ImageAvailableSemaphore };
 	const VkSemaphore signalSemaphores[] = { frame.m_RenderFinishedSemaphore };
 	const VkCommandBuffer commandBuffer = frame.m_CommandBuffer.Get();
-	const VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+
+	const bool hasPresentations = !m_ValidPresentations.empty();
+
+	df::Vector<VkSemaphore> imageAvailableSemaphores(m_ValidPresentations.size());
+	df::Vector<VkPipelineStageFlags> waitStages(m_ValidPresentations.size());
+
+	for (size_t i = 0; i < m_ValidPresentations.size(); ++i) {
+		imageAvailableSemaphores[i] = m_ValidPresentations[i]->GetImageAvailableSemaphore();
+		waitStages[i] = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	}
 
 	VkSubmitInfo submitInfo = {};
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-	submitInfo.waitSemaphoreCount = 1;
-	submitInfo.pWaitSemaphores = waitSemaphores;
-	submitInfo.pWaitDstStageMask = waitStages;
+	submitInfo.waitSemaphoreCount = uint32(m_ValidPresentations.size());
+	submitInfo.pWaitSemaphores = hasPresentations ? imageAvailableSemaphores.data() : nullptr;
+	submitInfo.pWaitDstStageMask = hasPresentations ? waitStages.data() : nullptr;
 	submitInfo.commandBufferCount = 1;
 	submitInfo.pCommandBuffers = &commandBuffer;
-	submitInfo.signalSemaphoreCount = 1;
-	submitInfo.pSignalSemaphores = signalSemaphores;
+	submitInfo.signalSemaphoreCount = hasPresentations ? 1 : 0;
+	submitInfo.pSignalSemaphores = hasPresentations ? signalSemaphores : nullptr;
 
 	if (vk::API::QueueSubmit(m_GraphicsQueue, 1, &submitInfo, frame.m_InFlightFence) != VK_SUCCESS) {
 		DFAssert(false, "Failed to submit render command buffer!");
@@ -516,6 +534,10 @@ void vk::RenderCore::RemoveCommandPool(VkCommandPool commandPool) {
 
 void vk::RenderCore::RemoveSwapchain(VkSwapchainKHR swapchain) {
 	m_VulkanObjectManager.RemoveSwapchain(m_VkDevice, swapchain);
+}
+
+void vk::RenderCore::RemoveSemaphore(VkSemaphore semaphore) {
+	m_VulkanObjectManager.RemoveSemaphore(m_VkDevice, semaphore);
 }
 
 void vk::RenderCore::SetBufferData(VkBuffer buffer, const void* data, uint32 dataSize, uint32 offset /*= 0*/) {
@@ -870,7 +892,6 @@ bool vk::RenderCore::InitFrameData(vk::FrameData& frameData) {
 		return false;
 	}
 
-	frameData.m_ImageAvailableSemaphore = vk::CreateSemaphore(m_VkDevice, 0);
 	frameData.m_RenderFinishedSemaphore = vk::CreateSemaphore(m_VkDevice, 0);
 
 	frameData.m_InFlightFence = vk::CreateFence(m_VkDevice, VK_FENCE_CREATE_SIGNALED_BIT);
@@ -882,7 +903,6 @@ void vk::RenderCore::ReleaseFrameData(vk::FrameData& frameData) {
 	m_VulkanObjectManager.RemoveFence(m_VkDevice, frameData.m_InFlightFence);
 
 	m_VulkanObjectManager.RemoveSemaphore(m_VkDevice, frameData.m_RenderFinishedSemaphore);
-	m_VulkanObjectManager.RemoveSemaphore(m_VkDevice, frameData.m_ImageAvailableSemaphore);
 
 	ReleaseCommandBuffers(frameData);
 }

@@ -21,22 +21,25 @@ namespace vk {
 namespace vk {
 	class Presentation {
 	public:
-		Presentation();
+		Presentation(const df::Window& window);
 
-		bool CreateSurface(VkInstance instance, const df::Window& window);
+		auto GetWindow() const -> const df::Window&;
+
+		bool CreateSurface(VkInstance instance);
 		void DestroySurface(VkInstance instance);
 
-		bool CreateSwapchain(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D extent, bool vSyncEnabled, uint32 graphicsFamilyIndex, uint32 presentFamilyIndex);
+		bool CreateSwapchain(VkDevice device, VkPhysicalDevice physicalDevice, bool vSyncEnabled, uint32 graphicsFamilyIndex, uint32 presentFamilyIndex);
 		void DestroySwapchain(vk::RenderCore& renderCore);
 
 		auto GetPhysicalDeviceSurfaceSupport(VkPhysicalDevice physicalDevice, uint32 queueFamilyIndex)->VkBool32;
-		auto AquireNextImage(VkDevice device, VkSemaphore semaphore)->VkResult;
+		auto AquireNextImage(VkDevice device)->VkResult;
+		auto GetImageAvailableSemaphore()const->VkSemaphore;
 		auto Present(VkSemaphore semaphore, VkQueue presentQueue)->VkResult;
 
 		bool Load(vk::RenderCore& renderCore);
 		void Unload(vk::RenderCore& renderCore);
 
-		bool RecreateSwapchain(vk::RenderCore& renderCore, VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D extent, bool vSyncEnabled, uint32 graphicsFamilyIndex, uint32 presentFamilyIndex);
+		bool RecreateSwapchain(vk::RenderCore& renderCore, VkDevice device, VkPhysicalDevice physicalDevice, bool vSyncEnabled, uint32 graphicsFamilyIndex, uint32 presentFamilyIndex);
 		bool RecreateSwapchain(vk::RenderCore& renderCore, VkDevice device, VkPhysicalDevice physicalDevice, uint32 graphicsFamilyIndex, uint32 presentFamilyIndex);
 
 		void SetPresentTexture(vk::Texture* texture);
@@ -53,7 +56,11 @@ namespace vk {
 		uint32 m_ImagesCount;
 		uint32 m_AvailableImageIndex;
 
+		const df::Window& m_Window;
+
 		df::Vector<VkImage> m_Images;
+		df::Vector<VkSemaphore> m_ImageAvailableSemaphores;
+		uint32 m_CurrentSemaphoreIndex;
 
 		df::Vector<VkImageView> m_ImageViews;
 		df::Vector<vk::RenderPass*> m_RenderPasses;
