@@ -15,14 +15,13 @@ namespace df {
 namespace df {
 	class Window {
 	public:
-		Window();
+		Window(uint32 width, uint32 height);
+		~Window();
 
-		bool Init(uint32 width, uint32 height);
-		void Release();
-
-		bool ShouldClose() const;
+		bool IsCloseRequested() const;
 		bool Update();
 		void SwapBuffers();
+		void Close();
 
 		auto GetPtr() const->APIWindow*;
 		auto GetWidth() const->uint32;
@@ -39,6 +38,8 @@ namespace df {
 
 		uint32 m_Width;
 		uint32 m_Height;
+
+		bool m_CloseRequested;
 
 	public:
 		// width, height

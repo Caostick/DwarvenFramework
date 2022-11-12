@@ -35,7 +35,7 @@ namespace vk {
 namespace vk {
 	class RenderCore {
 	public:
-		RenderCore(const df::Window& window);
+		RenderCore();
 
 		auto GetVkDevice() const->VkDevice;
 		auto GetVkDescriptorPool() const->VkDescriptorPool;
@@ -43,18 +43,12 @@ namespace vk {
 		bool Init();
 		void Release();
 
-		bool Load();
-		void Unload();
+		void SetWindowSource(df::Window* window, vk::Texture* texture);
 
 		auto BeginFrame()->vk::CommandBuffer*;
 		void EndFrame();
 
-		void Present(vk::Texture* texture);
-
 		void CompleteAllCommands();
-
-		bool RecreateSwapchain(uint32 screenWidth, uint32 screenHeight);
-		bool RecreateSwapchain();
 
 		auto CreateRenderPass()->vk::RenderPass*;
 		void DestroyRenderPass(vk::RenderPass* renderPass);
@@ -105,6 +99,7 @@ namespace vk {
 		void RemovePipeline(VkPipeline pipeline);
 		void RemoveDescriptorPool(VkDescriptorPool descriptorPool);
 		void RemoveCommandPool(VkCommandPool commandPool);
+		void RemoveSwapchain(VkSwapchainKHR swapchain);
 
 		void SetBufferData(VkBuffer buffer, const void* data, uint32 dataSize, uint32 offset = 0);
 		void SetImageData(VkImage image, const void* data, uint32 dataSize, uint32 width, uint32 height, int32 widthOffset = 0, int32 heightOffset = 0);
@@ -118,7 +113,6 @@ namespace vk {
 		bool InitPhysicalDevice();
 		bool InitDevice();
 
-		bool ValidateScreenSize();
 		bool CheckForPreventedCaptureSoft();
 
 		bool InitCommandPools();
@@ -136,8 +130,6 @@ namespace vk {
 		void EmptyTrashCan();
 
 	private:
-		const df::Window& m_Window;
-
 		uint32 m_NumFramesInFlight;
 		uint32 m_FrameIndex;
 
@@ -155,6 +147,9 @@ namespace vk {
 		df::ObjectPool<vk::Buffer> m_Buffers;
 		df::ObjectPool<vk::Mesh> m_Meshes;
 		df::ObjectPool<vk::Texture> m_Textures;
+
+		df::ObjectPool<vk::Presentation> m_Presentations;
+		df::Vector<vk::Presentation*> m_ValidPresentations;
 
 		df::Vector<vk::Texture*> m_TexturesToInitLayout;
 		df::Vector<vk::Texture*> m_TexturesToGenerateMips;
@@ -181,7 +176,6 @@ namespace vk {
 		df::Vector<VkCommandPool> m_GraphicsCommandPools;
 		df::Vector<VkCommandPool> m_TransferCommandPools;
 
-		vk::Presentation m_Presentation;
 		vk::TransferBuffer m_TransferBuffer;
 
 		VkDescriptorPool m_DescriptorPool;

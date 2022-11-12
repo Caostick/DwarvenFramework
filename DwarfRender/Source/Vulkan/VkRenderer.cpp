@@ -11,8 +11,8 @@
 
 #include <DwarvenCore/New.h>
 
-vk::Renderer::Renderer(const df::Window& window)
-	: m_RenderCore(window) {
+vk::Renderer::Renderer()
+	: m_RenderCore() {
 }
 
 vk::Renderer::~Renderer() {
@@ -24,17 +24,16 @@ bool vk::Renderer::Init() {
 		return false;
 	}
 
-	if (!m_RenderCore.Load()) {
-		return false;
-	}
-
 	return true;
 }
 
 void vk::Renderer::Release() {
 	m_RenderCore.CompleteAllCommands();
-	m_RenderCore.Unload();
 	m_RenderCore.Release();
+}
+
+void vk::Renderer::SetWindowSource(df::Window* window, df::Texture* texture) {
+	m_RenderCore.SetWindowSource(window, static_cast<vk::Texture*>(texture));
 }
 
 auto vk::Renderer::CreateMesh()->df::Mesh* {
@@ -103,8 +102,4 @@ auto vk::Renderer::BeginFrame()->df::CommandBuffer* {
 
 void vk::Renderer::EndFrame() {
 	m_RenderCore.EndFrame();
-}
-
-void vk::Renderer::Present(df::Texture* texture) {
-	m_RenderCore.Present(static_cast<vk::Texture*>(texture));
 }

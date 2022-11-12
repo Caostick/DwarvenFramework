@@ -19,9 +19,8 @@
 #include <DwarvenCore/DebugName.h>
 #include <DwarvenCore/Memory.h>
 
-vk::RenderCore::RenderCore(const df::Window& window) 
-	: m_Window(window) 
-	, m_ShaderCompiler(nullptr) {
+vk::RenderCore::RenderCore() 
+	: m_ShaderCompiler(nullptr) {
 
 	m_NumFramesInFlight = 0;
 	m_FrameIndex = 0;
@@ -75,10 +74,6 @@ bool vk::RenderCore::Init() {
 		return false;
 	}
 
-	if (!m_Presentation.CreateSurface(m_VkInstance, m_Window)) {
-		return false;
-	}
-
 	if (!InitPhysicalDevice()) {
 		return false;
 	}
@@ -95,13 +90,6 @@ bool vk::RenderCore::Init() {
 	vk::API::GetDeviceQueue(m_VkDevice, m_GraphicsFamilyIndex, 0, &m_GraphicsQueue);
 	vk::API::GetDeviceQueue(m_VkDevice, m_TransferFamilyIndex, 0, &m_TransferQueue);
 	vk::API::GetDeviceQueue(m_VkDevice, m_ComputeFamilyIndex, 0, &m_ComputeQueue);
-
-	if (!m_Presentation.CreateSwapchain(
-		m_VkDevice, m_VkPhysicalDevice,
-		{ m_Window.GetWidth(), m_Window.GetHeight() }, true,
-		m_GraphicsFamilyIndex, m_PresentFamilyIndex)) {
-		return false;
-	}
 
 	if (!InitCommandPools()) {
 		return false;
@@ -140,9 +128,6 @@ void vk::RenderCore::Release() {
 
 	ReleaseCommandPools();
 
-	// Destroy swapchain
-	m_Presentation.DestroySwapchain(m_VkDevice);
-
 	m_VertexAttributes.Clear();
 
 	for (auto sampler : m_Samplers) {
@@ -158,9 +143,6 @@ void vk::RenderCore::Release() {
 	m_VkDevice = VK_NULL_HANDLE;
 	m_VkPhysicalDevice = VK_NULL_HANDLE;
 
-	// Destroy surface
-	m_Presentation.DestroySurface(m_VkInstance);
-
 	// Destroy instance
 	DFAssert(m_VkInstance != VK_NULL_HANDLE, "Instance not created!");
 	vk::DestroyDebugCallback(m_VkInstance);
@@ -171,39 +153,53 @@ void vk::RenderCore::Release() {
 	m_ShaderCompiler = nullptr;
 }
 
-bool vk::RenderCore::Load() {
-	if (!m_Presentation.Load(*this)) {
-		return false;
+void vk::RenderCore::SetWindowSource(df::Window* window, vk::Texture* texture) {
+
+	auto presentation = m_Presentations.Create();
+	presentation->SetPresentTexture(texture);
+
+	if (!presentation->CreateSurface(m_VkInstance, *window)) {
+		DFAssert(false, "Can't create window surface!");
+	}
+	// Destroy surface
+	//presentation->DestroySurface(m_VkInstance);
+	
+	if (!presentation->CreateSwapchain(
+		m_VkDevice, m_VkPhysicalDevice,
+		{ window->GetWidth(), window->GetHeight() }, true,
+		m_GraphicsFamilyIndex, m_PresentFamilyIndex)) {
+		DFAssert(false, "Can't create swapchain!");
 	}
 
-	return true;
-}
+	// Destroy swapchain
+	//presentation->DestroySwapchain(m_VkDevice);
 
-void vk::RenderCore::Unload() {
-	m_Presentation.Unload(*this);
+	presentation->Load(*this);
+	//presentation->Unload(*this);
+
 }
 
 auto vk::RenderCore::BeginFrame() ->vk::CommandBuffer* {
-	if (!ValidateScreenSize()) {
-		return nullptr;
-	}
-
 	m_VulkanObjectManager.Update();
 
 	vk::FrameData& frame = m_FrameData[m_FrameIndex];
 
 	vk::API::WaitForFences(m_VkDevice, 1, &frame.m_InFlightFence, VK_TRUE, std::numeric_limits<uint64_t>::max());
 
-	const VkResult result = m_Presentation.AquireNextImage(m_VkDevice, frame.m_ImageAvailableSemaphore);
-	if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-		CompleteAllCommands();
-		RecreateSwapchain();
-		return false;
-	} else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
-		DFAssert(false, "Failed to acquire swap chain image!");
-		return false;
+	m_ValidPresentations.clear();
+	for (auto presentation : m_Presentations) {
+		const VkResult result = presentation->AquireNextImage(m_VkDevice, frame.m_ImageAvailableSemaphore);
+		if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+			presentation->RecreateSwapchain(
+				*this, m_VkDevice, m_VkPhysicalDevice,
+				m_GraphicsFamilyIndex, m_PresentFamilyIndex
+			);
+		} else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+			DFAssert(false, "Failed to aquire swap chain image!");
+		} else {
+			m_ValidPresentations.push_back(presentation);
+		}
 	}
-
 
 	vk::API::ResetFences(m_VkDevice, 1, &frame.m_InFlightFence);
 
@@ -239,6 +235,10 @@ void vk::RenderCore::EndFrame() {
 
 	vk::FrameData& frame = m_FrameData[m_FrameIndex];
 
+	for (auto presentation : m_ValidPresentations) {
+		presentation->PresentTexture(frame.m_CommandBuffer);
+	}
+
 	frame.m_CommandBuffer.End();
 
 	const VkSemaphore waitSemaphores[] = { frame.m_ImageAvailableSemaphore };
@@ -260,22 +260,21 @@ void vk::RenderCore::EndFrame() {
 		DFAssert(false, "Failed to submit render command buffer!");
 	}
 
-	const VkResult result = m_Presentation.Present(frame.m_RenderFinishedSemaphore, m_PresentQueue);
+	for (auto presentation : m_ValidPresentations) {
+		const VkResult result = presentation->Present(frame.m_RenderFinishedSemaphore, m_PresentQueue);
 
-	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
-		CompleteAllCommands();
-		RecreateSwapchain();
-	} else if (result != VK_SUCCESS) {
-		DFAssert(false, "Failed to present swap chain image!");
+		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
+			presentation->RecreateSwapchain(
+				*this, m_VkDevice, m_VkPhysicalDevice,
+				m_GraphicsFamilyIndex, m_PresentFamilyIndex
+			);
+		} else if (result != VK_SUCCESS) {
+			DFAssert(false, "Failed to present swap chain image!");
+		}
 	}
+	m_ValidPresentations.clear();
 
 	m_FrameIndex = (m_FrameIndex + 1) % m_NumFramesInFlight;
-}
-
-void vk::RenderCore::Present(vk::Texture* texture) {
-	vk::FrameData& frameData = m_FrameData[m_FrameIndex];
-
-	m_Presentation.PresentTexture(frameData.m_CommandBuffer, texture);
 }
 
 void vk::RenderCore::CompleteAllCommands() {
@@ -285,21 +284,6 @@ void vk::RenderCore::CompleteAllCommands() {
 	}
 
 	EmptyTrashCan();
-}
-
-bool vk::RenderCore::RecreateSwapchain(uint32 screenWidth, uint32 screenHeight) {
-	return m_Presentation.RecreateSwapchain(
-		*this, m_VkDevice, m_VkPhysicalDevice,
-		VkExtent2D({ screenWidth, screenHeight }), true,
-		m_GraphicsFamilyIndex, m_PresentFamilyIndex
-	);
-}
-
-bool vk::RenderCore::RecreateSwapchain() {
-	return m_Presentation.RecreateSwapchain(
-		*this, m_VkDevice, m_VkPhysicalDevice,
-		m_GraphicsFamilyIndex, m_PresentFamilyIndex
-	);
 }
 
 auto vk::RenderCore::CreateRenderPass()->vk::RenderPass* {
@@ -530,6 +514,10 @@ void vk::RenderCore::RemoveCommandPool(VkCommandPool commandPool) {
 	m_VulkanObjectManager.RemoveCommandPool(m_VkDevice, commandPool);
 }
 
+void vk::RenderCore::RemoveSwapchain(VkSwapchainKHR swapchain) {
+	m_VulkanObjectManager.RemoveSwapchain(m_VkDevice, swapchain);
+}
+
 void vk::RenderCore::SetBufferData(VkBuffer buffer, const void* data, uint32 dataSize, uint32 offset /*= 0*/) {
 	m_TransferBuffer.SetBufferData(buffer, data, dataSize, offset);
 }
@@ -675,7 +663,7 @@ bool vk::RenderCore::InitPhysicalDevice() {
 			m_ComputeFamilyIndex = i;
 		}
 
-		const VkBool32 presentSupport = m_Presentation.GetPhysicalDeviceSurfaceSupport(m_VkPhysicalDevice, i);
+		const VkBool32 presentSupport = true;// m_Presentation.GetPhysicalDeviceSurfaceSupport(m_VkPhysicalDevice, i);
 
 		if (queueFamily.queueCount > 0 && presentSupport) {
 			m_PresentFamilyIndex = i;
@@ -765,17 +753,6 @@ bool vk::RenderCore::InitDevice() {
 	}
 
 	if (!vk::API::LoadDeviceFunctions(m_VkDevice)) {
-		return false;
-	}
-
-	return true;
-}
-
-bool vk::RenderCore::ValidateScreenSize() {
-	const uint32 width = m_Window.GetWidth();
-	const uint32 height = m_Window.GetHeight();
-
-	if (width == 0 || height == 0) {
 		return false;
 	}
 

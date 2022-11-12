@@ -7,6 +7,7 @@
 #include "VkParameterSet.h"
 #include "VkGraphicsPipeline.h"
 #include "VkTexture.h"
+#include "VkObjectManager.h"
 
 #include "Generated/Presentation.generated.h"
 
@@ -83,6 +84,7 @@ vk::Presentation::Presentation()
 	, m_VSyncEnabled(true)
 	, m_ParametrSet(nullptr)
 	, m_Pipeline(nullptr)
+	, m_PresentTexture(nullptr)
 	, m_MinImagesCount(0)
 	, m_ImagesCount(0)
 	, m_AvailableImageIndex(0) {}
@@ -189,17 +191,17 @@ bool vk::Presentation::CreateSwapchain(VkDevice device, VkPhysicalDevice physica
 	return true;
 }
 
-void vk::Presentation::DestroySwapchain(VkDevice device) {
+void vk::Presentation::DestroySwapchain(vk::RenderCore& renderCore) {
 	DFAssert(m_VkSwapchain != VK_NULL_HANDLE, "Swapchain not created!");
 
 	for (uint32 i = 0; i < m_ImagesCount; ++i) {
-		vk::DestroyImageView(device, m_ImageViews[i]);
+		renderCore.RemoveImageView(m_ImageViews[i]);
 	}
 	m_ImageViews.clear();
 
 	m_Images.clear();
 
-	vk::API::DestroySwapchainKHR(device, m_VkSwapchain, vk::Allocator());
+	renderCore.RemoveSwapchain(m_VkSwapchain);
 	m_VkSwapchain = VK_NULL_HANDLE;
 	m_VkExtent = VkExtent2D({ 0, 0 });
 	m_MinImagesCount = 0;
@@ -313,8 +315,8 @@ void vk::Presentation::Unload(vk::RenderCore& renderCore) {
 	m_RenderPasses.clear();
 }
 
-bool vk::Presentation::RecreateSwapchain(vk::RenderCore& /*renderCore*/, VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D extent, bool vSyncEnabled, uint32 graphicsFamilyIndex, uint32 presentFamilyIndex) {
-	DestroySwapchain(device);
+bool vk::Presentation::RecreateSwapchain(vk::RenderCore& renderCore, VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D extent, bool vSyncEnabled, uint32 graphicsFamilyIndex, uint32 presentFamilyIndex) {
+	DestroySwapchain(renderCore);
 	if (!CreateSwapchain(device, physicalDevice, extent, vSyncEnabled, graphicsFamilyIndex, presentFamilyIndex)) {
 		return false;
 	}
@@ -346,10 +348,18 @@ bool vk::Presentation::RecreateSwapchain(vk::RenderCore& renderCore, VkDevice de
 	return RecreateSwapchain(renderCore, device, physicalDevice, m_VkExtent, m_VSyncEnabled, graphicsFamilyIndex, presentFamilyIndex);
 }
 
-void vk::Presentation::PresentTexture(vk::CommandBuffer& rcb, vk::Texture* texture) {
+void vk::Presentation::SetPresentTexture(vk::Texture* texture) {
+	m_PresentTexture = texture;
+}
+
+void vk::Presentation::PresentTexture(vk::CommandBuffer& rcb) {
+	if (!m_PresentTexture) {
+		return;
+	}
+
 	DFScopedRenderEvent(rcb, "Present Render Stage");
 
-	m_ParametrSet->SetTexture("Texture", texture);
+	m_ParametrSet->SetTexture("Texture", m_PresentTexture);
 	m_ParametrSet->SetFilter("Texture", df::EFilter::Linear);
 
 	rcb.BeginRenderPass(m_RenderPasses[m_AvailableImageIndex]);

@@ -6,26 +6,16 @@
 #include <glfw/glfw3.h>
 #endif
 
-df::Window::Window()
+df::Window::Window(uint32 width, uint32 height)
 	: m_Window(nullptr)
-	, m_Width(0)
-	, m_Height(0)
-{}
+	, m_Width(width)
+	, m_Height(height) 
+	, m_CloseRequested(false) {
 
-bool df::Window::Init(uint32 width, uint32 height) {
-	m_Width = width;
-	m_Height = height;
-
-#ifdef GLFW_WINDOW_IMPLEMENTATION
-	if (!glfwInit()) {
-		DFAssert(false, "Can't initialize GLFW!");
-		return false;
-	}
-
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-
-	const char* windowName = "Game";
+	const char* windowName = "Window";
 	const bool isFullscreen = false;
+
+#if GLFW_WINDOW_IMPLEMENTATION
 	m_Window = glfwCreateWindow(
 		m_Width,
 		m_Height,
@@ -34,10 +24,7 @@ bool df::Window::Init(uint32 width, uint32 height) {
 		nullptr
 	);
 
-	if (m_Window == nullptr) {
-		DFAssert(false, "Can't create GLFW window!");
-		return false;
-	}
+	DFAssert(m_Window != nullptr, "Can't create GLFW window!");
 
 	glfwSetWindowUserPointer(m_Window, this);
 	glfwMakeContextCurrent(m_Window);
@@ -49,25 +36,21 @@ bool df::Window::Init(uint32 width, uint32 height) {
 #endif
 
 	InitSignals();
-
-	return true;
 }
 
-void df::Window::Release() {
-#ifdef GLFW_WINDOW_IMPLEMENTATION
+bool df::Window::IsCloseRequested() const {
+	return m_CloseRequested;
+}
+
+df::Window::~Window() {
 	glfwDestroyWindow(m_Window);
-	glfwTerminate();
-#endif
-}
-
-bool df::Window::ShouldClose() const {
-	return glfwWindowShouldClose(m_Window);
 }
 
 bool df::Window::Update() {
-	DFAssert(m_Window != nullptr, "Window is not created!");
+	const bool shouldClose = (glfwWindowShouldClose(m_Window) != 0);
+	m_CloseRequested |= shouldClose;
 
-	glfwPollEvents();
+	DFAssert(m_Window != nullptr, "Window is not created!");
 
 	int w = 0;
 	int h = 0;
@@ -85,6 +68,10 @@ bool df::Window::Update() {
 void df::Window::SwapBuffers() {
 	DFAssert(m_Window != nullptr, "Window is not created!");
 	glfwSwapBuffers(m_Window);
+}
+
+void df::Window::Close() {
+	m_CloseRequested = true;
 }
 
 auto df::Window::GetPtr() const->APIWindow* {

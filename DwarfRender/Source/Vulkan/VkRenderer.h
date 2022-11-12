@@ -15,11 +15,13 @@ namespace vk {
 namespace vk {
 	class Renderer : public df::Renderer {
 	public:
-		Renderer(const df::Window& window);
+		Renderer();
 		virtual ~Renderer() override;
 
 		virtual bool Init() override;
 		virtual void Release() override;
+
+		virtual void SetWindowSource(df::Window* window, df::Texture* texture) override;
 
 		virtual auto CreateMesh()->df::Mesh* override;
 		virtual void DestroyMesh(df::Mesh* mesh) override;
@@ -46,8 +48,6 @@ namespace vk {
 
 		virtual auto BeginFrame()->df::CommandBuffer* override;
 		virtual void EndFrame() override;
-
-		virtual void Present(df::Texture* texture) override;
 
 	private:
 		vk::RenderCore m_RenderCore;

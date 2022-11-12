@@ -6,8 +6,8 @@
 
 #include <DwarvenCore/New.h>
 
-auto df::CreateRenderer(df::Window& window)->df::Renderer* {
+auto df::CreateRenderer()->df::Renderer* {
 #ifdef VK_RENDER_IMPLEMENTATION
-	return DFNew vk::Renderer(window);
+	return DFNew vk::Renderer();
 #endif
 }

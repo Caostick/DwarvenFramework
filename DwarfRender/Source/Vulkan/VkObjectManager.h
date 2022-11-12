@@ -158,6 +158,14 @@ namespace vk {
 		VkFence m_Fence;
 	};
 
+	class RemovedObject_Swapchain : public RemovedObject {
+	public:
+		RemovedObject_Swapchain(VkDevice device, VkSwapchainKHR swapchain);
+		~RemovedObject_Swapchain() override;
+	private:
+		VkSwapchainKHR m_Swapchain;
+	};
+
 
 
 
@@ -182,6 +190,7 @@ namespace vk {
 		void RemoveCommandPool(VkDevice device, VkCommandPool commandPool);
 		void RemoveSemaphore(VkDevice device, VkSemaphore semaphore);
 		void RemoveFence(VkDevice device, VkFence fence);
+		void RemoveSwapchain(VkDevice device, VkSwapchainKHR swapchain);
 
 		bool Update();
 

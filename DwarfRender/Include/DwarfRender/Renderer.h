@@ -11,6 +11,7 @@ namespace df {
 	class GraphicsPipeline;
 	class ParameterSet;
 	class CommandBuffer;
+	class Window;
 }
 
 namespace df {
@@ -20,6 +21,8 @@ namespace df {
 
 		virtual bool Init() = 0;
 		virtual void Release() = 0;
+
+		virtual void SetWindowSource(df::Window* window, df::Texture* texture) = 0;
 
 		virtual auto CreateMesh()->df::Mesh* = 0;
 		virtual void DestroyMesh(df::Mesh* mesh) = 0;
@@ -46,7 +49,5 @@ namespace df {
 
 		virtual auto BeginFrame()->df::CommandBuffer* = 0;
 		virtual void EndFrame() = 0;
-
-		virtual void Present(df::Texture* texture) = 0;
 	};
 }

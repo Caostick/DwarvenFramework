@@ -205,6 +205,14 @@ vk::RemovedObject_Fence::~RemovedObject_Fence() {
 	vk::API::DestroyFence(m_Device, m_Fence, vk::Allocator());
 }
 
+vk::RemovedObject_Swapchain::RemovedObject_Swapchain(VkDevice device, VkSwapchainKHR swapchain) 
+	: RemovedObject(device)
+	, m_Swapchain(swapchain) {}
+
+vk::RemovedObject_Swapchain::~RemovedObject_Swapchain() {
+	DebugDestroyOutput("Swapchain", m_Swapchain);
+	vk::API::DestroySwapchainKHR(m_Device, m_Swapchain, vk::Allocator());
+}
 
 
 
@@ -275,6 +283,10 @@ void vk::ObjectManager::RemoveSemaphore(VkDevice device, VkSemaphore semaphore) 
 
 void vk::ObjectManager::RemoveFence(VkDevice device, VkFence fence) {
 	m_RemovedObjects.push_back(DFNew RemovedObject_Fence(device, fence));
+}
+
+void vk::ObjectManager::RemoveSwapchain(VkDevice device, VkSwapchainKHR swapchain) {
+	m_RemovedObjects.push_back(DFNew RemovedObject_Swapchain(device, swapchain));
 }
 
 bool vk::ObjectManager::Update() {

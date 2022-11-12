@@ -27,7 +27,7 @@ namespace vk {
 		void DestroySurface(VkInstance instance);
 
 		bool CreateSwapchain(VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D extent, bool vSyncEnabled, uint32 graphicsFamilyIndex, uint32 presentFamilyIndex);
-		void DestroySwapchain(VkDevice device);
+		void DestroySwapchain(vk::RenderCore& renderCore);
 
 		auto GetPhysicalDeviceSurfaceSupport(VkPhysicalDevice physicalDevice, uint32 queueFamilyIndex)->VkBool32;
 		auto AquireNextImage(VkDevice device, VkSemaphore semaphore)->VkResult;
@@ -39,7 +39,8 @@ namespace vk {
 		bool RecreateSwapchain(vk::RenderCore& renderCore, VkDevice device, VkPhysicalDevice physicalDevice, VkExtent2D extent, bool vSyncEnabled, uint32 graphicsFamilyIndex, uint32 presentFamilyIndex);
 		bool RecreateSwapchain(vk::RenderCore& renderCore, VkDevice device, VkPhysicalDevice physicalDevice, uint32 graphicsFamilyIndex, uint32 presentFamilyIndex);
 
-		void PresentTexture(vk::CommandBuffer& rcb, vk::Texture* texture);
+		void SetPresentTexture(vk::Texture* texture);
+		void PresentTexture(vk::CommandBuffer& rcb);
 
 	private:
 		VkSurfaceKHR m_VkSurface;
@@ -58,5 +59,6 @@ namespace vk {
 		df::Vector<vk::RenderPass*> m_RenderPasses;
 		vk::GraphicsPipeline* m_Pipeline;
 		vk::ParameterSet* m_ParametrSet;
+		vk::Texture* m_PresentTexture;
 	};
 }

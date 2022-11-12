@@ -5,9 +5,5 @@ namespace df {
 }
 
 namespace df {
-	class Window;
-}
-
-namespace df {
-	auto CreateRenderer(df::Window& window)->df::Renderer*;
+	auto CreateRenderer()->df::Renderer*;
 }
