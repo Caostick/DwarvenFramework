@@ -15,6 +15,8 @@ df::Window::Window(uint32 width, uint32 height)
 	const char* windowName = "Window";
 	const bool isFullscreen = false;
 
+	glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
+
 #if GLFW_WINDOW_IMPLEMENTATION
 	m_Window = glfwCreateWindow(
 		m_Width,
@@ -26,8 +28,10 @@ df::Window::Window(uint32 width, uint32 height)
 
 	DFAssert(m_Window != nullptr, "Can't create GLFW window!");
 
+
+
 	glfwSetWindowUserPointer(m_Window, this);
-	glfwMakeContextCurrent(m_Window);
+	//glfwMakeContextCurrent(m_Window);
 
 	/*glfwSetFramebufferSizeCallback(m_Window, [](GLFWwindow* window, int width, int height) {
 		df::Window* self = static_cast<df::Window*>(glfwGetWindowUserPointer(window));
