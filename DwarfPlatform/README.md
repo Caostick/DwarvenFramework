@@ -1,5 +1,5 @@
-# DwarfWindowmaker
-DwarvenFramework module to make game window.
+# DwarfPlatform
+DwarvenFramework module to handle platform dependency logic like windows, input, etc.
 
 Dependencies:
 =============
