@@ -22,10 +22,10 @@ find_library(DwarvenCore_LIB DwarvenCore)
 target_link_libraries(${PROJECT_NAME} DwarvenCore)
 include_directories(../DwarvenCore/Include)
 
-# DwarfWindowmaker
-find_library(DwarfWindowmaker_LIB DwarfWindow)
-target_link_libraries(${PROJECT_NAME} DwarfWindow)
-include_directories(../DwarfWindow/Include)
+# DwarfPlatform
+find_library(DwarfPlatform_LIB DwarfPlatform)
+target_link_libraries(${PROJECT_NAME} DwarfPlatform)
+include_directories(../DwarfPlatform/Include)
 
 include(../ThirdParty/conanbuildinfo.cmake)
 conan_basic_setup(NO_OUTPUT_DIRS TARGETS)

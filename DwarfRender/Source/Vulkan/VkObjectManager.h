@@ -166,6 +166,15 @@ namespace vk {
 		VkSwapchainKHR m_Swapchain;
 	};
 
+	class RemovedObject_Surface : public RemovedObject {
+	public:
+		RemovedObject_Surface(VkInstance instance, VkSurfaceKHR surface);
+		~RemovedObject_Surface() override;
+	private:
+		VkInstance m_Instance;
+		VkSurfaceKHR m_Surface;
+	};
+
 
 
 
@@ -191,6 +200,7 @@ namespace vk {
 		void RemoveSemaphore(VkDevice device, VkSemaphore semaphore);
 		void RemoveFence(VkDevice device, VkFence fence);
 		void RemoveSwapchain(VkDevice device, VkSwapchainKHR swapchain);
+		void RemoveSurface(VkInstance instance, VkSurfaceKHR surface);
 
 		bool Update();
 

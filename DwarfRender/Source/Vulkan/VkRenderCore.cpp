@@ -13,7 +13,7 @@
 #include "VkMesh.h"
 #include "VkTexture.h"
 
-#include <DwarfWindow/Window.h>
+#include <DwarfPlatform/Window.h>
 
 #include <DwarvenCore/Assert.h>
 #include <DwarvenCore/DebugName.h>
@@ -116,6 +116,13 @@ bool vk::RenderCore::Init() {
 }
 
 void vk::RenderCore::Release() {
+
+	for (auto presentation : m_Presentations) {
+		presentation->Unload(*this);
+		presentation->DestroySwapchain(*this);
+		presentation->DestroySurface(*this);
+	}
+	m_Presentations.Clear();
 
 	m_PresentationPipiline.Release(*this);
 
@@ -311,7 +318,8 @@ void vk::RenderCore::EndFrame() {
 		const VkResult result = vk::API::QueuePresentKHR(m_PresentQueue, &presentInfo);
 
 		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
-			DFAssert(false, "Failed to present swap chain image!");
+			//DFAssert(false, "Failed to present swap chain image!");
+			return;
 		} else if (result != VK_SUCCESS) {
 			DFAssert(false, "Failed to present swap chain image!");
 		}
@@ -564,6 +572,10 @@ void vk::RenderCore::RemoveSwapchain(VkSwapchainKHR swapchain) {
 
 void vk::RenderCore::RemoveSemaphore(VkSemaphore semaphore) {
 	m_VulkanObjectManager.RemoveSemaphore(m_VkDevice, semaphore);
+}
+
+void vk::RenderCore::RemoveSurface(VkSurfaceKHR surface) {
+	m_VulkanObjectManager.RemoveSurface(m_VkInstance, surface);
 }
 
 void vk::RenderCore::SetBufferData(VkBuffer buffer, const void* data, uint32 dataSize, uint32 offset /*= 0*/) {

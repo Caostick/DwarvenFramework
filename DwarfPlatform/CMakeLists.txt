@@ -1,13 +1,13 @@
 cmake_minimum_required (VERSION 3.1)
 
-set(PROJECT_NAME DwarfWindow)
+set(PROJECT_NAME DwarfPlatform)
 set(CPP_VERSION 17)
 
 project(${PROJECT_NAME})
 
 file(GLOB SOURCES
-	Include/DwarfWindow/*.h
-	Include/DwarfWindow/*.inl
+	Include/DwarfPlatform/*.h
+	Include/DwarfPlatform/*.inl
 	Source/*.h
 	Source/*.inl
 	Source/*.cpp

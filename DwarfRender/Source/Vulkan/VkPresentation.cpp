@@ -12,7 +12,7 @@
 
 #include "Generated/Presentation.generated.h"
 
-#include <DwarfWindow/Window.h>
+#include <DwarfPlatform/Window.h>
 
 #include <DwarvenCore/Assert.h>
 #include <DwarvenCore/DebugName.h>
@@ -120,10 +120,10 @@ bool vk::Presentation::CreateSurface(VkInstance instance) {
 	return true;
 }
 
-void vk::Presentation::DestroySurface(VkInstance instance) {
+void vk::Presentation::DestroySurface(vk::RenderCore& renderCore) {
 	DFAssert(m_VkSurface != VK_NULL_HANDLE, "Surface not created!");
 
-	vk::API::DestroySurfaceKHR(instance, m_VkSurface, vk::Allocator());
+	renderCore.RemoveSurface(m_VkSurface);
 	m_VkSurface = VK_NULL_HANDLE;
 }
 

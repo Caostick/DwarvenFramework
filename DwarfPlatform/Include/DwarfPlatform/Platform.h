@@ -9,7 +9,7 @@ namespace df {
 }
 
 namespace df {
-	class WindowManager {
+	class Platform {
 	public:
 		bool Init();
 		void Release();

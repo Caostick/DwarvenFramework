@@ -102,6 +102,7 @@ namespace vk {
 		void RemoveCommandPool(VkCommandPool commandPool);
 		void RemoveSwapchain(VkSwapchainKHR swapchain);
 		void RemoveSemaphore(VkSemaphore semaphore);
+		void RemoveSurface(VkSurfaceKHR surface);
 
 		void SetBufferData(VkBuffer buffer, const void* data, uint32 dataSize, uint32 offset = 0);
 		void SetImageData(VkImage image, const void* data, uint32 dataSize, uint32 width, uint32 height, int32 widthOffset = 0, int32 heightOffset = 0);

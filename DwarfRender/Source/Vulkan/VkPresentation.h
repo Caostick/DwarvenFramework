@@ -29,7 +29,7 @@ namespace vk {
 		bool IsValid() const;
 
 		bool CreateSurface(VkInstance instance);
-		void DestroySurface(VkInstance instance);
+		void DestroySurface(vk::RenderCore& renderCore);
 
 		bool CreateSwapchain(VkDevice device, VkPhysicalDevice physicalDevice, bool vSyncEnabled, uint32 graphicsFamilyIndex, uint32 presentFamilyIndex);
 		void DestroySwapchain(vk::RenderCore& renderCore);

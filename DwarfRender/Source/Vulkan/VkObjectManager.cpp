@@ -205,6 +205,8 @@ vk::RemovedObject_Fence::~RemovedObject_Fence() {
 	vk::API::DestroyFence(m_Device, m_Fence, vk::Allocator());
 }
 
+
+
 vk::RemovedObject_Swapchain::RemovedObject_Swapchain(VkDevice device, VkSwapchainKHR swapchain) 
 	: RemovedObject(device)
 	, m_Swapchain(swapchain) {}
@@ -212,6 +214,18 @@ vk::RemovedObject_Swapchain::RemovedObject_Swapchain(VkDevice device, VkSwapchai
 vk::RemovedObject_Swapchain::~RemovedObject_Swapchain() {
 	DebugDestroyOutput("Swapchain", m_Swapchain);
 	vk::API::DestroySwapchainKHR(m_Device, m_Swapchain, vk::Allocator());
+}
+
+
+
+vk::RemovedObject_Surface::RemovedObject_Surface(VkInstance instance, VkSurfaceKHR surface)
+	: RemovedObject(VK_NULL_HANDLE)
+	, m_Instance(instance)
+	, m_Surface(surface) {}
+
+vk::RemovedObject_Surface::~RemovedObject_Surface() {
+	DebugDestroyOutput("Surface", m_Surface);
+	vk::API::DestroySurfaceKHR(m_Instance, m_Surface, vk::Allocator());
 }
 
 
@@ -287,6 +301,10 @@ void vk::ObjectManager::RemoveFence(VkDevice device, VkFence fence) {
 
 void vk::ObjectManager::RemoveSwapchain(VkDevice device, VkSwapchainKHR swapchain) {
 	m_RemovedObjects.push_back(DFNew RemovedObject_Swapchain(device, swapchain));
+}
+
+void vk::ObjectManager::RemoveSurface(VkInstance instance, VkSurfaceKHR surface) {
+	m_RemovedObjects.push_back(DFNew RemovedObject_Surface(instance, surface));
 }
 
 bool vk::ObjectManager::Update() {

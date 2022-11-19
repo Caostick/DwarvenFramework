@@ -6,8 +6,8 @@ project(${PROJECT_NAME})
 
 add_subdirectory(DwarvenCore)
 
+add_subdirectory(DwarfPlatform)
 add_subdirectory(DwarfResources)
-add_subdirectory(DwarfWindow)
 add_subdirectory(DwarfInput)
 add_subdirectory(DwarfRender)
 add_subdirectory(DwarfConstructorRender)

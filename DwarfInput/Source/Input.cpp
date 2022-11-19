@@ -3,7 +3,7 @@
 
 #include <GLFW/glfw3.h>
 
-#include <DwarfWindow/Window.h>
+#include <DwarfPlatform/Window.h>
 
 #include <DwarvenCore/Assert.h>
 #include <DwarvenCore/New.h>

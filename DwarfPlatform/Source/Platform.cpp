@@ -1,5 +1,5 @@
-#include <DwarfWindow/WindowManager.h>
-#include <DwarfWindow/Window.h>
+#include <DwarfPlatform/Platform.h>
+#include <DwarfPlatform/Window.h>
 
 #include <DwarvenCore/Assert.h>
 
@@ -8,7 +8,7 @@
 #endif
 
 
-bool df::WindowManager::Init() {
+bool df::Platform::Init() {
 	if (!glfwInit()) {
 		DFAssert(false, "Can't initialize GLFW!");
 		return false;
@@ -21,7 +21,7 @@ bool df::WindowManager::Init() {
 	return true;
 }
 
-void df::WindowManager::Release() {
+void df::Platform::Release() {
 #ifdef GLFW_WINDOW_IMPLEMENTATION
 	glfwTerminate();
 #endif
@@ -29,7 +29,7 @@ void df::WindowManager::Release() {
 	m_Initialized = false;
 }
 
-bool df::WindowManager::Update() {
+bool df::Platform::Update() {
 	DFAssert(m_Initialized, "Window manager is not initialized!");
 
 	glfwPollEvents();
@@ -50,7 +50,7 @@ bool df::WindowManager::Update() {
 	return true;
 }
 
-void df::WindowManager::SwapBuffers() {
+void df::Platform::SwapBuffers() {
 	DFAssert(m_Initialized, "Window manager is not initialized!");
 
 	for (auto window : m_Windows) {
@@ -58,16 +58,16 @@ void df::WindowManager::SwapBuffers() {
 	}
 }
 
-auto df::WindowManager::GetWindowCount() const->uint32 {
+auto df::Platform::GetWindowCount() const->uint32 {
 	return m_Windows.Count();
 }
 
-auto df::WindowManager::CreateWindow(uint32 width, uint32 height)->df::Window* {
+auto df::Platform::CreateWindow(uint32 width, uint32 height)->df::Window* {
 	DFAssert(m_Initialized, "Window manager is not initialized!");
 
 	return m_Windows.Create(width, height);
 }
 
-void df::WindowManager::DestroyWindow(df::Window* window) {
+void df::Platform::DestroyWindow(df::Window* window) {
 	m_Windows.Destroy(window);
 }
