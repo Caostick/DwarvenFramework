@@ -4,8 +4,8 @@ Modules:
 =============
 - [DvarvenCore](https://github.com/Caostick/DwarvenFramework/tree/main/DwarvenCore)
 
+- [DwarfPlatform](https://github.com/Caostick/DwarvenFramework/tree/main/DwarfPlatform)
 - [DwarfResources](https://github.com/Caostick/DwarvenFramework/tree/main/DwarfResources)
-- [DwarfWindow](https://github.com/Caostick/DwarvenFramework/tree/main/DwarfWindow)
 - [DwarfRenderer](https://github.com/Caostick/DwarvenFramework/tree/main/DwarfRenderer)
 - [DwarfInput](https://github.com/Caostick/DwarvenFramework/tree/main/DwarfInput)
 
