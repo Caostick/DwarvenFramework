@@ -26,17 +26,15 @@ add_library (${PROJECT_NAME} STATIC
 	${RENDER_VK_FILES}
 )
 
-include_directories(Include/)
+target_include_directories(${PROJECT_NAME} PUBLIC Include/)
 
 # DwarvenCore
 find_library(DwarvenCore_LIB DwarvenCore)
 target_link_libraries(${PROJECT_NAME} DwarvenCore)
-include_directories(../DwarvenCore/Include)
 
 # DwarfPlatform
 find_library(DwarfPlatform_LIB DwarfPlatform)
 target_link_libraries(${PROJECT_NAME} DwarfPlatform)
-include_directories(../DwarfPlatform/Include)
 
 include(../ThirdParty/conanbuildinfo.cmake)
 conan_basic_setup(NO_OUTPUT_DIRS TARGETS)

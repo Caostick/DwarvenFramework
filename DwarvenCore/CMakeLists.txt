@@ -38,7 +38,7 @@ add_library (${PROJECT_NAME} STATIC
 	${APP_FILES}
 )
 
-include_directories(Include/)
+target_include_directories(${PROJECT_NAME} PUBLIC Include/)
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD ${CPP_VERSION})
 

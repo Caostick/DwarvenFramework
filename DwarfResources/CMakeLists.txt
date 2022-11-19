@@ -17,11 +17,11 @@ file(GLOB SOURCES
 
 add_library (${PROJECT_NAME} STATIC ${SOURCES})
 
-include_directories(Include/)
+target_include_directories(${PROJECT_NAME} PUBLIC Include/)
 
+# DwarvenCore
 find_library(DwarvenCore_LIB DwarvenCore)
 target_link_libraries(${PROJECT_NAME} DwarvenCore)
-include_directories(../DwarvenCore/Include)
 
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY FOLDER "DwarfResources")
