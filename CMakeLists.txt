@@ -1,8 +1,13 @@
 cmake_minimum_required (VERSION 3.1)
 
-set(PROJECT_NAME DwarvenFramework)
+include(CMake/Module.cmake)
 
-project(${PROJECT_NAME})
+add_definitions(-DGLFW_WINDOW_IMPLEMENTATION)
+add_definitions(-DVK_RENDER_IMPLEMENTATION)
+
+set(CPP_VERSION 17)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /WX")
 
 add_subdirectory(DwarvenCore)
 
