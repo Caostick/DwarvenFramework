@@ -13,7 +13,7 @@
 void df::TaskManager::Init() {
 	m_IsWorking = true;
 
-	// Retrieve the number of hardware threads in this system:
+	// Retrieve the number of hardware threads in this system
 	const auto numCores = std::thread::hardware_concurrency();
 
 	// Calculate the actual number of worker threads we want (-1 main thread)
@@ -29,25 +29,25 @@ void df::TaskManager::Init() {
 					m_WakeCondition.wait(lock);
 				}
 			}
-			});
+		});
 
 #ifdef PLATFORM_WINDOWS
 		// Do Windows-specific thread setup
-		HANDLE handle = (HANDLE)worker.native_handle();
+		const HANDLE handle = (HANDLE)worker.native_handle();
 
 		// Put each thread on to dedicated core
-		DWORD_PTR affinityMask = 1ull << threadID;
-		DWORD_PTR affinity_result = SetThreadAffinityMask(handle, affinityMask);
+		const DWORD_PTR affinityMask = 1ull << threadID;
+		const DWORD_PTR affinity_result = SetThreadAffinityMask(handle, affinityMask);
 		DFAssert(affinity_result > 0, "Couldn't set affinity mask!");
 
 		// Increase thread priority
-		bool priority_result = SetThreadPriority(handle, THREAD_PRIORITY_HIGHEST);
+		const bool priority_result = SetThreadPriority(handle, THREAD_PRIORITY_HIGHEST);
 		DFAssert(priority_result != 0, "Couldn't set thread priority!");
 
 		// Name the thread
 		std::wstringstream wss;
 		wss << "df::TaskManagerThread_" << threadID;
-		HRESULT hr = SetThreadDescription(handle, wss.str().c_str());
+		const HRESULT hr = SetThreadDescription(handle, wss.str().c_str());
 		DFAssert(SUCCEEDED(hr), "Couldn't set thread description!");
 #endif // PLATFORM_WOINDOWS
 
