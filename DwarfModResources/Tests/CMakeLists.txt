@@ -13,9 +13,8 @@ FILE(GLOB Tests
 
 add_executable(ut ${TestApp} ${Tests})
 
-find_library(DwarfResourcer DwarfResourcer)
-target_link_libraries (ut DwarfResourcer)
-include_directories(../Include/)
+find_library(DwarfModResources-lib DwarfModResources)
+target_link_libraries (ut DwarfModResources)
   
 target_link_libraries(ut CONAN_PKG::catch2)
   

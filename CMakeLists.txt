@@ -2,6 +2,8 @@ cmake_minimum_required (VERSION 3.1)
 
 include(CMake/Module.cmake)
 
+option(DF_ENABLE_TESTS "Enable build of tests" ON)
+
 add_definitions(-DGLFW_WINDOW_IMPLEMENTATION)
 add_definitions(-DVK_RENDER_IMPLEMENTATION)
 
@@ -16,3 +18,7 @@ add_subdirectory(DwarfResources)
 add_subdirectory(DwarfInput)
 add_subdirectory(DwarfRender)
 add_subdirectory(DwarfProcedural)
+
+if(DF_ENABLE_TESTS)
+	add_subdirectory(DwarvenTests)
+endif()
