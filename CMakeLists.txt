@@ -6,6 +6,7 @@ option(DF_ENABLE_TESTS "Enable build of tests" ON)
 
 add_definitions(-DGLFW_WINDOW_IMPLEMENTATION)
 add_definitions(-DVK_RENDER_IMPLEMENTATION)
+add_definitions(-DPLATFORM_WINDOWS)
 
 set(CPP_VERSION 17)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
@@ -14,6 +15,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /WX")
 add_subdirectory(DwarvenCore)
 
 add_subdirectory(DwarfPlatform)
+add_subdirectory(DwarfMultithreading)
 add_subdirectory(DwarfResources)
 add_subdirectory(DwarfInput)
 add_subdirectory(DwarfRender)
