@@ -1,11 +1,5 @@
 cmake_minimum_required (VERSION 3.1)
 
-option(DwarvenCore_TESTS "Enable build of tests" OFF)
-
-if(DwarvenCore_TESTS)
-	add_subdirectory(Tests)
-endif()
-
 df_setup_module(
 	NAME
 		DwarvenCore

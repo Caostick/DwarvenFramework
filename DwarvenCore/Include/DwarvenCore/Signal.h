@@ -10,7 +10,7 @@ class Signal {
 public:
     Signal();
 
-    auto Connect(std::function<void(Args...)> const& func)->SlotId;
+	auto Connect(const std::function<void(Args...)>& func)->SlotId;
 
     template <typename T>
     auto Connect(T* inst, void (T::* func)(Args...))->SlotId;
