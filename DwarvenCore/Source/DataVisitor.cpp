@@ -10,22 +10,22 @@ void df::DataVisitor::Visit(bool& value) {
 
 
 
-df::WriteDataVisitor::WriteDataVisitor(uint8* data)
-    : m_Data(data) {
+df::WriteDataVisitor::WriteDataVisitor(void* data)
+    : m_Data(reinterpret_cast<uint8*>(data)) {
 }
 
-void df::WriteDataVisitor::VisitBuffer(uint8* data, uint32 size) {
+void df::WriteDataVisitor::VisitBuffer(void* data, size_t size) {
     df::MemCpy(m_Data, data, size);
     m_Data += size;
 }
 
 
 
-df::ReadDataVisitor::ReadDataVisitor(uint8* data)
-    : m_Data(data) {
+df::ReadDataVisitor::ReadDataVisitor(void* data)
+    : m_Data(reinterpret_cast<uint8*>(data)) {
 }
 
-void df::ReadDataVisitor::VisitBuffer(uint8* data, uint32 size) {
+void df::ReadDataVisitor::VisitBuffer(void* data, size_t size) {
     df::MemCpy(data, m_Data, size);
     m_Data += size;
 }

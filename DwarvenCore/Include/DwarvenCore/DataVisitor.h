@@ -10,16 +10,14 @@ namespace df {
         template<typename T>
         void Visit(T& value);
 
-    protected:
-        virtual void VisitBuffer(uint8* data, uint32 size) = 0;
+        virtual void VisitBuffer(void* data, size_t size) = 0;
     };
 
     class ReadDataVisitor : public DataVisitor {
     public:
-        ReadDataVisitor(uint8* data);
+        ReadDataVisitor(void* data);
 
-    protected:
-        void VisitBuffer(uint8* data, uint32 size) override;
+        void VisitBuffer(void* data, size_t size) override;
 
     private:
         uint8* m_Data;
@@ -27,10 +25,9 @@ namespace df {
 
     class WriteDataVisitor : public DataVisitor {
     public:
-        WriteDataVisitor(uint8* data);
+        WriteDataVisitor(void* data);
 
-    protected:
-        void VisitBuffer(uint8* data, uint32 size) override;
+        void VisitBuffer(void* data, size_t size) override;
         
     private:
         uint8* m_Data;
