@@ -2,8 +2,9 @@
 
 #include <DwarfResources/Resource.h>
 #include <DwarfResources/ResourceLoader.h>
-#include <DwarfResources/IFileSystem.h>
-#include <DwarfResources/IFile.h>
+
+#include <DwarfFileSystem/FileSystem.h>
+#include <DwarfFileSystem/File.h>
 
 #include <DwarvenCore/String.h>
 #include <DwarvenCore/StringView.h>
@@ -84,7 +85,7 @@ namespace df {
 		template<typename T>
 		friend class df::Resource;
 	public:
-		ResourceManager(const df::IFileSystem& fileSystem, const df::StringView& dataPath);
+		ResourceManager(const df::FileSystem& fileSystem, const df::StringView& dataPath);
 		~ResourceManager();
 
 		void SetupModules(const df::Vector<df::String>& activeModules);
@@ -119,7 +120,7 @@ namespace df {
 
 		auto MakeFilePath(int moduleIndex, const df::StringView& name, const df::StringView& extension)->df::String;
 
-		const df::IFileSystem& m_FileSystem;
+		const df::FileSystem& m_FileSystem;
 		const df::String m_DataPath;
 
 		df::Vector<df_private::ActiveModuleSet> m_ModuleSets;

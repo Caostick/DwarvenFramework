@@ -1,12 +1,12 @@
 #include <DwarfResources/ResourceManager.h>
 #include <DwarfResources/Data.h>
-#include <DwarfResources/IFileSystem.h>
-#include <DwarfResources/IFile.h>
+#include <DwarfFileSystem/FileSystem.h>
+#include <DwarfFileSystem/File.h>
 
 
 #include <assert.h>
 
-df::ResourceManager::ResourceManager(const df::IFileSystem& fileSystem, const df::StringView& dataPath)
+df::ResourceManager::ResourceManager(const df::FileSystem& fileSystem, const df::StringView& dataPath)
 	: m_FileSystem(fileSystem) 
 	, m_DataPath(dataPath) 
 	, m_ActiveModuleSetIndex(0)
@@ -32,7 +32,10 @@ void df::ResourceManager::SetupModules(const df::Vector<df::String>& activeModul
 	}
 
 	if (m_ActiveModuleSetIndex == -1) {
-		m_ModuleSets.emplace_back(df_private::ActiveModuleSet({ activeModules }));
+		df_private::ActiveModuleSet set = {};
+		set.m_ActiveModules = activeModules;
+
+		m_ModuleSets.emplace_back(set);
 		m_ActiveModuleSetIndex = int(m_ModuleSets.size()) - 1;
 	}
 }

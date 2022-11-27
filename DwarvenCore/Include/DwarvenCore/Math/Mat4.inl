@@ -127,8 +127,8 @@ auto TMat4<type>::Translation(type x, type y, type z) -> TMat4<type> {
 
 template<typename type>
 auto TMat4<type>::RotationX(const type angle) -> TMat4<type> {
-	const type s = sin(angle);
-	const type c = cos(angle);
+	const type s = type(sin(angle));
+	const type c = type(cos(angle));
 	return TMat4<type>(
 		type(1), type(0), type(0), type(0),
 		type(0), c, -s, type(0),
@@ -138,8 +138,8 @@ auto TMat4<type>::RotationX(const type angle) -> TMat4<type> {
 
 template<typename type>
 auto TMat4<type>::RotationY(const type angle) -> TMat4<type> {
-	const type s = sin(angle);
-	const type c = cos(angle);
+	const type s = type(sin(angle));
+	const type c = type(cos(angle));
 	return TMat4<type>(
 		c, type(0), s, type(0),
 		type(0), type(1), type(0), type(0),
@@ -247,7 +247,7 @@ auto TMat4<type>::Ortho(type xMin, type xMax, type yMin, type yMax, type zMin, t
 
 template<typename type>
 auto TMat4<type>::Perspective(type fov, type aspect, type zNear, type zFar) -> TMat4<type> {
-	const type ymax = zNear * tan(fov / type(2));
+	const type ymax = zNear * type(tan(fov / type(2)));
 	const type ymin = ymax;
 	const type xmax = ymax * aspect;
 	const type xmin = ymin * aspect;

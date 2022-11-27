@@ -61,8 +61,8 @@ auto TMat3<type>::Transposed(const TMat3<type>& mat) -> TMat3<type> {
 
 template<typename type>
 auto TMat3<type>::RotationX(type angle) -> TMat3<type> {
-	const type s = sin(angle);
-	const type c = cos(angle);
+	const type s = type(sin(angle));
+	const type c = type(cos(angle));
 	return TMat3<type>(
 		type(1), type(0), type(0),
 		type(0), c, -s,
@@ -71,8 +71,8 @@ auto TMat3<type>::RotationX(type angle) -> TMat3<type> {
 
 template<typename type>
 auto TMat3<type>::RotationY(type angle) -> TMat3<type> {
-	const type s = sin(angle);
-	const type c = cos(angle);
+	const type s = type(sin(angle));
+	const type c = type(cos(angle));
 	return TMat3<type>(
 		c, type(0), s,
 		type(0), type(1), type(0),
@@ -81,8 +81,8 @@ auto TMat3<type>::RotationY(type angle) -> TMat3<type> {
 
 template<typename type>
 auto TMat3<type>::RotationZ(type angle) -> TMat3<type> {
-	const type s = sin(angle);
-	const type c = cos(angle);
+	const type s = type(sin(angle));
+	const type c = type(cos(angle));
 	return TMat3<type>(
 		c, -s, type(0),
 		s, c, type(0),
@@ -91,8 +91,8 @@ auto TMat3<type>::RotationZ(type angle) -> TMat3<type> {
 
 template<typename type>
 auto TMat3<type>::Rotation(type angle, const TVec3<type>& axis) -> TMat3<type> {
-	const type s = sin(angle);
-	const type c = cos(angle);
+	const type s = type(sin(angle));
+	const type c = type(cos(angle));
 	const TVec3<type> n = TVec3<type>::Normalized(axis);
 	return TMat3<type>(
 		c + n.X * n.X * (type(1) - c),

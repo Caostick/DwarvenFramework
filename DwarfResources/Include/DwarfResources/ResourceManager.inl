@@ -262,5 +262,11 @@ auto df::ResourceManager::GetResourceId(const df::StringView& name) const->df::R
 		return df::ResourceId::Invalid;
 	}
 
-	return df::ResourceId({ uint64(1), uint64(1), uint64(m_ActiveModuleSetIndex), uint64(resTypeId), uint64(resourceIndex) });
+	df::ResourceId id = {};
+	id.m_IsValid = uint64(1);
+	id.m_IsAssigned = uint64(1);
+	id.m_ModuleSet = uint64(m_ActiveModuleSetIndex);
+	id.m_ResourceTypeId = uint64(resTypeId);
+	id.m_ResourceIndex = uint64(resourceIndex);
+	return id;
 }

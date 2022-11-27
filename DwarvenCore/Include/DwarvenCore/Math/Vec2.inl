@@ -29,7 +29,7 @@ TVec2<type>::TVec2(const TVec2<type2>& xy)
 
 template<typename type>
 void TVec2<type>::Normalize() {
-	const type length = Vec2::Length(vec);
+	const type length = TVec2<type>::Length();
 	X /= (length < type(0.000001)) ? type(1) : length;
 	Y /= (length < type(0.000001)) ? type(1) : length;
 }
@@ -56,7 +56,7 @@ auto TVec2<type>::Length(const TVec2<type>& vec) -> type {
 
 template<typename type>
 auto TVec2<type>::Normalized(const TVec2<type>& vec) -> TVec2<type> {
-	const type length = Vec2::Length(vec);
+	const type length = TVec2<type>::Length(vec);
 	return (length < type(0.000001)) ? TVec2<type>(type(0), type(0)) : TVec2<type>(vec.X / length, vec.Y / length);
 }
 
@@ -72,8 +72,8 @@ auto TVec2<type>::Cross(const TVec2<type>& left, const TVec2<type>& right) -> ty
 
 template<typename type>
 auto TVec2<type>::Angle(const TVec2<type>& left, const TVec2<type>& right) -> type {
-	const type cr = type(Vec2::Cross<type>(left, right) > type(0)) * type(2) - type(1);
-	return acos(Vec2::Dot<type>(left, right)) * cr;
+	const type cr = type(TVec2<type>::Cross(left, right) > type(0)) * type(2) - type(1);
+	return acos(TVec2<type>::Dot(left, right)) * cr;
 }
 
 template<typename type>

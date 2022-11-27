@@ -57,7 +57,7 @@ auto ComputeQTangentFromTangentFrame(TVec3<type> tangent, TVec3<type> binormal, 
 	const bool flipSign = (!isNegative && s < 0.0f) || (isNegative && s > 0.0f);
 
 	if ((isNegative || flipSign) && fabsf(qTangent.W) < threshold) {
-		const type renomalization = sqrt(1.0f - threshold * threshold);
+		const type renomalization = type(sqrt(type(1)) - threshold * threshold);
 
 		qTangent.W = isNegative ? -threshold : threshold;
 		qTangent.Z *= renomalization;
@@ -71,5 +71,5 @@ auto ComputeQTangentFromTangentFrame(TVec3<type> tangent, TVec3<type> binormal, 
 		qTangent *= -1.0f;
 	}
 
-	return Vec4(qTangent.X, qTangent.Y, qTangent.Z, qTangent.W);
+	return TVec4<type>(qTangent.X, qTangent.Y, qTangent.Z, qTangent.W);
 }

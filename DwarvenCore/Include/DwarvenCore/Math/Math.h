@@ -10,6 +10,8 @@ template<typename type> struct TPlane;
 template<typename type> struct TTransform;
 template<typename type> class TFrustum;
 
+#include <DwarvenCore/Types.h>
+
 #include <DwarvenCore/Math/Vec2.h>
 #include <DwarvenCore/Math/Vec3.h>
 #include <DwarvenCore/Math/Vec4.h>
@@ -142,12 +144,12 @@ using DPlane = TPlane<double>;
 using DFrustum = TFrustum<double>;
 using DTransform = TTransform<double>;
 
-using IVec2 = TVec2<int32_t>;
-using IVec3 = TVec3<int32_t>;
-using IVec4 = TVec4<int32_t> ;
+using IVec2 = TVec2<int32>;
+using IVec3 = TVec3<int32>;
+using IVec4 = TVec4<int32> ;
 
-using UIVec2 = TVec2<uint32_t>;
-using UIVec3 = TVec3<uint32_t>;
-using UIVec4 = TVec4<uint32_t>;
+using UIVec2 = TVec2<uint32>;
+using UIVec3 = TVec3<uint32>;
+using UIVec4 = TVec4<uint32>;
 
 #include <DwarvenCore/Math/Math.inl>

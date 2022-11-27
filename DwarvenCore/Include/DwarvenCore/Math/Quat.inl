@@ -28,17 +28,17 @@ TQuat<type>::TQuat(const TQuat<type2>& other)
 
 template<typename type>
 void QuaternionToEulerAngles(const TQuat<type>& quat, type& pitch, type& yaw, type& roll) {
-	const type t0 = type(2) * (W * X + Y * Z);
-	const type t1 = type(1) - type(2) * (X * X + Y * Y);
+	const type t0 = type(2) * (quat.W * quat.X + quat.Y * quat.Z);
+	const type t1 = type(1) - type(2) * (quat.X * quat.X + quat.Y * quat.Y);
 	roll = atan2(t0, t1);
 
-	type t2 = type(2) * (W * Y - Z * X);
+	type t2 = type(2) * (quat.W * quat.Y - quat.Z * quat.X);
 	t2 = t2 > type(1) ? type(1) : t2;
 	t2 = t2 < type(-1) ? type(-1) : t2;
 	pitch = asin(t2);
 
-	const type t3 = type(2) * (W * Z + X * Y);
-	const type t4 = type(1) - type(2) * (Y * Y + Z * Z);
+	const type t3 = type(2) * (quat.W * quat.Z + quat.X * quat.Y);
+	const type t4 = type(1) - type(2) * (quat.Y * quat.Y + quat.Z * quat.Z);
 	yaw = atan2(t3, t4);
 }
 
@@ -72,28 +72,28 @@ auto QuaternionFromMatrix(const TMat3<type>& mat) -> TQuat<type> {
 	const type t = mat.M[0] + mat.M[4] + mat.M[8];
 
 	if (t > type(0)) {
-		const type s = sqrt(type(1) + t) * type(2);
+		const type s = type(sqrt(type(1)) + t) * type(2);
 		return TQuat<type>(
 			(mat.M[7] - mat.M[5]) / s,
 			(mat.M[2] - mat.M[6]) / s,
 			(mat.M[3] - mat.M[1]) / s,
 			type(0.25) * s);
 	} else if (mat.M[0] > mat.M[4] && mat.M[0] > mat.M[8]) {
-		const type s = sqrt(type(1) + mat.M[0] - mat.M[4] - mat.M[8]) * type(2);
+		const type s = type(sqrt(type(1) + mat.M[0] - mat.M[4] - mat.M[8])) * type(2);
 		return TQuat<type>(
 			type(0.25) * s,
 			(mat.M[3] + mat.M[1]) / s,
 			(mat.M[2] + mat.M[6]) / s,
 			(mat.M[7] - mat.M[5]) / s);
 	} else if (mat.M[4] > mat.M[8]) {
-		const type s = sqrt(type(1) + mat.M[4] - mat.M[0] - mat.M[8]) * type(2);
+		const type s = type(sqrt(type(1) + mat.M[4] - mat.M[0] - mat.M[8])) * type(2);
 		return TQuat<type>(
 			(mat.M[3] + mat.M[1]) / s,
 			type(0.25) * s,
 			(mat.M[7] + mat.M[5]) / s,
 			(mat.M[2] - mat.M[6]) / s);
 	} else {
-		const type s = sqrt(type(1) + mat.M[8] - mat.M[0] - mat.M[4]) * type(2);
+		const type s = type(sqrt(type(1) + mat.M[8] - mat.M[0] - mat.M[4])) * type(2);
 		return TQuat<type>(
 			(mat.M[2] + mat.M[6]) / s,
 			(mat.M[7] + mat.M[5]) / s,

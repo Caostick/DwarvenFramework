@@ -9,7 +9,7 @@ bool LinesIntersection(
     const TVec2<type> dir1 = endA - startA;
     const TVec2<type> dir2 = endB - startB;
 
-    if(Vec2::Cross<type>(dir1, dir2) == type(0)) {
+    if(TVec2<type>::Cross(dir1, dir2) == type(0)) {
         return false;
     }
 

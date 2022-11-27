@@ -1,5 +1,6 @@
 #include <DwarfResources/Data.h>
-#include <DwarfResources/IFileSystem.h>
+
+#include <DwarfFileSystem/FileSystem.h>
 
 #include <DwarvenCore/HashMap.h>
 #include <DwarvenCore/String.h>
@@ -26,7 +27,7 @@ namespace {
 	}
 }
 
-df::Data::Data(const df::IFileSystem& fileSystem) 
+df::Data::Data(const df::FileSystem& fileSystem) 
 	: m_FileSystem(fileSystem) {
 }
 

@@ -6,7 +6,7 @@
 #include <DwarvenCore/Types.h>
 
 namespace df {
-	class IFileSystem;
+	class FileSystem;
 }
 
 namespace df {
@@ -22,7 +22,7 @@ namespace df {
 
 	class Data {
 	public:
-		Data(const df::IFileSystem& fileSystem);
+		Data(const df::FileSystem& fileSystem);
 
 		bool Parse(const df::StringView& dataPath);
 
@@ -35,7 +35,7 @@ namespace df {
 		auto GetExtension(uint32 index) const -> const df::String&;
 
 	private:
-		const df::IFileSystem& m_FileSystem;
+		const df::FileSystem& m_FileSystem;
 
 		df::Vector<df::String> m_Extensions;
 		df::Vector<df::String> m_Modules;

@@ -1,10 +1,14 @@
 #pragma once
 
 template<typename type>
-TPlane<type>::TPlane() : A(type(0)), B(type(1)), C(type(0)), D(type(0)) {}
+TPlane<type>::TPlane() 
+	: N(type(0), type(1), type(0))
+	, D(type(0)) {}
 
 template<typename type>
-TPlane<type>::TPlane(type a, type b, type c, type d) : A(a), B(b), C(c), D(d) {}
+TPlane<type>::TPlane(type a, type b, type c, type d) 
+	: N(a, b, c)
+	, D(d) {}
 
 template<typename type>
 TPlane<type>::TPlane(const TVec3<type>& normal, const TVec3<type>& point) {
