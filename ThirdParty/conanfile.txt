@@ -1,6 +1,6 @@
 [requires]
-glslang/master
-assimp/master
+glslang/8.13.3559
+assimp/5.2.2
 catch2/2.13.9
 glfw/3.3.8
 sol2/3.3.0
