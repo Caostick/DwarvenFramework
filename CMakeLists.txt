@@ -2,6 +2,9 @@ cmake_minimum_required (VERSION 3.1)
 
 include(CMake/Module.cmake)
 
+include(ThirdParty/conanbuildinfo.cmake)
+conan_basic_setup(NO_OUTPUT_DIRS TARGETS)
+
 option(DF_ENABLE_TESTS "Enable build of tests" ON)
 
 add_definitions(-DGLFW_WINDOW_IMPLEMENTATION)
@@ -15,6 +18,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /WX")
 add_subdirectory(DwarvenCore)
 
 add_subdirectory(DwarfPlatform)
+add_subdirectory(DwarfProfiling)
 add_subdirectory(DwarfMultithreading)
 add_subdirectory(DwarfFileSystem)
 add_subdirectory(DwarfResources)

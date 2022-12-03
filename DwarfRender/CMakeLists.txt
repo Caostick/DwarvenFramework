@@ -1,8 +1,5 @@
 cmake_minimum_required (VERSION 3.1)
 
-include(../ThirdParty/conanbuildinfo.cmake)
-conan_basic_setup(NO_OUTPUT_DIRS TARGETS)
-
 df_setup_module(
 	NAME
 		DwarfRender
