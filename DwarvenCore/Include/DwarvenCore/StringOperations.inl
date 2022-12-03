@@ -38,6 +38,26 @@ bool df::CompareNoCase(const TStringView<T>& a, const TStringView<T>& b) {
 }
 
 template<typename T>
+auto df::ToLower(const TStringView<T>& string) -> TString<T> {
+	String result(string);
+	for(auto&& c : result) {
+		c = (T)std::tolower(int(c));
+	}
+
+	return result;
+}
+
+template<typename T>
+auto df::ToUpper(const TStringView<T>& string) -> TString<T> {
+	String result(string);
+	for(auto&& c : result) {
+		c = (T)std::toupper(int(c));
+	}
+
+	return result;
+}
+
+template<typename T>
 auto df::Find(const TStringView<T>& string, T symbol) -> int {
 	int idx = 0;
 	for (auto c : string) {

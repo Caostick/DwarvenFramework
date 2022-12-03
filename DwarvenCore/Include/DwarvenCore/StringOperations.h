@@ -19,6 +19,12 @@ namespace df {
 	bool CompareNoCase(const TStringView<T>& a, const TStringView<T>& b);
 
 	template<typename T>
+	auto ToLower(const TStringView<T>& string) -> TString<T>;
+
+	template<typename T>
+	auto ToUpper(const TStringView<T>& string) -> TString<T>;
+
+	template<typename T>
 	auto Find(const TStringView<T>& string, T symbol) -> int;
 
 	template<typename T>

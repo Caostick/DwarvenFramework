@@ -134,4 +134,20 @@ TEST_CASE("String Operations") {
 		REQUIRE(!df::EqualPart(str, substring2));
 		REQUIRE(!df::EqualPart(str2, substring));
 	}
+
+	SECTION("To Lower") {
+		const df::String str = "Hello, World!";
+		const df::String ref = "hello, world!";
+		const df::String conv = df::ToLower<char>(str);
+
+		REQUIRE(ref == conv);
+	}
+
+	SECTION("To Upper") {
+		const df::String str = "Hello, World!";
+		const df::String ref = "HELLO, WORLD!";
+		const df::String conv = df::ToUpper<char>(str);
+
+		REQUIRE(ref == conv);
+	}
 }
