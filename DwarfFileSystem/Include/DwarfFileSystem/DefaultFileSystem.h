@@ -9,5 +9,6 @@ namespace df {
 		auto OpenFile(const df::StringView& filePath, EFileAccess access) const->df::File* override;
 		void CloseFile(df::File* file) const override;
 		bool CreateDirectory(const df::StringView& dirPath) const override;
+		auto GetUserLocalDirectory() const->String override;
 	};
 }

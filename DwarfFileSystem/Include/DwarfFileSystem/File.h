@@ -3,6 +3,10 @@
 #include <DwarfFileSystem/FileData.h>
 
 namespace df {
+	class FileSystem;
+}
+
+namespace df {
 	class File {
 	public:
 		virtual ~File() {}
@@ -11,6 +15,7 @@ namespace df {
 		virtual void Write(void* buffer, size_t size) = 0;
 		virtual void Read(void* buffer, size_t size) = 0;
 		virtual auto GetSize() const->size_t = 0;
+		virtual auto GetFileSystem() const->FileSystem* = 0;
 
 		template<typename T>
 		void Write(const T& value) {

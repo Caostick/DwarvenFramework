@@ -3,8 +3,9 @@
 #include <DwarvenCore/Assert.h>
 #include <DwarvenCore/New.h>
 
-df::DefaultWriteAccessFile::DefaultWriteAccessFile(FILE* file)
-	: m_File(file) {}
+df::DefaultWriteAccessFile::DefaultWriteAccessFile(FILE* file, FileSystem* fileSystem)
+	: m_File(file)
+	, m_FileSystem(fileSystem) {}
 
 df::DefaultWriteAccessFile::~DefaultWriteAccessFile() { fclose(m_File); }
 
@@ -28,4 +29,8 @@ auto df::DefaultWriteAccessFile::GetSize() const -> size_t {
 	fseek(m_File, 0, SEEK_SET);
 
 	return size;
+}
+
+auto df::DefaultWriteAccessFile::GetFileSystem() const->FileSystem* {
+	return m_FileSystem;
 }

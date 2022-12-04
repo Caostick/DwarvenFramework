@@ -7,7 +7,7 @@
 namespace df {
 	class DefaultWriteAccessFile : public df::File {
 	public:
-		explicit DefaultWriteAccessFile(FILE* file);
+		explicit DefaultWriteAccessFile(FILE* file, FileSystem* fileSystem);
 		~DefaultWriteAccessFile() override;
 
 		auto MapData(size_t offset = 0, size_t size = 0)->df::FileData override;
@@ -16,7 +16,9 @@ namespace df {
 
 		auto GetSize() const->size_t override;
 
+		auto GetFileSystem() const ->FileSystem* override;
 	private:
+		FileSystem* m_FileSystem;
 		FILE* m_File;
 	};
 }

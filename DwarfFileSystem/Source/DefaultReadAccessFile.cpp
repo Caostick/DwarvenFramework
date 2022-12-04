@@ -2,9 +2,10 @@
 
 #include <DwarvenCore/New.h>
 
-df::DefaultReadAccessFile::DefaultReadAccessFile(FILE* file)
+df::DefaultReadAccessFile::DefaultReadAccessFile(FILE* file, FileSystem* fileSystem)
 	: m_Size(0)
-	, m_File(file) {
+	, m_File(file) 
+	, m_FileSystem(fileSystem) {
 	fseek(m_File, 0, SEEK_END);
 	m_Size = ftell(m_File);
 	fseek(m_File, 0, SEEK_SET);
@@ -35,3 +36,7 @@ void df::DefaultReadAccessFile::Read(void* buffer, size_t size) {
 }
 
 auto df::DefaultReadAccessFile::GetSize() const -> size_t { return m_Size; }
+
+auto df::DefaultReadAccessFile::GetFileSystem() const->FileSystem* {
+	return m_FileSystem;
+}
