@@ -373,121 +373,121 @@ bool vk::GraphicsPipeline::Build() {
 }
 
 void vk::GraphicsPipeline::SetBlendEnabled(bool value) {
-	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
+	DFAssert(m_IsBuilt, "Can't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_BlendState.m_BlendEnable = value;
 }
 
 void vk::GraphicsPipeline::SetColorBlendOp(df::EBlendOp value) {
-	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
+	DFAssert(m_IsBuilt, "Can't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_BlendState.m_ColorBlendOp = value;
 }
 
 void vk::GraphicsPipeline::SetAlphaBlendOp(df::EBlendOp value) {
-	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
+	DFAssert(m_IsBuilt, "Can't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_BlendState.m_AlphaBlendOp = value;
 }
 
 void vk::GraphicsPipeline::SetSrcColorBlendFactor(df::EBlendFactor value) {
-	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
+	DFAssert(m_IsBuilt, "Can't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_BlendState.m_SrcColorBlendFactor = value;
 }
 
 void vk::GraphicsPipeline::SetSrcAlphaBlendFactor(df::EBlendFactor value) {
-	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
+	DFAssert(m_IsBuilt, "Can't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_BlendState.m_SrcAlphaBlendFactor = value;
 }
 
 void vk::GraphicsPipeline::SetDstColorBlendFactor(df::EBlendFactor value) {
-	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
+	DFAssert(m_IsBuilt, "Can't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_BlendState.m_DstColorBlendFactor = value;
 }
 
 void vk::GraphicsPipeline::SetDstAlphaBlendFactor(df::EBlendFactor value) {
-	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
+	DFAssert(m_IsBuilt, "Can't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_BlendState.m_DstAlphaBlendFactor = value;
 }
 
 void vk::GraphicsPipeline::SetBlendState(df::EBlendState value) {
-	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
+	DFAssert(m_IsBuilt, "Can't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_BlendState = value;
 }
 
 void vk::GraphicsPipeline::SetDepthTestEnabled(bool value) {
-	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
+	DFAssert(m_IsBuilt, "Can't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_DepthState.m_DepthTestEnable = value;
 }
 
 void vk::GraphicsPipeline::SetDepthWriteEnabled(bool value) {
-	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
+	DFAssert(m_IsBuilt, "Can't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_DepthState.m_DepthWriteEnable = value;
 }
 
 void vk::GraphicsPipeline::SetStencilTestEnabled(bool value) {
-	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
+	DFAssert(m_IsBuilt, "Can't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_DepthState.m_StencilTestEnable = value;
 }
 
 void vk::GraphicsPipeline::SetDepthCompareOp(df::EDepthCompareOp value) {
-	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
+	DFAssert(m_IsBuilt, "Can't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_DepthState.m_DepthCompareOp = value;
 }
 
 void vk::GraphicsPipeline::SetStencilOp(df::EStencilOp value) {
-	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
+	DFAssert(m_IsBuilt, "Can't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_DepthState.m_StencilOp = value;
 }
 
 void vk::GraphicsPipeline::SetDepthStencilState(df::EDepthStencilState value) {
-	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
+	DFAssert(m_IsBuilt, "Can't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_DepthState = value;
 }
 
 void vk::GraphicsPipeline::SetRasterizerDiscardEnabled(bool value) {
-	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
+	DFAssert(m_IsBuilt, "Can't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_RasterizationState.m_RasterizerDiscardEnable = value;
 }
 
 void vk::GraphicsPipeline::SetPolygonMode(df::EPolygonMode value) {
-	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
+	DFAssert(m_IsBuilt, "Can't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_RasterizationState.m_PolygonMode = value;
 }
 
 void vk::GraphicsPipeline::SetFrontFace(df::EFrontFace value) {
-	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
+	DFAssert(m_IsBuilt, "Can't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_RasterizationState.m_FrontFace = value;
 }
 
 void vk::GraphicsPipeline::SetCullMode(df::ECullMode value) {
-	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
+	DFAssert(m_IsBuilt, "Can't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_RasterizationState.m_CullMode = value;
 }
 
 void vk::GraphicsPipeline::SetRasterizationState(df::ERasterizationState value) {
-	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
+	DFAssert(m_IsBuilt, "Can't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_RasterizationState = value;
 }
 
 void vk::GraphicsPipeline::SetPrimitiveTopology(df::EPrimitiveTopology value) {
-	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
+	DFAssert(m_IsBuilt, "Can't set pipeline property - pipeline is not built yet!");
 
 	m_State.m_PrimitiveTopology = value;
 }
@@ -497,7 +497,7 @@ auto vk::GraphicsPipeline::GetVertexAttributeBits() const -> const df::Bitset<64
 }
 
 auto vk::GraphicsPipeline::GetParameterSetSlot(vk::ParameterSet* parameterSet) const -> int32 {
-	DFAssert(m_IsBuilt, "Casn't set pipeline property - pipeline is not built yet!");
+	DFAssert(m_IsBuilt, "Can't set pipeline property - pipeline is not built yet!");
 
 	const auto* definition = &parameterSet->GetDefinition();
 
