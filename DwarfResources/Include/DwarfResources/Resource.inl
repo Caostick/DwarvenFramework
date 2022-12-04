@@ -1,107 +1,156 @@
 #pragma once
 
-#include <DwarfResources/ResourceManager.h>
+#include <DwarvenCore/Assert.h>
 
-template<typename T>
-df::Resource<T>::Resource() 
-	: m_ResourceId(df::ResourceId::Unassigned)
-	, m_ResourceManager(nullptr)
-	, m_Resource(nullptr) {
+template <typename DataType>
+df::TResource<DataType>::DataContainer::DataContainer(const StringView& guid, const StringView& path, const StringView& ext)
+	: m_RefCount(0) 
+	, m_GUID(String(guid))
+	, m_Path(String(path)) 
+	, m_Ext(String(ext)) {
+
 }
 
-template<typename T>
-df::Resource<T>::Resource(const df::ResourceManager* resourceManager, const df::ResourceId resourceId, const T* resource)
-	: m_ResourceManager(resourceManager)
-	, m_ResourceId(resourceId)
-	, m_Resource(resource) {
+template <typename DataType>
+auto df::TResource<DataType>::DataContainer::GetRefCount() const->int32 {
+	return m_RefCount;
+}
 
-	if (m_Resource) {
-		m_ResourceManager->AcquireResource<T>(resourceId);
+template <typename DataType>
+auto df::TResource<DataType>::DataContainer::GetGUID() const->const String& {
+	return m_GUID;
+}
+
+template <typename DataType>
+auto df::TResource<DataType>::DataContainer::GetPath() const->const String& {
+	return m_Path;
+}
+
+template <typename DataType>
+auto df::TResource<DataType>::DataContainer::GetExt() const->const String& {
+	return m_Ext;
+}
+
+template <typename DataType>
+auto df::TResource<DataType>::DataContainer::GetData()->Data& {
+	return m_Data;
+}
+
+template <typename DataType>
+auto df::TResource<DataType>::DataContainer::GetData() const -> const Data& {
+	return m_Data;
+}
+
+template <typename DataType>
+auto df::TResource<DataType>::DataContainer::TakeOne() -> int32 {
+	return ++m_RefCount;
+}
+
+template <typename DataType>
+auto df::TResource<DataType>::DataContainer::FreeOne() -> int32 {
+	return --m_RefCount;
+}
+
+
+template <typename DataType>
+df::TResource<DataType>::TResource()
+	: m_Data(nullptr) {
+}
+
+template <typename DataType>
+df::TResource<DataType>::TResource(DataContainer* data)
+	: m_Data(data) {
+	m_Data->TakeOne();
+}
+
+template <typename DataType>
+df::TResource<DataType>::TResource(const TResource &other)
+	: m_Data(other.m_Data) {
+	m_Data->TakeOne();
+}
+
+template <typename DataType>
+df::TResource<DataType>::TResource(TResource &&other)
+	: m_Data(other.m_Data) {
+	other.m_Data = nullptr;
+}
+
+template <typename DataType>
+df::TResource<DataType>::~TResource() {
+	if (m_Data) {
+		m_Data->FreeOne();
+		m_Data = nullptr;
 	}
 }
 
-template<typename T>
-df::Resource<T>::Resource(const Resource& other) {
-	m_ResourceId = other.m_ResourceId;
-	m_ResourceManager = other.m_ResourceManager;
-	m_Resource = other.m_Resource;
-
-	if (m_Resource) {
-		m_ResourceManager->AcquireResource(m_ResourceId);
-	}
-}
-
-template<typename T>
-df::Resource<T>::Resource(Resource&& other) {
-	m_ResourceId = other.m_ResourceId;
-	m_ResourceManager = other.m_ResourceManager;
-	m_Resource = other.m_Resource;
-
-	other.m_ResourceManager = nullptr;
-	other.m_Resource = nullptr;
-	other.m_ResourceId = df::ResourceId::Unassigned;
-}
-
-template<typename T>
-df::Resource<T>::~Resource() {
-	if (m_Resource) {
-		Clear();
-	}
-}
-
-template<typename T>
-void df::Resource<T>::Clear() {
-	if (m_ResourceManager) {
-		m_ResourceManager->FreeResource<T>(m_ResourceId);
-	}
-
-	m_ResourceManager = nullptr;
-	m_Resource = nullptr;
-	m_ResourceId = df::ResourceId::Unassigned;
-}
-
-template<typename T>
-bool df::Resource<T>::IsSet() {
-	return m_ResourceId != df::ResourceId::Unassigned;
-}
-
-template<typename T>
-auto df::Resource<T>::operator = (const df::Resource<T>& other) -> df::Resource<T>& {
-	m_ResourceId = other.m_ResourceId;
-	m_ResourceManager = other.m_ResourceManager;
-	m_Resource = other.m_Resource;
-
-	m_ResourceManager->AcquireResource<T>(m_ResourceId);
+template <typename DataType>
+auto df::TResource<DataType>::operator=(const TResource &other) -> TResource& {
+	m_Data = other.m_Data;
+	m_Data->TakeOne();
 
 	return *this;
 }
 
-template<typename T>
-auto df::Resource<T>::operator = (df::Resource<T>&& other) -> df::Resource<T>& {
-	m_ResourceId = other.m_ResourceId;
-	m_ResourceManager = other.m_ResourceManager;
-	m_Resource = other.m_Resource;
-
-	other.m_ResourceManager = nullptr;
-	other.m_Resource = nullptr;
-	other.m_ResourceId = df::ResourceId::Unassigned;
+template <typename DataType>
+auto df::TResource<DataType>::operator=(TResource &&other) -> TResource& {
+	m_Data = other.m_Data;
+	other.m_Data = nullptr;
 
 	return *this;
 }
 
-template<typename T>
-auto df::Resource<T>::operator->() const -> const T* {
-	return m_Resource;
+template <typename DataType>
+auto df::TResource<DataType>::GetContainer() -> DataContainer* {
+	return m_Data;
 }
 
-template<typename T>
-int df::ResourceInfo<T>::GetResourceTypeId() {
+template <typename DataType>
+auto df::TResource<DataType>::GetContainer() const -> const DataContainer* {
+	return m_Data;
+}
+
+template <typename DataType>
+auto df::TResource<DataType>::GetData()->DataType& {
+	DFAssert(m_Data != nullptr, "trying to get uninitialized resource data!");
+
+	return m_Data->GetData();
+}
+
+template <typename DataType>
+auto df::TResource<DataType>::GetData()const-> const DataType& {
+	DFAssert(m_Data != nullptr, "trying to get uninitialized resource data!");
+
+	return m_Data->GetData();
+}
+
+template <typename DataType>
+auto df::TResource<DataType>::operator -> ()->DataType* {
+	DFAssert(m_Data != nullptr, "trying to get uninitialized resource data!");
+
+	return &m_Data->GetData();
+}
+
+template <typename DataType>
+auto df::TResource<DataType>::operator -> () const -> const DataType* {
+	DFAssert(m_Data != nullptr, "trying to get uninitialized resource data!");
+
+	return &m_Data->GetData();
+}
+
+template <typename DataType>
+df::TResource<DataType>::operator bool() const {
+	return m_Data != nullptr;
+}
+
+
+template<typename ResourceType>
+int df::ResourceInfo<ResourceType>::GetResourceTypeId() {
 	return s_ResourceTypeId;
 }
 
-template<typename T>
-int df::ResourceInfo<T>::GetResourceTypeIdStaticTime() {
-	static int id = df::ResourceCapacity::s_ResourceTypeCount++;
-	static_assert(std::is_base_of<df::IResource, T>::value, "Type should be inherited from Resource!");
+template<typename ResourceType>
+int df::ResourceInfo<ResourceType>::GetResourceTypeIdStaticTime() {
+	static int id = df::ResourceTypeRegistry::s_TypeCount++;
+	static_assert(std::is_base_of<TResource<ResourceType::Data>, ResourceType>::value, "ResourceType should be inherited from TResource!");
 	return id;
 }

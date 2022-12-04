@@ -15,6 +15,9 @@ namespace df {
 
 	template<typename T>
 	auto OptimizePath(const TStringView<T>& filePath) -> TString<T>;
+
+	template<typename T>
+	auto GetRelative(const TStringView<T>& directory, const TStringView<T>& filePath)->TString<T>;
 }
 
 #include <DwarvenCore/FileNameOperations.inl>

@@ -15,8 +15,9 @@ df_setup_module(
 		Source/Loaders/*.h
 		Source/Loaders/*.inl
 		Source/Loaders/*.cpp
-
+		
 	DEPENDENCIES
 		DwarvenCore
 		DwarfFileSystem
+		DwarfMultithreading
 )

@@ -17,6 +17,7 @@
 
 #include <DwarvenCore/Assert.h>
 #include <DwarvenCore/DebugName.h>
+#include <DwarvenCore/StringOperations.h>
 #include <DwarvenCore/Memory.h>
 
 vk::RenderCore::RenderCore() 
@@ -462,7 +463,7 @@ void vk::RenderCore::AddShaderInclude(const df::StringView& name, const df::Stri
 }
 
 auto vk::RenderCore::GetShaderInclude(const df::StringView& name) const->const df::String& {
-	const auto& it = m_ShaderIncludes.find(df::String(name));
+	const auto& it = m_ShaderIncludes.find(df::ToLower<char>(name));
 	if (it != m_ShaderIncludes.end()) {
 		return it->second;
 	}

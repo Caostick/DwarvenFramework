@@ -54,6 +54,7 @@ function(df_setup_app)
 	
 	add_executable (${DF_NAME} ${SRC_FILES})
 	set_property(TARGET ${DF_NAME} PROPERTY CXX_STANDARD ${CPP_VERSION})
+	set_property(TARGET ${DF_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/Bin")
 
 	target_include_directories(${DF_NAME} PRIVATE Code/)
 

@@ -5,69 +5,61 @@
 #include <DwarvenCore/Types.h>
 
 namespace df {
-	class ResourceManager;
-}
-
-namespace df {
-	struct ResourceId {
-		ResourceId() = default;
-		ResourceId(const ResourceId&) = default;
-		ResourceId(ResourceId&&) = default;
-		ResourceId& operator = (const ResourceId&) = default;
-		ResourceId& operator = (ResourceId&&) = default;
-
-		auto operator == (const ResourceId& other) const -> bool;
-		auto operator != (const ResourceId& other) const -> bool;
-
-		// Tells if resource is mapped
-		uint64 m_IsValid : 1;
-
-		// Tells if id was assigned
-		uint64 m_IsAssigned : 1;
-
-		// Module set id in resource manager. Needed to prevent of using resourceId after changing module set.
-		uint64 m_ModuleSet : 8;
-
-		// Resource type id. Corresponds to resource type container in resource manager
-		uint64 m_ResourceTypeId : 10;
-
-		// Resource index in resource type container
-		uint64 m_ResourceIndex : 44;
-
-		static const ResourceId Unassigned;
-		static const ResourceId Invalid;
-	};
-
-	template<typename T>
-	class Resource {
+	template<typename DataType>
+	class TResource {
 	public:
-		Resource();
-		Resource(const df::ResourceManager* resourceManager, const df::ResourceId resourceId, const T* resource);
-		Resource(const Resource& other);
-		Resource(Resource&& other);
-		~Resource();
+		using Data = DataType;
+		struct DataContainer {
+			DataContainer(const StringView& guid, const StringView& path, const StringView& ext);
 
-		void Clear();
-		bool IsSet();
+			auto GetRefCount() const->int32;
+			auto GetGUID() const->const String&;
+			auto GetPath() const->const String&;
+			auto GetExt() const->const String&;
+			auto GetData()->Data&;
+			auto GetData() const -> const Data&;
 
-		auto operator = (const Resource& other) -> df::Resource<T>&;
-		auto operator = (Resource&& other) -> df::Resource<T>&;
+			auto TakeOne()->int32;
+			auto FreeOne()->int32;
 
-		operator bool() const { return m_Resource != nullptr; }
-		auto operator->() const -> const T*;
+		private:
+			int32 m_RefCount = 0;
+			String m_GUID;
+			String m_Path;
+			String m_Ext;
+			Data m_Data;
+		};
+
+	public:
+		TResource();
+		TResource(DataContainer* data);
+		TResource(const TResource& other);
+		TResource(TResource&& other);
+		~TResource();
+
+		auto operator = (const TResource& other) -> TResource&;
+		auto operator = (TResource&& other) -> TResource&;
+
+		auto GetContainer() -> DataContainer*;
+		auto GetContainer() const -> const DataContainer*;
+
+		auto GetData()->DataType&;
+		auto GetData()const-> const DataType&;
+
+		auto operator -> () -> DataType*;
+		auto operator -> () const -> const DataType*;
+
+		operator bool() const;
 
 	private:
-		df::ResourceId m_ResourceId = df::ResourceId::Unassigned;
-
-		const df::ResourceManager* m_ResourceManager = nullptr;
-		const T* m_Resource = nullptr;
+		DataContainer* m_Data = nullptr;
 	};
 
-	struct ResourceCapacity {
-		static int s_ResourceTypeCount;
+	struct ResourceTypeRegistry {
+		static int s_TypeCount;
 	};
 
-	template<typename T>
+	template<typename ResourceType>
 	struct ResourceInfo {
 	public:
 		static int s_ResourceTypeId;
@@ -78,13 +70,8 @@ namespace df {
 		static int GetResourceTypeIdStaticTime();
 	};
 
-	class IResource {
-	public:
-		virtual ~IResource() {}
-	};
-
-	template<typename T>
-	int df::ResourceInfo<T>::s_ResourceTypeId = df::ResourceInfo<T>::GetResourceTypeIdStaticTime();
+	template<typename ResourceType>
+	int ResourceInfo<ResourceType>::s_ResourceTypeId = ResourceInfo<ResourceType>::GetResourceTypeIdStaticTime();
 }
 
 #include <DwarfResources/Resource.inl>

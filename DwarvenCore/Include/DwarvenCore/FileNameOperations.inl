@@ -77,3 +77,12 @@ auto df::OptimizePath(const TStringView<T>& filePath) -> TString<T> {
 
 	return result;
 }
+
+template<typename T>
+auto df::GetRelative(const TStringView<T>& directory, const TStringView<T>& filePath)->TString<T> {
+	if (TString<T>(filePath.begin(), filePath.begin() + directory.size()) == directory) {
+		return TString<T>(filePath.begin() + directory.size(), filePath.end());
+	}
+
+	return TString<T>(filePath);
+}
