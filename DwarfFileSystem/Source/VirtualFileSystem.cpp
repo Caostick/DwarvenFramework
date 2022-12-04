@@ -8,6 +8,8 @@ df::VirtualFileSystem::VirtualDirectory::VirtualDirectory(FileSystem& fileSystem
 	: m_FileSystem(fileSystem) {
 }
 
+
+
 auto df::VirtualFileSystem::GetFilesRecursive(const StringView& directory) const->Vector<String> {
 	auto&& [actualDir, fileSystem] = ToActualPath(directory);
 	if (!fileSystem) {
@@ -60,6 +62,8 @@ void df::VirtualFileSystem::CreateVirtualDirectory(const StringView& virtualDir,
 			return;
 		}
 	}
+
+	// @TODO: Sort directories to make possible v dirs like "Data/Shaders/" along "Data/"
 
 	m_VirtualDirectories.emplace_back(dir);
 }

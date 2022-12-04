@@ -72,7 +72,9 @@ auto df::DefaultFileSystem::GetUserLocalDirectory() const->String {
 	size_t count = 0;
 	_dupenv_s(&buffer, &count, "APPDATA");
 	if (buffer) {
-		return FixSlash<char>(buffer);
+		const String result = FixSlash<char>(buffer);
+		free(buffer);
+		return result;
 	}
 	return String("");
 }
