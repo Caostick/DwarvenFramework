@@ -19,5 +19,4 @@ df_setup_module(
 	THIRD_PARTY
 		CONAN_PKG::glslang
 		CONAN_PKG::assimp
-		CONAN_PKG::rapidjson
 )
