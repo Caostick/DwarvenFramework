@@ -83,6 +83,7 @@ namespace vk {
 	public:
 		auto GetName() const -> const df::String&;
 		auto MakeShaderSnippet(uint32 idx) const->df::String;
+		auto MakeShaderSnippet() const->df::String;
 		auto CreateDescriptorSet() -> VkDescriptorSet;
 
 		auto GetVkDescriptorSetLayout() const->VkDescriptorSetLayout;

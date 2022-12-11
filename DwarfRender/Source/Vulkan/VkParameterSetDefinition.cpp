@@ -318,6 +318,73 @@ auto vk::ParameterSetDefinition::MakeShaderSnippet(uint32 idx) const->df::String
 	return snippet;
 }
 
+auto vk::ParameterSetDefinition::MakeShaderSnippet() const->df::String {
+	df::String snippet;
+
+	snippet.reserve(1024);
+
+	if (!m_Constants.empty()) {
+		snippet += df::String("layout(set = #");
+		snippet += ", binding = ";
+		snippet += std::to_string(0);
+		snippet += ") uniform _";
+		snippet += m_Name;
+		snippet += "CB";
+		snippet += " {";
+		snippet += "\n";
+
+		for (const auto& constant : m_Constants) {
+			snippet += "    " + ShaderConstantTypeToString(constant->GetType()) + " ";
+			snippet += constant->m_Name;
+			snippet += ";";
+			snippet += "\n";
+		}
+
+		snippet += "} ";
+		snippet += m_Name;
+		snippet += "CB;";
+		snippet += "\n";
+		snippet += "\n";
+	}
+
+	if (!m_Buffers.empty()) {
+		for (const auto& buffer : m_Buffers) {
+			snippet += "layout(set = #";
+			snippet += ", binding = ";
+			snippet += std::to_string(buffer.m_Binding);
+			snippet += ") readonly buffer _";
+			snippet += buffer.m_Name;
+			snippet += " {\n";
+			snippet += "    ";
+			snippet += ShaderConstantTypeToString(buffer.m_DataType);
+			snippet += " Data[];\n";
+			snippet += "} ";
+			snippet += buffer.m_Name;
+			snippet += ";";
+
+			snippet += "\n";
+		}
+	}
+
+	if (!m_Textures.empty()) {
+		for (const auto& texture : m_Textures) {
+			snippet += "layout(set = #";
+			snippet += ", binding = ";
+			snippet += std::to_string(texture.m_Binding);
+			snippet += ") uniform sampler2D ";
+			snippet += texture.m_Name;
+			snippet += ";";
+
+			snippet += "\n";
+		}
+	}
+
+	snippet.shrink_to_fit();
+
+
+	return snippet;
+}
+
 auto vk::ParameterSetDefinition::CreateDescriptorSet()->VkDescriptorSet {
 	VkDevice vkDevice = m_RenderCore.GetVkDevice();
 	VkDescriptorPool vkDescriptorPool = m_RenderCore.GetVkDescriptorPool();

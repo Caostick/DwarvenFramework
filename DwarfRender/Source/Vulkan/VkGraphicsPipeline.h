@@ -46,6 +46,11 @@ namespace vk {
 		virtual void SetName(const df::StringView& name) override;
 		virtual void DeclareVertexShader(const df::StringView& code) override;
 		virtual void DeclareFragmentShader(const df::StringView& code) override;
+
+		virtual void SetupVertexShader(const df::Vector<uint32>& bytecode) override;
+		virtual void SetupFragmentShader(const df::Vector<uint32>& bytecode) override;
+		virtual void SetupVertexAttributes(const df::Vector<df::String>& vertexAttributes) override;
+		virtual void SetupParameterSets(const df::Vector<df::String>& parameterSets) override;
 		virtual bool Build() override;
 
 		virtual void SetBlendEnabled(bool value) override;
@@ -102,6 +107,9 @@ namespace vk {
 		df::String m_Name;
 		df::String m_VertexShaderCode;
 		df::String m_FragmentShaderCode;
+
+		df::Vector<uint32> m_VertexShaderSpirV;
+		df::Vector<uint32> m_FragmentShaderSpirV;
 
 		VkShaderModule m_VkVertexShaderModule;
 		VkShaderModule m_VkFragmentShaderModule;

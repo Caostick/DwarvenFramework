@@ -461,3 +461,10 @@ auto vk::VertexAttribute::MakeShaderSnippet(uint32 idx) const->df::String {
 
 	return df::String("layout(location = ") + strLocation + ") in " + strType + df::String(" ") + strName + df::String(";\n");
 }
+
+auto vk::VertexAttribute::MakeShaderSnippet() const->df::String {
+	const auto strType = ToShaderInOutString(ToShaderInOutType(m_Format));
+	const auto& strName = m_Name;
+
+	return df::String("layout(location = #) in ") + strType + df::String(" ") + strName + df::String(";");
+}

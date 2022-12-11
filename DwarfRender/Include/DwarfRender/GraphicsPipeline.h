@@ -5,10 +5,14 @@
 #include <DwarfRender/RasterizationState.h>
 #include <DwarfRender/PrimitiveTopology.h>
 
+#include <DwarvenCore/Types.h>
 #include <DwarvenCore/StringView.h>
+#include <DwarvenCore/String.h>
+#include <DwarvenCore/Vector.h>
 
 namespace df {
 	class ParameterSet;
+	struct VertexAttribute;
 }
 
 namespace df {
@@ -16,9 +20,14 @@ namespace df {
 	public:
 		virtual ~GraphicsPipeline() {}
 
-		virtual void SetName(const df::StringView& name) = 0;
-		virtual void DeclareVertexShader(const df::StringView& code) = 0;
-		virtual void DeclareFragmentShader(const df::StringView& code) = 0;
+		virtual void SetName(const StringView& name) = 0;
+		virtual void DeclareVertexShader(const StringView& code) = 0;
+		virtual void DeclareFragmentShader(const StringView& code) = 0;
+
+		virtual void SetupVertexShader(const Vector<uint32>& bytecode) = 0;
+		virtual void SetupFragmentShader(const Vector<uint32>& bytecode) = 0;
+		virtual void SetupVertexAttributes(const Vector<String>& vertexAttributes) = 0;
+		virtual void SetupParameterSets(const Vector<String>& parameterSets) = 0;
 		virtual bool Build() = 0;
 
 		virtual void SetBlendEnabled(bool value) = 0;

@@ -35,5 +35,6 @@ namespace vk {
 namespace vk {
 	struct VertexAttribute : public df::VertexAttribute {
 		auto MakeShaderSnippet(uint32 idx) const->df::String;
+		auto MakeShaderSnippet() const->df::String;
 	};
 }

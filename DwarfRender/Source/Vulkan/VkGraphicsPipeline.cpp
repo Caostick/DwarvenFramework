@@ -289,6 +289,34 @@ void vk::GraphicsPipeline::DeclareFragmentShader(const df::StringView& code) {
 	m_FragmentShaderCode = df::String(code);
 }
 
+void vk::GraphicsPipeline::SetupVertexShader(const df::Vector<uint32> &bytecode) {
+	DFAssert(!m_IsBuilt, "Casn't set up pipeline vertex shader - pipeline is already built!");
+
+	m_VertexShaderSpirV = bytecode;
+}
+
+void vk::GraphicsPipeline::SetupFragmentShader(const df::Vector<uint32> &bytecode) {
+	DFAssert(!m_IsBuilt, "Casn't set up pipeline fragment shader - pipeline is already built!");
+
+	m_FragmentShaderSpirV = bytecode;
+}
+
+void vk::GraphicsPipeline::SetupVertexAttributes(const df::Vector<df::String> &vertexAttributes) {
+	m_VertexAttributes.resize(vertexAttributes.size());
+
+	for (size_t i = 0; i < m_VertexAttributes.size(); ++i) {
+		m_VertexAttributes[i] = m_RenderCore.FindVertexAttribute(vertexAttributes[i]);
+	}
+}
+
+void vk::GraphicsPipeline::SetupParameterSets(const df::Vector<df::String> &parameterSets) {
+	m_ParameterSetDefinitions.resize(parameterSets.size());
+
+	for(size_t i = 0; i < m_ParameterSetDefinitions.size(); ++i) {
+		m_ParameterSetDefinitions[i] = m_RenderCore.FindParameterSetDefinition(parameterSets[i]);
+	}
+}
+
 bool vk::GraphicsPipeline::Build() {
 	auto shaderCompiler = m_RenderCore.GetShaderCompiler();
 

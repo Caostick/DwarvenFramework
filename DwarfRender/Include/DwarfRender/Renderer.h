@@ -22,32 +22,36 @@ namespace df {
 		virtual bool Init() = 0;
 		virtual void Release() = 0;
 
-		virtual void SetWindowSource(df::Window* window, df::Texture* texture) = 0;
+		virtual void SetWindowSource(Window* window, Texture* texture) = 0;
 
-		virtual auto CreateMesh()->df::Mesh* = 0;
-		virtual void DestroyMesh(df::Mesh* mesh) = 0;
+		virtual auto CreateMesh()->Mesh* = 0;
+		virtual void DestroyMesh(Mesh* mesh) = 0;
 
-		virtual auto CreateBuffer()->df::Buffer* = 0;
-		virtual void DestroyBuffer(df::Buffer* buffer) = 0;
+		virtual auto CreateBuffer()->Buffer* = 0;
+		virtual void DestroyBuffer(Buffer* buffer) = 0;
 
-		virtual auto CreateTexture()->df::Texture* = 0;
-		virtual void DestroyTexture(df::Texture* texture) = 0;
+		virtual auto CreateTexture()->Texture* = 0;
+		virtual void DestroyTexture(Texture* texture) = 0;
 
-		virtual auto CreateRenderPass()->df::RenderPass* = 0;
-		virtual void DestroyRenderPass(df::RenderPass* renderPass) = 0;
+		virtual auto CreateRenderPass()->RenderPass* = 0;
+		virtual void DestroyRenderPass(RenderPass* renderPass) = 0;
 
-		virtual auto RegisterVertexAttribute(const df::StringView& name, df::EVertexAttributeFormat format) -> const df::VertexAttribute* = 0;
-		virtual auto FindVertexAttribute(const df::StringView& name) const -> const df::VertexAttribute* = 0;
+		virtual auto RegisterVertexAttribute(const StringView& name, EVertexAttributeFormat format) -> const VertexAttribute* = 0;
+		virtual auto FindVertexAttribute(const StringView& name) const -> const VertexAttribute* = 0;
 
-		virtual auto CreateParameterSet(const df::StringView& className)->df::ParameterSet* = 0;
-		virtual void DestroyParameterSet(df::ParameterSet* parameterSet) = 0;
+		virtual auto CreateParameterSet(const StringView& className)->ParameterSet* = 0;
+		virtual void DestroyParameterSet(ParameterSet* parameterSet) = 0;
 
-		virtual void AddShaderInclude(const df::StringView& name, const df::StringView& content) = 0;
+		virtual void AddShaderInclude(const StringView& name, const StringView& content) = 0;
 
-		virtual auto CreateGraphicsPipeline()->df::GraphicsPipeline* = 0;
-		virtual void DestroyGraphicsPipeline(df::GraphicsPipeline* pipeline) = 0;
+		virtual auto CreateGraphicsPipeline()->GraphicsPipeline* = 0;
+		virtual void DestroyGraphicsPipeline(GraphicsPipeline* pipeline) = 0;
 
-		virtual auto BeginFrame()->df::CommandBuffer* = 0;
+		virtual auto BeginFrame()->CommandBuffer* = 0;
 		virtual void EndFrame() = 0;
+
+	public:
+		virtual auto MakeParameterSetSnippet(const StringView& className) const -> String = 0;
+		virtual auto MakeVertexAttributeSnippet(const StringView& name) const -> String = 0;
 	};
 }

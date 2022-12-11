@@ -6,9 +6,19 @@ df::Result<T, E>::Result(const T& result)
 	, m_Result(result) {}
 
 template<typename T, typename E>
+df::Result<T, E>::Result(T&& result)
+	: m_Succeded(true)
+	, m_Result(std::move(result)) {}
+
+template<typename T, typename E>
 df::Result<T, E>::Result(const E& result)
 	: m_Succeded(false)
 	, m_Error(result) {}
+
+template<typename T, typename E>
+df::Result<T, E>::Result(E&& result)
+	: m_Succeded(false)
+	, m_Error(std::move(result)) {}
 
 template<typename T, typename E>
 df::Result<T, E>::operator bool() const {

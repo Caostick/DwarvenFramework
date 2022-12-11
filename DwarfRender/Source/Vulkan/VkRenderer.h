@@ -49,6 +49,10 @@ namespace vk {
 		virtual auto BeginFrame()->df::CommandBuffer* override;
 		virtual void EndFrame() override;
 
+	public:
+		virtual auto MakeParameterSetSnippet(const df::StringView& className) const -> df::String override;
+		virtual auto MakeVertexAttributeSnippet(const df::StringView& name) const -> df::String override;
+
 	private:
 		vk::RenderCore m_RenderCore;
 	};

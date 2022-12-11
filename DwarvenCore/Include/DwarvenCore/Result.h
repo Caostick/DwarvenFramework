@@ -5,7 +5,9 @@ namespace df {
 	class Result {
 	public:
 		Result(const T& result);
+		Result(T&& result);
 		Result(const E& result);
+		Result(E&& result);
 		Result(const Result&) = default;
 		Result(Result&&) = default;
 		Result& operator = (const Result&) = default;

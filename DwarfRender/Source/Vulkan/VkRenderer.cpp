@@ -103,3 +103,21 @@ auto vk::Renderer::BeginFrame()->df::CommandBuffer* {
 void vk::Renderer::EndFrame() {
 	m_RenderCore.EndFrame();
 }
+
+auto vk::Renderer::MakeParameterSetSnippet(const df::StringView& className) const -> df::String {
+	auto def = m_RenderCore.FindParameterSetDefinition(className);
+	if(def) {
+		return def->MakeShaderSnippet();
+	}
+
+	return df::String();
+}
+
+auto vk::Renderer::MakeVertexAttributeSnippet(const df::StringView& name) const -> df::String {
+	auto va = FindVertexAttribute(name);
+	if(va) {
+		return static_cast<const vk::VertexAttribute*>(va)->MakeShaderSnippet();
+	}
+	
+	return df::String();
+}
