@@ -12,6 +12,9 @@ namespace df {
 	class ParameterSet;
 	class CommandBuffer;
 	class Window;
+	class VertexAttributeHandler;
+	class ParameterSetHandler;
+	class SnippetProvider;
 }
 
 namespace df {
@@ -50,8 +53,6 @@ namespace df {
 		virtual auto BeginFrame()->CommandBuffer* = 0;
 		virtual void EndFrame() = 0;
 
-	public:
-		virtual auto MakeParameterSetSnippet(const StringView& className) const -> String = 0;
-		virtual auto MakeVertexAttributeSnippet(const StringView& name) const -> String = 0;
+		virtual auto GetSnippetProvider() const -> const SnippetProvider& = 0;
 	};
 }

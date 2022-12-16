@@ -1,16 +1,20 @@
 #pragma once
 
+#include <DwarfRender/SnippetProvider.h>
+
+#include <DwarvenCore/Vector.h>
 #include <DwarvenCore/String.h>
 #include <DwarvenCore/StringView.h>
 #include <DwarvenCore/Result.h>
+#include <DwarvenCore/Types.h>
 
 namespace df {
 	class Renderer;
 	class FileSystem;
 	class ShaderIncludeCache;
-	class NamedIndexedSnippetCache;
+	class SnippetProvider;
 
-	struct PipelineCompileInfo;
+	//struct PipelineCompileInfo;
 }
 
 namespace df {
@@ -24,28 +28,25 @@ namespace df {
 }
 
 namespace df {
-	using ShaderCompileResult = Result<bool, String>;
+	using ShaderCompileResult = Result<Vector<uint32>, String>;
 
 	class ShaderCompiler {
 	public:
 		ShaderCompiler(const Renderer& renderer, FileSystem& fileSystem, const StringView& dataPath);
 		~ShaderCompiler();
 
-		void CreateVertexAttributePrototype(const StringView& name, const StringView& snippet);
-		void CreateParameterSetPrototype(const StringView& name, const StringView& snippet);
+		auto GetVertexAttribute(const StringView& name, uint32 idx) const -> const String&;
+		auto GetParameterSet(const StringView& name, uint32 idx) const -> const String&;
 
 		auto CompileShader(
 			const StringView& shaderName,
-			const StringView& code,
-			EShaderType shaderType,
-			PipelineCompileInfo& pipelineCompileInfo
+			const Vector<const char*> codeParts,
+			EShaderType shaderType
 		) -> ShaderCompileResult;
 
 	private:
 		const Renderer& m_Renderer; 
 		FileSystem& m_FileSystem;
 		ShaderIncludeCache* m_ShaderIncludeCache;
-		NamedIndexedSnippetCache* m_VertexAttributeSnippetCache;
-		NamedIndexedSnippetCache* m_ParameterSetSnippetCache;
 	};
 }

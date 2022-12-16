@@ -1,5 +1,7 @@
 #pragma once
 
+#include <DwarvenCore/Types.h>
+
 #include <vector>
 
 namespace df {
@@ -7,7 +9,7 @@ namespace df {
 	using Vector = std::vector<T>;
 
 	template<typename T>
-	bool AddUnique(Vector<T>& vector, const T& element);
+	auto AddUnique(Vector<T>& vector, const T& element) -> uint32;
 
 	template<typename T>
 	auto FindElement(Vector<T>& vector, const T& element) -> int;

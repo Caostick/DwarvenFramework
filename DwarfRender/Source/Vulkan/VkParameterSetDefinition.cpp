@@ -462,6 +462,9 @@ void vk::ParameterSetDefinition::Build() {
 	CreateRenderData();
 
 	m_IsBuilt = true;
+
+	auto& sp = m_RenderCore.GetSnippetProvider();
+	sp.AddParameterSetPrototype(m_Name, MakeShaderSnippet());
 }
 
 void vk::ParameterSetDefinition::CreateRenderData() {

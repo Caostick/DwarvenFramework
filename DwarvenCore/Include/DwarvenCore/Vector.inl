@@ -1,16 +1,16 @@
 #pragma once
 
 template<typename T>
-bool df::AddUnique(Vector<T>& vector, const T& element) {
-	for (const auto& el : vector) {
-		if (el == element) {
-			return false;
+auto df::AddUnique(Vector<T>& vector, const T& element) -> uint32 {
+	for (size_t i = 0; i < vector.size(); ++i) {
+		if (vector[i] == element) {
+			return static_cast<uint32>(i);
 		}
 	}
 
 	vector.push_back(element);
 
-	return true;
+	return static_cast<uint32>(vector.size() - 1);
 }
 
 template<typename T>

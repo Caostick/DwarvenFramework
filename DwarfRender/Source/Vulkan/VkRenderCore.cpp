@@ -446,6 +446,8 @@ auto vk::RenderCore::RegisterVertexAttribute(const df::StringView& name, df::EVe
 	attr->m_Format = format;
 	attr->m_Index = index;
 
+	m_SnippetProvider.AddVertexAttributePrototype(name, attr->MakeShaderSnippet());
+
 	return attr;
 }
 
@@ -473,6 +475,14 @@ auto vk::RenderCore::GetShaderInclude(const df::StringView& name) const->const d
 
 auto vk::RenderCore::GetShaderCompiler()->vk::ShaderCompiler* {
 	return m_ShaderCompiler;
+}
+
+auto vk::RenderCore::GetSnippetProvider() -> vk::SnippetProvider& {
+	return m_SnippetProvider;
+}
+
+auto vk::RenderCore::GetSnippetProvider() const -> const vk::SnippetProvider& {
+	return m_SnippetProvider;
 }
 
 auto vk::RenderCore::RequestSampler(const vk::SamplerState& state)->vk::Sampler* {

@@ -1,9 +1,7 @@
 #include <DwarfIntermediate/ShaderCompiler.h>
-#include <DwarfIntermediate/PipelineCompileInfo.h>
 
 #include "ShaderIncludeCache.h"
 #include "ShaderFileIncluder.h"
-#include "NamedIndexedSnippetCache.h"
 
 #include <DwarfRender/Renderer.h>
 
@@ -133,9 +131,7 @@ namespace {
 df::ShaderCompiler::ShaderCompiler(const Renderer& renderer, FileSystem& fileSystem, const StringView& dataPath) 
 	: m_Renderer(renderer)
 	, m_FileSystem(fileSystem)
-	, m_ShaderIncludeCache(DFNew ShaderIncludeCache(fileSystem, dataPath))
-	, m_VertexAttributeSnippetCache(DFNew NamedIndexedSnippetCache(16)) 
-	, m_ParameterSetSnippetCache(DFNew NamedIndexedSnippetCache(8)) {
+	, m_ShaderIncludeCache(DFNew ShaderIncludeCache(fileSystem, dataPath)) {
 
 	glslang::InitializeProcess();
 }
@@ -143,39 +139,34 @@ df::ShaderCompiler::ShaderCompiler(const Renderer& renderer, FileSystem& fileSys
 df::ShaderCompiler::~ShaderCompiler() {
 	glslang::FinalizeProcess();
 
-	DFDelete m_ParameterSetSnippetCache;
-	DFDelete m_VertexAttributeSnippetCache;
 	DFDelete m_ShaderIncludeCache;
 }
 
-void df::ShaderCompiler::CreateVertexAttributePrototype(const StringView& name, const StringView& snippet) {
-	m_VertexAttributeSnippetCache->AddPrototype(name, snippet);
+auto df::ShaderCompiler::GetVertexAttribute(const StringView& name, uint32 idx) const -> const String& {
+	return m_Renderer.GetSnippetProvider().GetVertexAttributeSnippet(name, idx);
 }
 
-void df::ShaderCompiler::CreateParameterSetPrototype(const StringView& name, const StringView& snippet) {
-	m_ParameterSetSnippetCache->AddPrototype(name, snippet);
+auto df::ShaderCompiler::GetParameterSet(const StringView& name, uint32 idx) const -> const String& {
+	return m_Renderer.GetSnippetProvider().GetParameterSetSnippet(name, idx);
 }
 
 auto df::ShaderCompiler::CompileShader(
 	const StringView& shaderName,
-	const StringView& code,
-	EShaderType shaderType,
-	PipelineCompileInfo& pipelineCompileInfo) -> ShaderCompileResult {
+	const Vector<const char*> codeParts,
+	EShaderType shaderType) -> ShaderCompileResult {
 
-	Vector<uint32>* bytecodePtr = nullptr;
+	Vector<uint32> spirVCode;
 
 	EShLanguage shaderLanguage = EShLanguage::EShLangCount;
 	switch (shaderType) {
 	case EShaderType::Vertex:
 		shaderLanguage = EShLanguage::EShLangVertex;
-		bytecodePtr = &pipelineCompileInfo.m_VertexSpirV;
 		break;
 	case EShaderType::Geometry:
 		shaderLanguage = EShLanguage::EShLangGeometry;
 		break;
 	case EShaderType::Fragment:
 		shaderLanguage = EShLanguage::EShLangFragment;
-		bytecodePtr = &pipelineCompileInfo.m_FragmentSpirV;
 		break;
 	case EShaderType::Compute:
 		shaderLanguage = EShLanguage::EShLangCompute;
@@ -187,16 +178,11 @@ auto df::ShaderCompiler::CompileShader(
 		break;
 	}
 
-	if (!bytecodePtr) {
-		return String("Invalid shader type!");
-	}
-
-	Vector<uint32>& spirVCode = *bytecodePtr;
-	const String strCode = String(code);
-
-	Vector<const char*> inputData(2);
+	Vector<const char*> inputData(codeParts.size() + 1);
 	inputData[0] = Preamble;
-	inputData[1] = strCode.c_str();
+	for (size_t i = 0; i < codeParts.size(); ++i) {
+		inputData[i + 1] = codeParts[i];
+	}
 
 	const int defaultVersion = 100;
 	const int version = 100;
@@ -212,12 +198,7 @@ auto df::ShaderCompiler::CompileShader(
 	shader.setEnvClient(glslang::EShClientVulkan, vulkanClientVersion);
 	shader.setEnvTarget(glslang::EShTargetSpv, targetVersion);
 
-	ShaderFileIncluder includer = ShaderFileIncluder(
-		pipelineCompileInfo,
-		*m_ShaderIncludeCache,
-		*m_VertexAttributeSnippetCache,
-		*m_ParameterSetSnippetCache
-	);
+	ShaderFileIncluder includer = ShaderFileIncluder(*m_ShaderIncludeCache);
 
 	df::String preprocessedCode;
 	if (!shader.preprocess(&resources, defaultVersion, ENoProfile, false, false, messages, &preprocessedCode, includer)) {
@@ -244,7 +225,7 @@ auto df::ShaderCompiler::CompileShader(
 	program.addShader(&shader);
 
 	if (!program.link(messages)) {
-		return 
+		return
 			String("GLSL Linking Failed for: ") + String(shaderName) +
 			String(shader.getInfoLog()) +
 			String(shader.getInfoDebugLog());
@@ -267,5 +248,5 @@ auto df::ShaderCompiler::CompileShader(
 		return logger.getAllMessages();
 	}
 
-	return true;
+	return ShaderCompileResult(std::move(spirVCode));
 }

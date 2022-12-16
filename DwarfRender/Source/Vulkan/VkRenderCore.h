@@ -9,6 +9,7 @@
 #include "VkVertexAttribute.h"
 #include "VkSampler.h"
 #include "VkBuffer.h"
+#include "VkSnippetProvider.h"
 
 #include <DwarvenCore/Types.h>
 #include <DwarvenCore/String.h>
@@ -82,6 +83,9 @@ namespace vk {
 
 		auto GetShaderCompiler()->vk::ShaderCompiler*;
 
+		auto GetSnippetProvider() -> vk::SnippetProvider&;
+		auto GetSnippetProvider() const -> const vk::SnippetProvider&;
+
 		auto RequestSampler(const vk::SamplerState& state)->vk::Sampler*;
 
 	public:
@@ -138,6 +142,7 @@ namespace vk {
 
 		df::Vector<vk::FrameData> m_FrameData;
 
+		vk::SnippetProvider m_SnippetProvider;
 		vk::PresentationPipeline m_PresentationPipiline;
 		vk::CommandBuffer m_TransferCommandBuffer;
 		vk::ShaderCompiler* m_ShaderCompiler;
