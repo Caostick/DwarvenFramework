@@ -28,7 +28,6 @@ namespace vk {
 	class GraphicsPipeline;
 	class ParameterSetDefinition;
 	class ParameterSet;
-	class ShaderCompiler;
 	class Buffer;
 	class Mesh;
 	class Texture;
@@ -77,11 +76,6 @@ namespace vk {
 
 		auto RegisterVertexAttribute(const df::StringView& name, df::EVertexAttributeFormat format) -> const vk::VertexAttribute*;
 		auto FindVertexAttribute(const df::StringView& name) const -> const vk::VertexAttribute*;
-
-		void AddShaderInclude(const df::StringView& name, const df::StringView& content);
-		auto GetShaderInclude(const df::StringView& name) const -> const df::String&;
-
-		auto GetShaderCompiler()->vk::ShaderCompiler*;
 
 		auto GetSnippetProvider() -> vk::SnippetProvider&;
 		auto GetSnippetProvider() const -> const vk::SnippetProvider&;
@@ -145,7 +139,6 @@ namespace vk {
 		vk::SnippetProvider m_SnippetProvider;
 		vk::PresentationPipeline m_PresentationPipiline;
 		vk::CommandBuffer m_TransferCommandBuffer;
-		vk::ShaderCompiler* m_ShaderCompiler;
 
 		df::ObjectPool<vk::RenderPass> m_RenderPasses;
 		df::ObjectPool<vk::GraphicsPipeline> m_GraphicsPipelines;

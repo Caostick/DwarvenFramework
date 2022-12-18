@@ -8,7 +8,6 @@
 #include "VkGraphicsPipeline.h"
 #include "VkParameterSetDefinition.h"
 #include "VkParameterSet.h"
-#include "VkShaderCompiler.h"
 #include "VkBuffer.h"
 #include "VkMesh.h"
 #include "VkTexture.h"
@@ -20,8 +19,7 @@
 #include <DwarvenCore/StringOperations.h>
 #include <DwarvenCore/Memory.h>
 
-vk::RenderCore::RenderCore() 
-	: m_ShaderCompiler(nullptr) {
+vk::RenderCore::RenderCore() {
 
 	m_NumFramesInFlight = 0;
 	m_FrameIndex = 0;
@@ -58,10 +56,6 @@ auto vk::RenderCore::GetVkDescriptorPool() const->VkDescriptorPool {
 }
 
 bool vk::RenderCore::Init() {
-	AddShaderInclude("", "");
-
-	m_ShaderCompiler = DFNew vk::ShaderCompiler(*this);
-
 	m_NumFramesInFlight = 3;
 
 	m_FrameData.resize(m_NumFramesInFlight);
@@ -161,9 +155,6 @@ void vk::RenderCore::Release() {
 	vk::DestroyDebugCallback(m_VkInstance);
 	vk::API::DestroyInstance(m_VkInstance, vk::Allocator());
 	m_VkInstance = VK_NULL_HANDLE;
-
-	DFDelete m_ShaderCompiler;
-	m_ShaderCompiler = nullptr;
 }
 
 void vk::RenderCore::SetWindowSource(df::Window* window, vk::Texture* texture) {
@@ -458,23 +449,6 @@ auto vk::RenderCore::FindVertexAttribute(const df::StringView& name) const -> co
 		}
 	}
 	return nullptr;
-}
-
-void vk::RenderCore::AddShaderInclude(const df::StringView& name, const df::StringView& content) {
-	m_ShaderIncludes[df::String(name)] = df::String(content);
-}
-
-auto vk::RenderCore::GetShaderInclude(const df::StringView& name) const->const df::String& {
-	const auto& it = m_ShaderIncludes.find(df::ToLower<char>(name));
-	if (it != m_ShaderIncludes.end()) {
-		return it->second;
-	}
-
-	return m_NullInclude;
-}
-
-auto vk::RenderCore::GetShaderCompiler()->vk::ShaderCompiler* {
-	return m_ShaderCompiler;
 }
 
 auto vk::RenderCore::GetSnippetProvider() -> vk::SnippetProvider& {

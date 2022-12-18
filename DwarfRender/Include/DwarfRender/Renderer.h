@@ -45,8 +45,6 @@ namespace df {
 		virtual auto CreateParameterSet(const StringView& className)->ParameterSet* = 0;
 		virtual void DestroyParameterSet(ParameterSet* parameterSet) = 0;
 
-		virtual void AddShaderInclude(const StringView& name, const StringView& content) = 0;
-
 		virtual auto CreateGraphicsPipeline()->GraphicsPipeline* = 0;
 		virtual void DestroyGraphicsPipeline(GraphicsPipeline* pipeline) = 0;
 

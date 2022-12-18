@@ -41,8 +41,6 @@ namespace vk {
 		virtual auto CreateParameterSet(const df::StringView& className)->df::ParameterSet* override;
 		virtual void DestroyParameterSet(df::ParameterSet* parameterSet) override;
 
-		virtual void AddShaderInclude(const df::StringView& name, const df::StringView& content) override;
-
 		virtual auto CreateGraphicsPipeline()->df::GraphicsPipeline* override;
 		virtual void DestroyGraphicsPipeline(df::GraphicsPipeline* pipeline) override;
 

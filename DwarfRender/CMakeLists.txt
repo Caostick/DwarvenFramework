@@ -20,8 +20,6 @@ df_setup_module(
 
 	THIRD_PARTY
 		CONAN_PKG::glfw
-		CONAN_PKG::glslang
-		CONAN_PKG::assimp
 		CONAN_PKG::vulkan-headers
 		CONAN_PKG::vulkan-memory-allocator
 )

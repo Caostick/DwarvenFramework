@@ -4,9 +4,6 @@
 #include "VkParameterSetDefinition.h"
 #include "VkParameterSet.h"
 #include "VkRenderPass.h"
-#include "VkShaderCompiler.h"
-#include "VkShaderParsing.h"
-
 
 #include <DwarvenCore/StringOperations.h>
 
@@ -679,100 +676,4 @@ auto vk::GraphicsPipeline::CreatePipelineStateObject()->VkPipeline {
 
 	m_PipelineStateObjects.push_back(PipelineStateObjectSlot(m_State, vkPipeline));
 	return vkPipeline;
-}
-
-auto vk::GraphicsPipeline::ParseShader(const df::StringView& code)->df::String {
-	using namespace vk_shader_parsing;
-
-	df::String outCode;
-	outCode.reserve(1024);
-
-	for (auto&& line : df::Tokenize(code, "\n\r")) {
-		if (line.empty()) {
-			continue;
-		}
-
-		bool parsed = false;
-
-		if (const auto vertexAttribute = FetchVertexAttribute(line, m_RenderCore)) {
-			df::AddUnique(m_VertexAttributes, vertexAttribute.Get());
-
-			parsed = true;
-		} else if (const auto parameterSet = FetchParameterSet(line, m_RenderCore)) {
-			df::AddUnique(m_ParameterSetDefinitions, parameterSet.Get());
-
-			parsed = true;
-		} else if (const auto depthTest = FetchDepthTest(line)) {
-			m_State.m_DepthState.m_DepthTestEnable = depthTest.Get();
-
-			parsed = true;
-		} else if (const auto depthWrite = FetchDepthWrite(line)) {
-			m_State.m_DepthState.m_DepthWriteEnable = depthWrite.Get();
-
-			parsed = true;
-		} else if (const auto stencilTest = FetchStencilTest(line)) {
-			m_State.m_DepthState.m_StencilTestEnable = stencilTest.Get();
-
-			parsed = true;
-		} else if (const auto depthCompareOp = FetchDepthCompareOp(line)) {
-			m_State.m_DepthState.m_DepthCompareOp = depthCompareOp.Get();
-
-			parsed = true;
-		} else if (const auto stencilOp = FetchStencilOp(line)) {
-			m_State.m_DepthState.m_StencilOp = stencilOp.Get();
-
-			parsed = true;
-		} else if (const auto polygonMode = FetchPolygonMode(line)) {
-			m_State.m_RasterizationState.m_PolygonMode = polygonMode.Get();
-
-			parsed = true;
-		} else if (const auto frontFace = FetchFrontFace(line)) {
-			m_State.m_RasterizationState.m_FrontFace = frontFace.Get();
-
-			parsed = true;
-		} else if (const auto cullMode = FetchCullMode(line)) {
-			m_State.m_RasterizationState.m_CullMode = cullMode.Get();
-
-			parsed = true;
-		} else if (const auto blendEnable = FetchBlendEnable(line)) {
-			m_State.m_BlendState.m_BlendEnable = blendEnable.Get();
-
-			parsed = true;
-		} else if (const auto colorBlendOp = FetchColorBlendOp(line)) {
-			m_State.m_BlendState.m_ColorBlendOp = colorBlendOp.Get();
-
-			parsed = true;
-		} else if (const auto alphaBlendOp = FetchAlphaBlendOp(line)) {
-			m_State.m_BlendState.m_AlphaBlendOp = alphaBlendOp.Get();
-
-			parsed = true;
-		} else if (const auto srcColorBlendFactor = FetchSrcColorBlendFactor(line)) {
-			m_State.m_BlendState.m_SrcColorBlendFactor = srcColorBlendFactor.Get();
-
-			parsed = true;
-		} else if (const auto dstColorBlendFactor = FetchDstColorBlendFactor(line)) {
-			m_State.m_BlendState.m_DstColorBlendFactor = dstColorBlendFactor.Get();
-
-			parsed = true;
-		} else if (const auto srcAlphaBlendFactor = FetchSrcAlphaBlendFactor(line)) {
-			m_State.m_BlendState.m_SrcAlphaBlendFactor = srcAlphaBlendFactor.Get();
-
-			parsed = true;
-		} else if (const auto dstAlphaBlendFactor = FetchDstAlphaBlendFactor(line)) {
-			m_State.m_BlendState.m_DstAlphaBlendFactor = dstAlphaBlendFactor.Get();
-
-			parsed = true;
-		} else if (const auto blendState = FetchBlendState(line)) {
-			m_State.m_BlendState = blendState.Get();
-
-			parsed = true;
-		}
-
-		if (!parsed) {
-			outCode += line;
-		}
-		outCode += "\n";
-	}
-
-	return outCode;
 }

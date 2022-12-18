@@ -88,8 +88,6 @@ namespace vk {
 
 		auto CreatePipelineStateObject()->VkPipeline;
 
-		auto ParseShader(const df::StringView& code) -> df::String;
-
 	private:
 		struct PipelineStateObjectSlot {
 			PipelineStateObjectSlot() = default;

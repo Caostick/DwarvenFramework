@@ -84,10 +84,6 @@ void vk::Renderer::DestroyParameterSet(df::ParameterSet* parameterSet) {
 	m_RenderCore.DestroyParameterSet(static_cast<vk::ParameterSet*>(parameterSet));
 }
 
-void vk::Renderer::AddShaderInclude(const df::StringView& name, const df::StringView& content) {
-	m_RenderCore.AddShaderInclude(name, content);
-}
-
 auto vk::Renderer::CreateGraphicsPipeline()->df::GraphicsPipeline* {
 	return m_RenderCore.CreateGraphicsPipeline();
 }
