@@ -2,39 +2,39 @@
 
 template<typename type>
 TFrustum<type>::TFrustum(const TMat4<type>& matrix) {
-	m_Planes[int(EFrustumPlane::Front)].A = matrix.M[12] - matrix.M[8];
-	m_Planes[int(EFrustumPlane::Front)].B = matrix.M[13] - matrix.M[9];
-	m_Planes[int(EFrustumPlane::Front)].C = matrix.M[14] - matrix.M[10];
+	m_Planes[int(EFrustumPlane::Front)].N.X = matrix.M[12] - matrix.M[8];
+	m_Planes[int(EFrustumPlane::Front)].N.Y = matrix.M[13] - matrix.M[9];
+	m_Planes[int(EFrustumPlane::Front)].N.Z = matrix.M[14] - matrix.M[10];
 	m_Planes[int(EFrustumPlane::Front)].D = matrix.M[15] - matrix.M[11];
 	//m_Planes[int(EFrustumPlane::Front)].Normalize();
 
-	m_Planes[int(EFrustumPlane::Back)].A = matrix.M[12] + matrix.M[8];
-	m_Planes[int(EFrustumPlane::Back)].B = matrix.M[13] + matrix.M[9];
-	m_Planes[int(EFrustumPlane::Back)].C = matrix.M[14] + matrix.M[10];
+	m_Planes[int(EFrustumPlane::Back)].N.X = matrix.M[12] + matrix.M[8];
+	m_Planes[int(EFrustumPlane::Back)].N.Y = matrix.M[13] + matrix.M[9];
+	m_Planes[int(EFrustumPlane::Back)].N.Z = matrix.M[14] + matrix.M[10];
 	m_Planes[int(EFrustumPlane::Back)].D = matrix.M[15] + matrix.M[11];
 	//m_Planes[int(EFrustumPlane::Back)].Normalize();
 
-	m_Planes[int(EFrustumPlane::Left)].A = matrix.M[12] + matrix.M[0];
-	m_Planes[int(EFrustumPlane::Left)].B = matrix.M[13] + matrix.M[1];
-	m_Planes[int(EFrustumPlane::Left)].C = matrix.M[14] + matrix.M[2];
+	m_Planes[int(EFrustumPlane::Left)].N.X = matrix.M[12] + matrix.M[0];
+	m_Planes[int(EFrustumPlane::Left)].N.Y = matrix.M[13] + matrix.M[1];
+	m_Planes[int(EFrustumPlane::Left)].N.Z = matrix.M[14] + matrix.M[2];
 	m_Planes[int(EFrustumPlane::Left)].D = matrix.M[15] + matrix.M[3];
 	//m_Planes[int(EFrustumPlane::Left)].Normalize();
 
-	m_Planes[int(EFrustumPlane::Right)].A = matrix.M[12] - matrix.M[0];
-	m_Planes[int(EFrustumPlane::Right)].B = matrix.M[13] - matrix.M[1];
-	m_Planes[int(EFrustumPlane::Right)].C = matrix.M[14] - matrix.M[2];
+	m_Planes[int(EFrustumPlane::Right)].N.X = matrix.M[12] - matrix.M[0];
+	m_Planes[int(EFrustumPlane::Right)].N.Y = matrix.M[13] - matrix.M[1];
+	m_Planes[int(EFrustumPlane::Right)].N.Z = matrix.M[14] - matrix.M[2];
 	m_Planes[int(EFrustumPlane::Right)].D = matrix.M[15] - matrix.M[3];
 	//m_Planes[int(EFrustumPlane::Right)].Normalize();
 
-	m_Planes[int(EFrustumPlane::Top)].A = matrix.M[12] - matrix.M[4];
-	m_Planes[int(EFrustumPlane::Top)].B = matrix.M[13] - matrix.M[5];
-	m_Planes[int(EFrustumPlane::Top)].C = matrix.M[14] - matrix.M[6];
+	m_Planes[int(EFrustumPlane::Top)].N.X = matrix.M[12] - matrix.M[4];
+	m_Planes[int(EFrustumPlane::Top)].N.Y = matrix.M[13] - matrix.M[5];
+	m_Planes[int(EFrustumPlane::Top)].N.Z = matrix.M[14] - matrix.M[6];
 	m_Planes[int(EFrustumPlane::Top)].D = matrix.M[15] - matrix.M[7];
 	//m_Planes[int(EFrustumPlane::Top)].Normalize();
 
-	m_Planes[int(EFrustumPlane::Bottom)].A = matrix.M[12] + matrix.M[4];
-	m_Planes[int(EFrustumPlane::Bottom)].B = matrix.M[13] + matrix.M[5];
-	m_Planes[int(EFrustumPlane::Bottom)].C = matrix.M[14] + matrix.M[6];
+	m_Planes[int(EFrustumPlane::Bottom)].N.X = matrix.M[12] + matrix.M[4];
+	m_Planes[int(EFrustumPlane::Bottom)].N.Y = matrix.M[13] + matrix.M[5];
+	m_Planes[int(EFrustumPlane::Bottom)].N.Z = matrix.M[14] + matrix.M[6];
 	m_Planes[int(EFrustumPlane::Bottom)].D = matrix.M[15] + matrix.M[7];
 	//m_Planes[int(EFrustumPlane::Bottom)].Normalize();
 }

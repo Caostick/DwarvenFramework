@@ -27,31 +27,31 @@ template<typename type> class TFrustum;
 #include <DwarvenCore/Math/Constants.h>
 
 template<typename type>
-type DegToRad(const type& value);
+type DegToRad(type value);
 
 template<typename type>
-type RadToDeg(const type& value);
+type RadToDeg(type value);
 
 template<typename type>
 type Steer(type angleCur, type angleDst, type angleVelocity, type angleMin, type angleMax);
 
 template<typename type>
-type Fract(const type& value);
+type Fract(type value);
 
 template<typename type>
 auto Fract(const TVec3<type>& value) -> TVec3<type>;
 
 template<typename type>
-type Floor(const type& value);
+type Floor(type value);
 
 template<typename type>
-type ScaleFloor(const type& value, const type& scale);
+type ScaleFloor(type value, type scale);
 
 template <typename type>
-type Random(const type& min, const type& max);
+type Random(type min, type max);
 
 template <typename type>
-type Max(const type& a, const type& b);
+type Max(type a, type b);
 
 template <typename type>
 auto Max(const TVec2<type>& a, const TVec2<type>& b)->TVec2<type>;
@@ -60,7 +60,7 @@ template <typename type>
 auto Max(const TVec3<type>& a, const TVec3<type>& b)->TVec3<type>;
 
 template <typename type>
-type Min(const type& a, const type& b);
+type Min(type a, type b);
 
 template <typename type>
 auto Min(const TVec2<type>& a, const TVec2<type>& b)->TVec2<type>;
@@ -69,7 +69,7 @@ template <typename type>
 auto Min(const TVec3<type>& a, const TVec3<type>& b) -> TVec3<type>;
 
 template <typename type>
-type Clamp(const type& value, const type& min, const type& max);
+type Clamp(type value, type min, type max);
 
 template <typename type>
 auto Clamp(const TVec2<type>& value, const TVec2<type>& min, const TVec2<type>& max) -> TVec2<type>;
@@ -78,7 +78,7 @@ template <typename type>
 auto Clamp(const TVec3<type>& value, const TVec3<type>& min, const TVec3<type>& max)->TVec3<type>;
 
 template <typename type>
-type Abs(const type& value);
+type Abs(type value);
 
 template <typename type>
 auto Abs(const TVec2<type>& value) -> TVec2<type>;
@@ -87,22 +87,43 @@ template <typename type>
 auto Abs(const TVec3<type>& value)->TVec3<type>;
 
 template <typename type>
-void SinCos(const type& angle, type& sin, type& cos);
+auto Sin(type value) -> type;
+
+template <typename type>
+auto Cos(type value)->type;
+
+template <typename type>
+auto Tan(type value)->type;
+
+template <typename type>
+auto Asin(type value)->type;
+
+template <typename type>
+auto Acos(type value)->type;
+
+template <typename type>
+auto Atan(type value)->type;
+
+template <typename type>
+auto Atan2(type y, type x)->type;
+
+template <typename type>
+auto Sqrt(type value)->type;
 
 template <typename type>
 void Swap(type& a, type& b);
 
 template <typename type>
-const type Mod(const type& a, const type& b);
+auto Mod(type a, type b) -> const type;
 
 template <typename type, typename ltype>
-const type Lerp(const type& a, const type& b, const ltype& lerp);
+auto Lerp(type a, type b, const ltype& lerp) -> const type;
 
 template <typename type, typename ltype>
-const type Mix(const type& a, const type& b, const ltype& lerp);
+auto Mix(type a, type b, const ltype& lerp) -> const type;
 
 template <typename type, typename  ltype>
-const type Bezier(const type& p0, const type& p1, const type& p2, const ltype& lerp);
+auto Bezier(type p0, type p1, type p2, const ltype& lerp) -> const type;
 
 template <typename type>
 bool HitTestAABBsCenterExt(const TVec3<type>& centerA, const TVec3<type>& extA, const TVec3<type>& centerB, const TVec3<type>& extB);

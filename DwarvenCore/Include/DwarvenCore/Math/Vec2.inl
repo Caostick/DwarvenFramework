@@ -41,7 +41,7 @@ auto TVec2<type>::LengthSqr() const -> type {
 
 template<typename type>
 auto TVec2<type>::Length() const -> type {
-	return sqrt(X * X + Y * Y);
+	return Sqrt<type>(X * X + Y * Y);
 }
 
 template<typename type>
@@ -51,7 +51,7 @@ auto TVec2<type>::LengthSqr(const TVec2<type>& vec) -> type {
 
 template<typename type>
 auto TVec2<type>::Length(const TVec2<type>& vec) -> type {
-	return sqrt(vec.X * vec.X + vec.Y * vec.Y);
+	return Sqrt<type>(vec.X * vec.X + vec.Y * vec.Y);
 }
 
 template<typename type>
@@ -73,13 +73,13 @@ auto TVec2<type>::Cross(const TVec2<type>& left, const TVec2<type>& right) -> ty
 template<typename type>
 auto TVec2<type>::Angle(const TVec2<type>& left, const TVec2<type>& right) -> type {
 	const type cr = type(TVec2<type>::Cross(left, right) > type(0)) * type(2) - type(1);
-	return acos(TVec2<type>::Dot(left, right)) * cr;
+	return Acos<type>(TVec2<type>::Dot(left, right)) * cr;
 }
 
 template<typename type>
 auto TVec2<type>::Rotated(const TVec2<type>& vec, type angle) -> TVec2<type> {
-	const type c = cos(angle);
-	const type s = sin(angle);
+	const type c = Cos<type>(angle);
+	const type s = Sin<type>(angle);
 	return TVec2<type>(vec.X * c - vec.Y * s, vec.X * s + vec.Y * c);
 }
 

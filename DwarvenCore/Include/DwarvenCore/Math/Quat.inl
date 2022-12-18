@@ -30,26 +30,26 @@ template<typename type>
 void QuaternionToEulerAngles(const TQuat<type>& quat, type& pitch, type& yaw, type& roll) {
 	const type t0 = type(2) * (quat.W * quat.X + quat.Y * quat.Z);
 	const type t1 = type(1) - type(2) * (quat.X * quat.X + quat.Y * quat.Y);
-	roll = atan2(t0, t1);
+	roll = Atan2<type>(t0, t1);
 
 	type t2 = type(2) * (quat.W * quat.Y - quat.Z * quat.X);
 	t2 = t2 > type(1) ? type(1) : t2;
 	t2 = t2 < type(-1) ? type(-1) : t2;
-	pitch = asin(t2);
+	pitch = Asin<type>(t2);
 
 	const type t3 = type(2) * (quat.W * quat.Z + quat.X * quat.Y);
 	const type t4 = type(1) - type(2) * (quat.Y * quat.Y + quat.Z * quat.Z);
-	yaw = atan2(t3, t4);
+	yaw = Atan2<type>(t3, t4);
 }
 
 template<typename type>
 auto QuaternionFromEulerAngles(type pitch, type yaw, type roll) -> TQuat<type> {
-	const type pitchSin = sin(pitch * type(0.5));
-	const type pitchCos = cos(pitch * type(0.5));
-	const type yawSin = sin(yaw * type(0.5));
-	const type yawCos = cos(yaw * type(0.5));
-	const type rollSin = sin(roll * type(0.5));
-	const type rollCos = cos(roll * type(0.5));
+	const type pitchSin = Sin<type>(pitch * type(0.5));
+	const type pitchCos = Cos<type>(pitch * type(0.5));
+	const type yawSin = Sin<type>(yaw * type(0.5));
+	const type yawCos = Cos<type>(yaw * type(0.5));
+	const type rollSin = Sin<type>(roll * type(0.5));
+	const type rollCos = Cos<type>(roll * type(0.5));
 	const type rotPitchCosYawCos = pitchCos * yawCos;
 	const type rotPitchSinYawSin = pitchSin * yawSin;
 	return TQuat<type>(
@@ -62,8 +62,8 @@ auto QuaternionFromEulerAngles(type pitch, type yaw, type roll) -> TQuat<type> {
 template<typename type>
 auto QuaternionFromAxisRotation(TQuat<type>* quat, const TVec3<type>& vec, type angle) -> TQuat<type> {
 	vec.Normalize();
-	const type s = sin(angle * type(0.5));
-	const type c = cos(angle * type(0.5));
+	const type s = Sin<type>(angle * type(0.5));
+	const type c = Cos<type>(angle * type(0.5));
 	return TQuat<type>(vec.X * s, vec.Y * s, vec.Z * s, c);
 }
 
@@ -72,14 +72,14 @@ auto QuaternionFromMatrix(const TMat3<type>& mat) -> TQuat<type> {
 	const type t = mat.M[0] + mat.M[4] + mat.M[8];
 
 	if (t > type(0)) {
-		const type s = type(sqrt(type(1)) + t) * type(2);
+		const type s = type(Sqrt<type>(type(1)) + t) * type(2);
 		return TQuat<type>(
 			(mat.M[7] - mat.M[5]) / s,
 			(mat.M[2] - mat.M[6]) / s,
 			(mat.M[3] - mat.M[1]) / s,
 			type(0.25) * s);
 	} else if (mat.M[0] > mat.M[4] && mat.M[0] > mat.M[8]) {
-		const type s = type(sqrt(type(1) + mat.M[0] - mat.M[4] - mat.M[8])) * type(2);
+		const type s = type(Sqrt<type>(type(1) + mat.M[0] - mat.M[4] - mat.M[8])) * type(2);
 		return TQuat<type>(
 			type(0.25) * s,
 			(mat.M[3] + mat.M[1]) / s,
@@ -118,10 +118,10 @@ auto SLerp(const TQuat<type>& quatA, const TQuat<type>& quatB, type factor) -> T
 	type sclp, sclq;
 	if ((type(1.0) - cosom) > type(0.0001)) {
 		type omega, sinom;
-		omega = acos(cosom);
-		sinom = sin(omega);
-		sclp = sin((type(1.0) - factor) * omega) / sinom;
-		sclq = sin(factor * omega) / sinom;
+		omega = Acos<type>(cosom);
+		sinom = Sin<type>(omega);
+		sclp = Sin<type>((type(1.0) - factor) * omega) / sinom;
+		sclq = Sin<type>(factor * omega) / sinom;
 	} else {
 		sclp = type(1.0) - factor;
 		sclq = factor;

@@ -5,12 +5,12 @@
 #include <random>
 
 template<typename type>
-type DegToRad(const type& value) {
+type DegToRad(type value) {
     return value / type(180) * Constants<type>::Pi;
 }
 
 template<typename type>
-type RadToDeg(const type& value) {
+type RadToDeg(type value) {
     return value * Constants<type>::InvPi * type(180);
 }
 
@@ -30,7 +30,7 @@ type Steer(type angleCur, type angleDst, type angleVelocity, type angleMin, type
 }
 
 template<typename type>
-type Fract(const type& value) {
+type Fract(type value) {
     const type result = value - int(value);
     return result >= type(0) ? result : (result + type(1));
 }
@@ -41,22 +41,22 @@ auto Fract(const TVec3<type>& value)->TVec3<type> {
 }
 
 template<typename type>
-type Floor(const type& value) {
+type Floor(type value) {
     return value - Fract(value);
 }
 
 template<typename type>
-type ScaleFloor(const type& value, const type& scale) {
+type ScaleFloor(type value, type scale) {
     return Floor(value / scale + type(0.0001)) * scale;
 }
 
 template <typename type>
-type Random(const type& min, const type& max) {
+type Random(type min, type max) {
     return type(((rand() % RAND_MAX) / double(RAND_MAX))) * (max - min) + min;
 }
 
 template <typename type>
-type Max(const type& a, const type& b) {
+type Max(type a, type b) {
     return (a >= b) ? a : b;
 }
 
@@ -78,7 +78,7 @@ auto Max(const TVec3<type>& a, const TVec3<type>& b) -> TVec3<type> {
 }
 
 template <typename type>
-type Min(const type& a, const type& b) {
+type Min(type a, type b) {
     return (a < b) ? a : b;
 }
 
@@ -100,7 +100,7 @@ auto Min(const TVec3<type>& a, const TVec3<type>& b) -> TVec3<type> {
 }
 
 template <typename type>
-type Clamp(const type& value, const type& min, const type& max) {
+type Clamp(type value, type min, type max) {
     return Max<type>(min, Min<type>(value, max));
 }
 
@@ -122,31 +122,155 @@ auto Clamp(const TVec3<type>& value, const TVec3<type>& min, const TVec3<type>& 
 }
 
 template <typename type>
-type Abs(const type& value) {
-    return value < type(0) ? -value : value;
+type Abs(type value) {
+    if constexpr (std::is_same<type, float>()) {
+        return fabsf(value);
+    }
+
+    if constexpr (std::is_same<type, double>()) {
+        return fabs(value);
+    }
+
+    if constexpr (std::is_same<type, long double>()) {
+        return fabsl(value);
+    }
 }
 
 template <typename type>
 auto Abs(const TVec2<type>& value)->TVec2<type> {
     return TVec2<type>(
-        Abs(value.X),
-        Abs(value.Y)
+        Abs<type>(value.X),
+        Abs<type>(value.Y)
     );
 }
 
 template <typename type>
 auto Abs(const TVec3<type>& value)->TVec3<type> {
 	return TVec3<type>(
-		Abs(value.X),
-		Abs(value.Y),
-        Abs(value.Z)
+		Abs<type>(value.X),
+		Abs<type>(value.Y),
+        Abs<type>(value.Z)
     );
 }
 
 template <typename type>
-void SinCos(const type& angle, type& sin, type& cos) {
-    sin = sin(angle);
-    cos = cos(angle);
+auto Sin(type value)->type {
+    if constexpr (std::is_same<type, float>()) {
+        return sinf(value);
+    }
+
+    if constexpr (std::is_same<type, double>()) {
+        return sin(value);
+    }
+
+    if constexpr (std::is_same<type, long double>()) {
+        return sinl(value);
+    }
+}
+
+template <typename type>
+auto Cos(type value)->type {
+    if constexpr (std::is_same<type, float>()) {
+        return cosf(value);
+    }
+
+    if constexpr (std::is_same<type, double>()) {
+        return cos(value);
+    }
+
+    if constexpr (std::is_same<type, long double>()) {
+        return cosl(value);
+    }
+}
+
+template <typename type>
+auto Tan(type value)->type {
+    if constexpr (std::is_same<type, float>()) {
+        return tanf(value);
+    }
+
+    if constexpr (std::is_same<type, double>()) {
+        return tan(value);
+    }
+
+    if constexpr (std::is_same<type, long double>()) {
+        return tanl(value);
+    }
+}
+
+template <typename type>
+auto Asin(type value)->type {
+    if constexpr (std::is_same<type, float>()) {
+        return asinf(value);
+    }
+
+    if constexpr (std::is_same<type, double>()) {
+        return asin(value);
+    }
+
+    if constexpr (std::is_same<type, long double>()) {
+        return asinl(value);
+    }
+}
+
+template <typename type>
+auto Acos(type value)->type {
+    if constexpr (std::is_same<type, float>()) {
+        return acosf(value);
+    }
+
+    if constexpr (std::is_same<type, double>()) {
+        return acos(value);
+    }
+
+    if constexpr (std::is_same<type, long double>()) {
+        return acosl(value);
+    }
+}
+
+template <typename type>
+auto Atan(type value)->type {
+    if constexpr (std::is_same<type, float>()) {
+        return atanf(value);
+    }
+
+    if constexpr (std::is_same<type, double>()) {
+        return atan(value);
+    }
+
+    if constexpr (std::is_same<type, long double>()) {
+        return atanl(value);
+    }
+}
+
+template <typename type>
+auto Atan2(type y, type x)->type {
+    if constexpr (std::is_same<type, float>()) {
+        return atan2f(y, x);
+    }
+
+    if constexpr (std::is_same<type, double>()) {
+        return atan2(y, x);
+    }
+
+    if constexpr (std::is_same<type, long double>()) {
+        return atan2l(y, x);
+    }
+}
+
+template <typename type>
+auto Sqrt(type value)->type {
+    if constexpr (std::is_same<type, float>()) {
+        return sqrtf(value);
+    }
+
+    if constexpr (std::is_same<type, double>()) {
+        return sqrt(value);
+    }
+
+    if constexpr (std::is_same<type, long double>()) {
+        return sqrtl(value);
+    }
 }
 
 template <typename type>
@@ -157,23 +281,23 @@ void Swap(type& a, type& b) {
 }
 
 template <typename type>
-const type Mod(const type& a, const type& b) {
+const type Mod(type a, type b) {
     type result = a % b;
     return result + b * type(result < type(0));
 }
 
 template <typename type, typename ltype>
-const type Lerp(const type& a, const type& b, const ltype& lerp) {
+const type Lerp(type a, type b, const ltype& lerp) {
     return (b - a) * lerp + a;
 }
 
 template <typename type, typename ltype>
-const type Mix(const type& a, const type& b, const ltype& lerp) {
+const type Mix(type a, type b, const ltype& lerp) {
     return (b - a) * lerp + a;
 }
 
 template <typename type, typename  ltype>
-const type Bezier(const type& p0, const type& p1, const type& p2, const ltype& lerp) {
+const type Bezier(type p0, type p1, type p2, const ltype& lerp) {
 	return Mix<type, ltype>(Mix<type, ltype>(p0, p1, lerp), Mix<type, ltype>(p1, p2, lerp), lerp);
 }
 

@@ -57,7 +57,7 @@ auto TVec3<type>::LengthSqr() const -> type {
 
 template<typename type>
 auto TVec3<type>::Length() const -> type {
-	return type(sqrt(X * X + Y * Y + Z * Z));
+	return Sqrt<type>(X * X + Y * Y + Z * Z);
 }
 
 template<typename type>
@@ -75,7 +75,7 @@ auto TVec3<type>::LengthSqr(const TVec3<type>& vec) -> type {
 
 template<typename type>
 auto TVec3<type>::Length(const TVec3<type>& vec) -> type {
-	return sqrt(vec.X * vec.X + vec.Y * vec.Y + vec.Z * vec.Z);
+	return Sqrt<type>(vec.X * vec.X + vec.Y * vec.Y + vec.Z * vec.Z);
 }
 
 template<typename type>
