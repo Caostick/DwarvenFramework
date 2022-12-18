@@ -22,6 +22,8 @@ namespace df {
 		auto CreateWindow(uint32 width, uint32 height)->df::Window*;
 		void DestroyWindow(df::Window* window);
 
+		auto GetTime() const -> double;
+
 	private:
 		df::ObjectPool<df::Window> m_Windows;
 		df::Vector<df::Window*> m_ToClose;

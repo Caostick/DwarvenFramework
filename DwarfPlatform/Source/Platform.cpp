@@ -71,3 +71,7 @@ auto df::Platform::CreateWindow(uint32 width, uint32 height)->df::Window* {
 void df::Platform::DestroyWindow(df::Window* window) {
 	m_Windows.Destroy(window);
 }
+
+auto df::Platform::GetTime() const -> double {
+	return glfwGetTime();
+}

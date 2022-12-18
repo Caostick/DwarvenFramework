@@ -62,6 +62,14 @@ void df::Input::Reset() {
 	}
 }
 
+auto df::Input::GetActiveInputDevice() const -> const df::InputDevice* {
+	return m_ActiveInputDevice;
+}
+
+auto df::Input::GetInputSettings()->df::InputSettings& {
+	return m_InputSettings;
+}
+
 void df::Input::KeyFunction(int key, int /*scancode*/, int state, int /*mods*/) {
 	switch (state) {
 	case 0:
@@ -118,12 +126,4 @@ void df::Input::GamepadConnectionFunction(int gamepadIdx, bool connected) {
 		DFDelete m_GamepadInputDevices[gamepadIdx];
 		m_GamepadInputDevices[gamepadIdx] = nullptr;
 	}
-}
-
-auto df::Input::GetActiveInputDevice() const -> const df::InputDevice* {
-	return m_ActiveInputDevice;
-}
-
-auto df::Input::GetInputSettings()->df::InputSettings& {
-	return m_InputSettings;
 }

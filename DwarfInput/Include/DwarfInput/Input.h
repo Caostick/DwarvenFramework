@@ -22,15 +22,16 @@ namespace df {
 		void Update();
 		void Reset();
 
+		auto GetActiveInputDevice() const -> const df::InputDevice*;
+		auto GetInputSettings()->df::InputSettings&;
+
+	private:
 		void KeyFunction(int key, int scancode, int state, int mods);
 		void CharFunction(unsigned int charCode);
 		void MouseButtonFunction(int button, int state, int mods);
 		void ScrollFunction(double xOffset, double yOffset);
 		void MouseMoveFunction(double x, double y);
 		void GamepadConnectionFunction(int gamepadIdx, bool connected);
-
-		auto GetActiveInputDevice() const -> const df::InputDevice*;
-		auto GetInputSettings()->df::InputSettings&;
 
 	private:
 		df::StandardInputDevice m_StandardInputDevice;
