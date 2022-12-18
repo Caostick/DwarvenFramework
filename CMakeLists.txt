@@ -26,6 +26,7 @@ add_subdirectory(DwarfResources)
 add_subdirectory(DwarfInput)
 add_subdirectory(DwarfRender)
 add_subdirectory(DwarfProcedural)
+add_subdirectory(DwarfScene)
 
 if(DF_ENABLE_TESTS)
 	add_subdirectory(DwarvenTests)

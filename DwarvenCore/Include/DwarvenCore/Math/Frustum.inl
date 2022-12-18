@@ -1,7 +1,7 @@
 #pragma once
 
 template<typename type>
-void TFrustum<type>::FromMatrix(const TMat4<type>& matrix) {
+TFrustum<type>::TFrustum(const TMat4<type>& matrix) {
 	m_Planes[int(EFrustumPlane::Front)].A = matrix.M[12] - matrix.M[8];
 	m_Planes[int(EFrustumPlane::Front)].B = matrix.M[13] - matrix.M[9];
 	m_Planes[int(EFrustumPlane::Front)].C = matrix.M[14] - matrix.M[10];
