@@ -21,9 +21,6 @@ namespace df {
 		virtual ~GraphicsPipeline() {}
 
 		virtual void SetName(const StringView& name) = 0;
-		virtual void DeclareVertexShader(const StringView& code) = 0;
-		virtual void DeclareFragmentShader(const StringView& code) = 0;
-
 		virtual void SetupVertexShader(const Vector<uint32>& bytecode) = 0;
 		virtual void SetupFragmentShader(const Vector<uint32>& bytecode) = 0;
 		virtual void SetupVertexAttributes(const Vector<String>& vertexAttributes) = 0;

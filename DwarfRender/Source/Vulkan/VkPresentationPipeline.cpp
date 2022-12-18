@@ -2,47 +2,24 @@
 #include "VkRenderCore.h"
 #include "VkParameterSet.h"
 #include "VkGraphicsPipeline.h"
+#include "Generated/Presentation.generated.h"
 
 bool vk::PresentationPipeline::Init(vk::RenderCore& renderCore) {
-	const char* vsCode =
-		"layout(location = 0) out vec2 outTexcoord;\n"
-		"\n"
-		"vec2 positions[3] = vec2[](\n"
-		"    vec2(-1.0, -1.0),\n"
-		"    vec2(-1.0, 3.0),\n"
-		"    vec2(3.0, -1.0)\n"
-		");\n"
-		"\n"
-		"vec2 tcs[3] = vec2[](\n"
-		"    vec2(0.0, 0.0),\n"
-		"    vec2(0.0, 2.0),\n"
-		"    vec2(2.0, 0.0)\n"
-		");\n"
-		"\n"
-		"void main() {\n"
-		"    gl_Position = vec4(positions[gl_VertexIndex], 0.0, 1.0);\n"
-		"    outTexcoord = tcs[gl_VertexIndex];\n"
-		"}";
-
-	const char* fsCode =
-		"#ParameterSet Present\n"
-		"\n"
-		"layout(location = 0) in vec2 inTexcoord;\n"
-		"\n"
-		"layout(location = 0) out vec4 outColor;\n"
-		"\n"
-		"void main() {\n"
-		"    outColor = texture(Texture, inTexcoord);\n"
-		"}";
-
 	m_ParametrSet = renderCore.CreateParameterSet("Present");
 	m_ParametrSet->DeclareTextureParameter("Texture");
 	m_ParametrSet->Build();
 
+	df::Vector<uint32> vsSpirV(generated::presentation::vsCodeLength);
+	memcpy(vsSpirV.data(), generated::presentation::vsCodeData, sizeof(uint32) * generated::presentation::vsCodeLength);
+
+	df::Vector<uint32> fsSpirV(generated::presentation::fsCodeLength);
+	memcpy(fsSpirV.data(), generated::presentation::fsCodeData, sizeof(uint32) * generated::presentation::fsCodeLength);
+
 	m_Pipeline = renderCore.CreateGraphicsPipeline();
 	m_Pipeline->SetName("Present");
-	m_Pipeline->DeclareVertexShader(vsCode);
-	m_Pipeline->DeclareFragmentShader(fsCode);
+	m_Pipeline->SetupParameterSets({"Present"});
+	m_Pipeline->SetupVertexShader(vsSpirV);
+	m_Pipeline->SetupFragmentShader(fsSpirV);
 	m_Pipeline->Build();
 
 	return true;

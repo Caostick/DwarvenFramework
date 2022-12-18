@@ -244,7 +244,7 @@ vk::GraphicsPipeline::PipelineStateObjectSlot::PipelineStateObjectSlot(const vk:
 }
 
 vk::GraphicsPipeline::GraphicsPipeline(vk::RenderCore& renderCore)
-	: m_RenderCore(renderCore) 
+	: m_RenderCore(renderCore)
 	, m_VkVertexShaderModule(VK_NULL_HANDLE)
 	, m_VkFragmentShaderModule(VK_NULL_HANDLE) 
 	, m_VkPipelineLayout(VK_NULL_HANDLE)
@@ -277,26 +277,14 @@ void vk::GraphicsPipeline::SetName(const df::StringView& name) {
 	UpdateDebugNames();
 }
 
-void vk::GraphicsPipeline::DeclareVertexShader(const df::StringView& code) {
-	DFAssert(!m_IsBuilt, "Casn't set pipeline shader - pipeline is already built!");
-
-	m_VertexShaderCode = df::String(code);
-}
-
-void vk::GraphicsPipeline::DeclareFragmentShader(const df::StringView& code) {
-	DFAssert(!m_IsBuilt, "Casn't set pipeline shader - pipeline is already built!");
-
-	m_FragmentShaderCode = df::String(code);
-}
-
 void vk::GraphicsPipeline::SetupVertexShader(const df::Vector<uint32> &bytecode) {
-	DFAssert(!m_IsBuilt, "Casn't set up pipeline vertex shader - pipeline is already built!");
+	DFAssert(!m_IsBuilt, "Can't set up pipeline vertex shader - pipeline is already built!");
 
 	m_VertexShaderSpirV = bytecode;
 }
 
 void vk::GraphicsPipeline::SetupFragmentShader(const df::Vector<uint32> &bytecode) {
-	DFAssert(!m_IsBuilt, "Casn't set up pipeline fragment shader - pipeline is already built!");
+	DFAssert(!m_IsBuilt, "Can't set up pipeline fragment shader - pipeline is already built!");
 
 	m_FragmentShaderSpirV = bytecode;
 }
@@ -306,6 +294,7 @@ void vk::GraphicsPipeline::SetupVertexAttributes(const df::Vector<df::String> &v
 
 	for (size_t i = 0; i < m_VertexAttributes.size(); ++i) {
 		m_VertexAttributes[i] = m_RenderCore.FindVertexAttribute(vertexAttributes[i]);
+		m_RequiredVertexAttributeBits[m_VertexAttributes[i]->m_Index] = true;
 	}
 }
 
@@ -318,75 +307,14 @@ void vk::GraphicsPipeline::SetupParameterSets(const df::Vector<df::String> &para
 }
 
 bool vk::GraphicsPipeline::Build() {
-	auto shaderCompiler = m_RenderCore.GetShaderCompiler();
-
-	const df::String vsCode = ParseShader(m_VertexShaderCode);
-	const df::String fsCode = ParseShader(m_FragmentShaderCode);
-
 	// Vertex Shader
-	if (!vsCode.empty()) {
-
-		df::Vector<df::String> generated;
-		df::Vector<const char*> codeLines;
-
-		for (uint32 i = 0; i < uint32(m_ParameterSetDefinitions.size()); ++i) {
-			const auto& def = m_ParameterSetDefinitions[i];
-			generated.emplace_back(def->MakeShaderSnippet(i));
-		}
-
-		for (uint32 i = 0; i < uint32(m_VertexAttributes.size()); ++i) {
-			const auto& attr = m_VertexAttributes[i];
-			generated.emplace_back(attr->MakeShaderSnippet(i));
-
-			m_RequiredVertexAttributeBits[attr->m_Index] = true;
-		}
-
-		for (auto& str : generated) {
-			codeLines.push_back(str.c_str());
-		}
-		codeLines.push_back(vsCode.c_str());
-
-
-		const auto spirVCode = shaderCompiler->CompileShader(m_Name, codeLines, vk::EShaderType::Vertex);
-
-		const auto& log = shaderCompiler->GetLog();
-		if (!log.empty()) {
-			std::cout << "Vertex Shader Compile Error:\n" << log << "\n";
-			shaderCompiler->ClearLog();
-
-			return false;
-		} else {
-			m_VkVertexShaderModule = CreateShaderModule(spirVCode.data(), uint32(spirVCode.size()));
-		}
+	if (!m_VertexShaderSpirV.empty()) {
+		m_VkVertexShaderModule = CreateShaderModule(m_VertexShaderSpirV.data(), uint32(m_VertexShaderSpirV.size()));
 	}
 
 	// Fragment Shader
-	if (!fsCode.empty()) {
-
-		df::Vector<df::String> generated;
-		df::Vector<const char*> codeLines;
-
-		for (uint32 i = 0; i < uint32(m_ParameterSetDefinitions.size()); ++i) {
-			const auto& def = m_ParameterSetDefinitions[i];
-			generated.emplace_back(def->MakeShaderSnippet(i));
-		}
-
-		for (auto& str : generated) {
-			codeLines.push_back(str.c_str());
-		}
-		codeLines.push_back(fsCode.c_str());
-
-		const auto spirVCode = shaderCompiler->CompileShader(m_Name, codeLines, vk::EShaderType::Fragment);
-
-		const auto& log = shaderCompiler->GetLog();
-		if (!log.empty()) {
-			std::cout << "Fragment Shader Compile Error:\n" << log << "\n";
-			shaderCompiler->ClearLog();
-
-			return false;
-		} else {
-			m_VkFragmentShaderModule = CreateShaderModule(spirVCode.data(), uint32(spirVCode.size()));
-		}
+	if (!m_FragmentShaderSpirV.empty()) {
+		m_VkFragmentShaderModule = CreateShaderModule(m_FragmentShaderSpirV.data(), uint32(m_FragmentShaderSpirV.size()));
 	}
 
 	// Pipeline Layout

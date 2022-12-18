@@ -44,9 +44,6 @@ namespace vk {
 		virtual ~GraphicsPipeline() override;
 
 		virtual void SetName(const df::StringView& name) override;
-		virtual void DeclareVertexShader(const df::StringView& code) override;
-		virtual void DeclareFragmentShader(const df::StringView& code) override;
-
 		virtual void SetupVertexShader(const df::Vector<uint32>& bytecode) override;
 		virtual void SetupFragmentShader(const df::Vector<uint32>& bytecode) override;
 		virtual void SetupVertexAttributes(const df::Vector<df::String>& vertexAttributes) override;
@@ -105,8 +102,6 @@ namespace vk {
 		vk::RenderCore& m_RenderCore;
 
 		df::String m_Name;
-		df::String m_VertexShaderCode;
-		df::String m_FragmentShaderCode;
 
 		df::Vector<uint32> m_VertexShaderSpirV;
 		df::Vector<uint32> m_FragmentShaderSpirV;
