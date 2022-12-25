@@ -114,16 +114,25 @@ template <typename type>
 void Swap(type& a, type& b);
 
 template <typename type>
-auto Mod(type a, type b) -> const type;
+auto Mod(type a, type b) -> type;
 
 template <typename type, typename ltype>
-auto Lerp(type a, type b, const ltype& lerp) -> const type;
+auto Lerp(type a, type b, const ltype& lerp) -> type;
 
 template <typename type, typename ltype>
-auto Mix(type a, type b, const ltype& lerp) -> const type;
+auto Mix(type a, type b, const ltype& lerp) -> type;
 
-template <typename type, typename  ltype>
-auto Bezier(type p0, type p1, type p2, const ltype& lerp) -> const type;
+template<typename T>
+auto CalculateBezierPoint(const TVec2<T>& p0, const TVec2<T>& p1, const TVec2<T>& p2, T t) -> T;
+
+template<typename T>
+auto CalculateBezierPoint(const TVec3<T>& p0, const TVec3<T>& p1, const TVec3<T>& p2, T t) -> T;
+
+template<typename T>
+auto CalculateBezierPoint(const TVec2<T>& p0, const TVec2<T>& p1, const TVec2<T>& p2, const TVec2<T>& p3, T t) -> T;
+
+template<typename T>
+auto CalculateBezierPoint(const TVec3<T>& p0, const TVec3<T>& p1, const TVec3<T>& p2, const TVec3<T>& p3, T t) -> T;
 
 template <typename type>
 bool HitTestAABBsCenterExt(const TVec3<type>& centerA, const TVec3<type>& extA, const TVec3<type>& centerB, const TVec3<type>& extB);

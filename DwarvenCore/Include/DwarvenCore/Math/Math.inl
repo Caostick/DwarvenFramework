@@ -281,24 +281,51 @@ void Swap(type& a, type& b) {
 }
 
 template <typename type>
-const type Mod(type a, type b) {
+type Mod(type a, type b) {
     type result = a % b;
     return result + b * type(result < type(0));
 }
 
 template <typename type, typename ltype>
-const type Lerp(type a, type b, const ltype& lerp) {
+type Lerp(type a, type b, const ltype& lerp) {
     return (b - a) * lerp + a;
 }
 
 template <typename type, typename ltype>
-const type Mix(type a, type b, const ltype& lerp) {
+type Mix(type a, type b, const ltype& lerp) {
     return (b - a) * lerp + a;
 }
 
-template <typename type, typename  ltype>
-const type Bezier(type p0, type p1, type p2, const ltype& lerp) {
-	return Mix<type, ltype>(Mix<type, ltype>(p0, p1, lerp), Mix<type, ltype>(p1, p2, lerp), lerp);
+template<typename T>
+auto CalculateBezierPoint(const TVec2<T>& p0, const TVec2<T>& p1, const TVec2<T>& p2, T t) -> T {
+    const TVec2<T> p01 = Lerp<T>(p0, p1, t);
+    const TVec2<T> p12 = Lerp<T>(p1, p2, t);
+
+    return Lerp<T>(p01, p12, t);
+}
+
+template<typename T>
+auto CalculateBezierPoint(const TVec3<T>& p0, const TVec3<T>& p1, const TVec3<T>& p2, T t) -> T {
+    const TVec3<T> p01 = Lerp<T>(p0, p1, t);
+    const TVec3<T> p12 = Lerp<T>(p1, p2, t);
+
+    return Lerp<T>(p01, p12, t);
+}
+
+template<typename T>
+auto CalculateBezierPoint(const TVec2<T>& p0, const TVec2<T>& p1, const TVec2<T>& p2, const TVec2<T>& p3, T t) -> T {
+    const TVec2<T> p012 = Lerp<T>(p0, p1, p2, t);
+    const TVec2<T> p123 = Lerp<T>(p1, p2, p3, t);
+
+    return Lerp<T>(p012, p123, t);
+}
+
+template<typename T>
+auto CalculateBezierPoint(const TVec3<T>& p0, const TVec3<T>& p1, const TVec3<T>& p2, const TVec3<T>& p3, T t) -> T {
+    const TVec3<T> p012 = Lerp<T>(p0, p1, p2, t);
+    const TVec3<T> p123 = Lerp<T>(p1, p2, p3, t);
+
+    return Lerp<T>(p012, p123, t);
 }
 
 template <typename type>
