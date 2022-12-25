@@ -210,7 +210,7 @@ auto df::ShaderCompiler::CompileShader(
 
 	const char* preprocessedInputData = preprocessedCode.c_str();
 
-	std::cout << "\n" << preprocessedInputData << "\n\n";
+	//std::cout << "\n" << preprocessedInputData << "\n\n";
 
 	shader.setStrings(&preprocessedInputData, 1);
 
