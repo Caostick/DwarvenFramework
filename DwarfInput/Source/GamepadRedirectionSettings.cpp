@@ -1,5 +1,7 @@
 #include "DwarfInput/GamepadRedirectionSettings.h"
 
+#include <DwarvenCore/Assert.h>
+
 #include <GLFW/glfw3.h>
 
 #include <string.h>
@@ -16,11 +18,14 @@ df::GamepadRedirectionSettings::GamepadRedirectionSettings() {
 }
 
 void df::GamepadRedirectionSettings::Setup(const char* gamepadName) {
+	// @TODO: Make it data-driven and check "Xbox Controller"
     if (!strcmp(gamepadName, "Xbox 360 Controller")) {
         SetupXBox();
     } else if (!strcmp(gamepadName, "Wireless Controller")) {
         SetupDualshock4();
-    }
+	} else {
+		SetupDualshock4();
+	}
 }
 
 void df::GamepadRedirectionSettings::SetupXBox() {

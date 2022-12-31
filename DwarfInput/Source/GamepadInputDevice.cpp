@@ -72,11 +72,11 @@ void df::GamepadInputDevice::Update() {
 }
 
 auto df::GamepadInputDevice::GetAxis(EGamepadAxis axis) const -> float {
-	return CalibrateAxisValue(RemapAxisValue(
-		m_AxisStates[m_RedirectionSettings.m_AxisSettings[int(axis)].Idx],
-		m_RedirectionSettings.m_AxisSettings[int(axis)].BoundMin.Value,
-		m_RedirectionSettings.m_AxisSettings[int(axis)].BoundMax.Value)
-	);
+	const auto& value = m_AxisStates[m_RedirectionSettings.m_AxisSettings[int(axis)].Idx];
+	const auto& boundA = m_RedirectionSettings.m_AxisSettings[int(axis)].BoundMin.Value;
+	const auto& boundB = m_RedirectionSettings.m_AxisSettings[int(axis)].BoundMax.Value;
+
+	return CalibrateAxisValue(RemapAxisValue(value, boundA, boundB));
 }
 
 auto df::GamepadInputDevice::GetIndex() const->int {

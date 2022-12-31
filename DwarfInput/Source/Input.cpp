@@ -44,12 +44,22 @@ void df::Input::Release() {
 void df::Input::Update() {
 	GamepadManager::Update();
 
+	bool activeDeviceIsValid = false;
+
 	for (auto inputDevice : m_InputDevices) {
 		inputDevice->Update();
 
 		if (!inputDevice->GetEvents().empty()) {
 			m_ActiveInputDevice = inputDevice;
 		}
+
+		if(m_ActiveInputDevice == inputDevice) {
+			activeDeviceIsValid = true;
+		}
+	}
+
+	if(!activeDeviceIsValid) {
+		m_ActiveInputDevice = &m_StandardInputDevice;
 	}
 }
 

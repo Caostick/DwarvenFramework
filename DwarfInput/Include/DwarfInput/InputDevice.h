@@ -11,7 +11,7 @@ namespace df {
 		virtual auto GetAxis(int axis) const -> double = 0;
 		virtual void Update() = 0;
 
-		auto GetEvents() const -> const df::Vector<int>&;
+		virtual auto GetEvents() const -> const df::Vector<int>&;
 		void PushEvent(int eventId);
 		void ResetEvents();
 
