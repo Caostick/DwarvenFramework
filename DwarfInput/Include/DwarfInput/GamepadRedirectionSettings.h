@@ -33,6 +33,7 @@ namespace df {
 
         // @TODO: Make data-driven instead
         void SetupXBox();
+        void SetupXBox360();
         void SetupDualshock4();
 
         int m_Buttons[int(EGamepadButton::NumButtons)];
