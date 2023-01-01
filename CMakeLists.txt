@@ -19,6 +19,7 @@ add_subdirectory(DwarvenCore)
 
 add_subdirectory(DwarfPlatform)
 add_subdirectory(DwarfProfiling)
+add_subdirectory(DwarfPhysics)
 add_subdirectory(DwarfMultithreading)
 add_subdirectory(DwarfIntermediate)
 add_subdirectory(DwarfFileSystem)
