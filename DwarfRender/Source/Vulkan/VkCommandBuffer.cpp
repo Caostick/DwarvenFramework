@@ -124,12 +124,12 @@ void vk::CommandBuffer::Draw(uint32 vertexCount) {
 	vk::API::CmdDraw(m_VkCommandBuffer, vertexCount, 1, 0, 0);
 }
 
-void vk::CommandBuffer::Draw(df::Mesh* mesh, uint32 instanceCount /*= 1*/) {
+void vk::CommandBuffer::Draw(df::Mesh* mesh, uint32 instanceCount /*= 1*/, uint32 instanceOffset /*= 0*/) {
 	vk::Mesh* vkMesh = static_cast<vk::Mesh*>(mesh);
 
 	const auto& reqAttrBits = m_CurrentPipeline->GetVertexAttributeBits();
 	const auto& hasAttrBits = vkMesh->GetAttributeBits();
-	if ((hasAttrBits & reqAttrBits) != reqAttrBits) {
+	if((hasAttrBits & reqAttrBits) != reqAttrBits) {
 		DFAssert(false, "Mesh has no required vertex attributes to draw!");
 	}
 
@@ -138,14 +138,14 @@ void vk::CommandBuffer::Draw(df::Mesh* mesh, uint32 instanceCount /*= 1*/) {
 
 	const uint32 firstVertex = 0;
 	const uint32 firstIndex = 0;
-	const uint32 firstInstance = 0;
+	const uint32 firstInstance = instanceOffset;
 	const uint32 vertexOffset = 0;
 
-	for (const auto& attr : vkMesh->GetAttributes()) {
+	for(const auto& attr : vkMesh->GetAttributes()) {
 		BindVertexBuffer(attr.m_Buffer, attr.m_Attribute->m_Index);
 	}
 
-	if (indexCount > 0) {
+	if(indexCount > 0) {
 		BindIndexBuffer(vkMesh->GetIndexBuffer());
 
 		vk::API::CmdDrawIndexed(m_VkCommandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);

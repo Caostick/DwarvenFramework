@@ -47,7 +47,7 @@ namespace vk {
 		virtual bool BindParameterSet(df::ParameterSet* parameterSet) override;
 
 		virtual void Draw(uint32 vertexCount) override;
-		virtual void Draw(df::Mesh* mesh, uint32 instanceCount = 1) override;
+		virtual void Draw(df::Mesh* mesh, uint32 instanceCount = 1, uint32 instanceOffset = 0) override;
 
 	public:
 		auto Get() const->VkCommandBuffer;
