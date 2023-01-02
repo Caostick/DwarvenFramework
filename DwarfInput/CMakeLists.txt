@@ -14,4 +14,7 @@ df_setup_module(
 	DEPENDENCIES
 		DwarvenCore
 		DwarfPlatform
+
+	THIRD_PARTY
+		CONAN_PKG::glfw
 )

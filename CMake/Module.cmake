@@ -30,14 +30,8 @@ function(df_setup_module)
 	target_include_directories(${DF_NAME} PUBLIC Include/)
 	target_compile_definitions(${DF_NAME} PUBLIC ${DF_NAME}_Enabled=1)
 
-	foreach(LIB ${DF_DEPENDENCIES})
-		find_library(LIB-lib ${LIB})
-		target_link_libraries(${DF_NAME} ${LIB})
-	endforeach()
-	
-	foreach(LIB ${DF_THIRD_PARTY})
-		target_link_libraries(${DF_NAME} ${LIB})
-	endforeach()
+	target_link_libraries(${DF_NAME} PRIVATE ${DF_DEPENDENCIES})
+	target_link_libraries(${DF_NAME} PRIVATE ${DF_THIRD_PARTY})
 endfunction()
 
 
