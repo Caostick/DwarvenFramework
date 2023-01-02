@@ -11,13 +11,19 @@ namespace df {
 		~BtPhysicsBody() override;
 
 		void SetupMass(float mass) override;
-		void SetupPosition(float x, float y, float z) override;
 		void SetupPosition(const Vec3& position) override;
 		void SetupRotation(const Quat& rotation) override;
+		void SetupRotation(const Mat3& rotation) override;
+		void SetupTransform(const Transform& transform) override;
 		void SetupCollisionSphere(float radius) override;
 		void SetupCollisionBox(const Vec3& halfExtents) override;
-
+		void SetupCollisionCylinder(const Vec3& halfExtents) override;
+		void SetupCollisionCapsule(float radius, float height) override;
 		void Build() override;
+
+		void SetTransform(const Transform& transform) override;
+		auto GetTransform()->Transform override;
+
 	private:
 		btDiscreteDynamicsWorld& m_World;
 

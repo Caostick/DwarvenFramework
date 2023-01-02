@@ -86,14 +86,14 @@ auto QuaternionFromMatrix(const TMat3<type>& mat) -> TQuat<type> {
 			(mat.M[2] + mat.M[6]) / s,
 			(mat.M[7] - mat.M[5]) / s);
 	} else if (mat.M[4] > mat.M[8]) {
-		const type s = type(sqrt(type(1) + mat.M[4] - mat.M[0] - mat.M[8])) * type(2);
+		const type s = type(Sqrt<type>(type(1) + mat.M[4] - mat.M[0] - mat.M[8])) * type(2);
 		return TQuat<type>(
 			(mat.M[3] + mat.M[1]) / s,
 			type(0.25) * s,
 			(mat.M[7] + mat.M[5]) / s,
 			(mat.M[2] - mat.M[6]) / s);
 	} else {
-		const type s = type(sqrt(type(1) + mat.M[8] - mat.M[0] - mat.M[4])) * type(2);
+		const type s = type(Sqrt<type>(type(1) + mat.M[8] - mat.M[0] - mat.M[4])) * type(2);
 		return TQuat<type>(
 			(mat.M[2] + mat.M[6]) / s,
 			(mat.M[7] + mat.M[5]) / s,

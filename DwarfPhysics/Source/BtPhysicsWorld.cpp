@@ -1,4 +1,5 @@
 #include "BtPhysicsWorld.h"
+#include "TypeConversions.h"
 
 #include <bullet/btBulletDynamicsCommon.h>
 
