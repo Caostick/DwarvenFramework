@@ -1,16 +1,21 @@
 #pragma once
 
+#include <DwarfPhysics/PhysicsBody.h>
+
+#include <DwarvenCore/ObjectPool.h>
+
 class btDiscreteDynamicsWorld;
 
 namespace df {
 	class PhysicsWorld {
 	public:
-		PhysicsWorld(btDiscreteDynamicsWorld* world);
-		~PhysicsWorld();
+		virtual ~PhysicsWorld() {}
 
-		void SetGravity(float gravity);
+		virtual void Update(float deltaTime) = 0;
 
-	private:
-		btDiscreteDynamicsWorld* m_World;
+		virtual void SetGravity(float gravity) = 0;
+
+		virtual auto CreateBody()->PhysicsBody* = 0;
+		virtual void DestroyBody(PhysicsBody* body) = 0;
 	};
 }

@@ -1,6 +1,8 @@
 #include <DwarfPhysics/Physics.h>
 #include <DwarfPhysics/PhysicsWorld.h>
 
+#include "BtPhysicsWorld.h"
+
 #include <bullet/btBulletDynamicsCommon.h>
 
 #include <DwarvenCore/New.h>
@@ -20,7 +22,7 @@ df::Physics::~Physics() {
 }
 
 auto df::Physics::CreatePhysicsWorld()->PhysicsWorld* {
-	return DFNew PhysicsWorld(new btDiscreteDynamicsWorld(
+	return DFNew BtPhysicsWorld(new btDiscreteDynamicsWorld(
 		m_CollisionDispatcher,
 		m_OverlappingPairCache,
 		m_Solver,
