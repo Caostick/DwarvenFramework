@@ -32,13 +32,13 @@ void df::BtPhysicsBody::SetupPosition(const Vec3& position) {
 	m_MotionState.m_graphicsWorldTrans.setOrigin(pos);
 }
 
-void df::BtPhysicsBody::SetupRotation(const Quat& rotation) {
+void df::BtPhysicsBody::SetupOrienattion(const Quat& rotation) {
 	const auto rot = DfToBt(rotation);
 	m_MotionState.m_startWorldTrans.setRotation(rot);
 	m_MotionState.m_graphicsWorldTrans.setRotation(rot);
 }
 
-void df::BtPhysicsBody::SetupRotation(const Mat3& rotation) {
+void df::BtPhysicsBody::SetupOrienattion(const Mat3& rotation) {
 	const auto rot = DfToBt(rotation);
 	m_MotionState.m_startWorldTrans.setBasis(rot);
 	m_MotionState.m_graphicsWorldTrans.setBasis(rot);
@@ -46,7 +46,7 @@ void df::BtPhysicsBody::SetupRotation(const Mat3& rotation) {
 
 void df::BtPhysicsBody::SetupTransform(const Transform& transform) {
 	SetupPosition(transform.GetPosition());
-	SetupRotation(transform.GetOrientation());
+	SetupOrienattion(transform.GetOrientation());
 }
 
 void df::BtPhysicsBody::SetupCollisionSphere(float radius) {
@@ -73,6 +73,19 @@ void df::BtPhysicsBody::SetupCollisionCapsule(float radius, float height) {
 	m_Shape = new btCapsuleShape(radius, height);
 }
 
+void df::BtPhysicsBody::SetupCollisionCone(float radius, float height) {
+	DFAssert(m_Shape == nullptr, "Collision shape is already created!");
+
+	m_Shape = new btConeShape(radius, height);
+}
+
+void df::BtPhysicsBody::SetupCollisionPlane(const Vec3& point, const Vec3& normal) {
+	DFAssert(m_Shape == nullptr, "Collision shape is already created!");
+
+	Plane plane(normal, point);
+	m_Shape = new btStaticPlaneShape(DfToBt(plane.N), plane.D);
+}
+
 void df::BtPhysicsBody::Build() {
 	DFAssert(m_Body == nullptr, "PhysicsBody is alerady built!");
 	DFAssert(m_Shape != nullptr, "Collision shape wasn't created!");
@@ -91,6 +104,8 @@ void df::BtPhysicsBody::Build() {
 }
 
 void df::BtPhysicsBody::SetTransform(const Transform& transform) {
+	DFAssert(m_Body != nullptr, "PhysicsBody wasn't built!");
+
 	m_Body->setWorldTransform(DfToBt(transform));
 }
 

@@ -21,6 +21,6 @@ namespace df {
 		virtual bool BindParameterSet(df::ParameterSet* parameterSet) = 0;
 
 		virtual void Draw(uint32 vertexCount) = 0;
-		virtual void Draw(Mesh* mesh, uint32 instanceCount = 1) = 0;
+		virtual void Draw(Mesh* mesh, uint32 instanceCount = 1, uint32 instanceOffset = 0) = 0;
 	};
 }

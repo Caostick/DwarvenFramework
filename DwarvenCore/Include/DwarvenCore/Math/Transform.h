@@ -6,6 +6,8 @@ struct TTransform {
 	TTransform(const TMat4<type>& transform);
 	TTransform(const TVec3<type>& position);
 	TTransform(const TVec3<type>& position, const TMat3<type>& orientation);
+	TTransform(const TVec3<type>& position, const TMat3<type>& orientation, const TVec3<type>& scale);
+	TTransform(const TVec3<type>& position, const TVec3<type>& scale);
 	TTransform(const TTransform&) = default;
 	TTransform(TTransform&&) = default;
 	TTransform& operator = (const TTransform&) = default;
@@ -13,6 +15,7 @@ struct TTransform {
 
 	auto GetPosition() const->TVec3<type>;
 	auto GetOrientation() const->TMat3<type>;
+	auto GetScale() const->TVec3<type>;
 
 	operator TMat4<type>() const;
 
