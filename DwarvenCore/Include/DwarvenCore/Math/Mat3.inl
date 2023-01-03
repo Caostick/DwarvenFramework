@@ -15,6 +15,13 @@ TMat3<type>::TMat3(type m0, type m1, type m2, type m3, type m4, type m5, type m6
 }
 
 template<typename type>
+TMat3<type>::TMat3(const TVec3<type>& r0, const TVec3<type>& r1, const TVec3<type>& r2) {
+	M[0] = r0.X; M[1] = r0.Y; M[2] = r0.Z;
+	M[3] = r1.X; M[4] = r1.Y; M[5] = r1.Z;
+	M[6] = r2.X; M[7] = r2.Y; M[8] = r2.Z;
+}
+
+template<typename type>
 template<typename type2>
 TMat3<type>::TMat3(const TMat3<type2>& a_Matrix) {
 	M[0] = type(a_Matrix.M[0]);

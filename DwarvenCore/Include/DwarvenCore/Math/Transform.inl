@@ -50,9 +50,9 @@ auto TTransform<type>::GetPosition() const->TVec3<type> {
 template<typename type>
 auto TTransform<type>::GetOrientation() const->TMat3<type> {
 	return TMat3<type>(
-		m_Transform[0].X, m_Transform[0].Y, m_Transform[0].Z,
-		m_Transform[1].X, m_Transform[1].Y, m_Transform[1].Z,
-		m_Transform[2].X, m_Transform[2].Y, m_Transform[2].Z
+		TVec3<type>::Normalized(TVec3<type>(m_Transform[0].X, m_Transform[0].Y, m_Transform[0].Z)),
+		TVec3<type>::Normalized(TVec3<type>(m_Transform[1].X, m_Transform[1].Y, m_Transform[1].Z)),
+		TVec3<type>::Normalized(TVec3<type>(m_Transform[2].X, m_Transform[2].Y, m_Transform[2].Z))
 	);
 }
 

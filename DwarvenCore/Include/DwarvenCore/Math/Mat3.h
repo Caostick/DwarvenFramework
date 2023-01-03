@@ -4,6 +4,7 @@ template<typename type>
 struct TMat3 {
 	TMat3();
 	TMat3(type m0, type m1, type m2, type m3, type m4, type m5, type m6, type m7, type m8);
+	TMat3(const TVec3<type>& r0, const TVec3<type>& r1, const TVec3<type>& r2);
 
 	template<typename type2>
 	TMat3(const TMat3<type2>& a_Matrix);
