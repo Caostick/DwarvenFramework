@@ -30,9 +30,9 @@ TTransform<type>::TTransform(const TVec3<type>& position, const TMat3<type>& ori
 
 template<typename type>
 TTransform<type>::TTransform(const TVec3<type>& position, const TMat3<type>& orientation, const TVec3<type>& scale) {
-	m_Transform[0] = TVec4<type>(scale.X * orientation.M[0], scale.X * orientation.M[1], scale.X * orientation.M[2], position.X);
-	m_Transform[1] = TVec4<type>(scale.Y * orientation.M[3], scale.Y * orientation.M[4], scale.Y * orientation.M[5], position.Y);
-	m_Transform[2] = TVec4<type>(scale.Z * orientation.M[6], scale.Z * orientation.M[7], scale.Z * orientation.M[8], position.Z);
+	m_Transform[0] = TVec4<type>(scale.X * orientation.M[0], scale.Y * orientation.M[1], scale.Z * orientation.M[2], position.X);
+	m_Transform[1] = TVec4<type>(scale.X * orientation.M[3], scale.Y * orientation.M[4], scale.Z * orientation.M[5], position.Y);
+	m_Transform[2] = TVec4<type>(scale.X * orientation.M[6], scale.Y * orientation.M[7], scale.Z * orientation.M[8], position.Z);
 }
 
 template<typename type>
@@ -49,11 +49,15 @@ auto TTransform<type>::GetPosition() const->TVec3<type> {
 
 template<typename type>
 auto TTransform<type>::GetOrientation() const->TMat3<type> {
-	return TMat3<type>(
-		TVec3<type>::Normalized(TVec3<type>(m_Transform[0].X, m_Transform[0].Y, m_Transform[0].Z)),
-		TVec3<type>::Normalized(TVec3<type>(m_Transform[1].X, m_Transform[1].Y, m_Transform[1].Z)),
-		TVec3<type>::Normalized(TVec3<type>(m_Transform[2].X, m_Transform[2].Y, m_Transform[2].Z))
-	);
+	const TVec3<type> c0 = TVec3<type>::Normalized(TVec3<type>(m_Transform[0].X, m_Transform[1].X, m_Transform[2].X));
+	const TVec3<type> c1 = TVec3<type>::Normalized(TVec3<type>(m_Transform[0].Y, m_Transform[1].Y, m_Transform[2].Y));
+	const TVec3<type> c2 = TVec3<type>::Normalized(TVec3<type>(m_Transform[0].Z, m_Transform[1].Z, m_Transform[2].Z));
+
+	const TVec3<type> r0 = TVec3<type>(c0.X, c1.X, c2.X);
+	const TVec3<type> r1 = TVec3<type>(c0.Y, c1.Y, c2.Y);
+	const TVec3<type> r2 = TVec3<type>(c0.Z, c1.Z, c2.Z);
+
+	return TMat3<type>(r0, r1, r2);
 }
 
 template<typename type>
