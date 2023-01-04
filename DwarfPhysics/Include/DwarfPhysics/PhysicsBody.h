@@ -18,6 +18,7 @@ namespace df {
         virtual void SetupCollisionCapsule(float radius, float height) = 0;
         virtual void SetupCollisionCone(float radius, float height) = 0;
         virtual void SetupCollisionPlane(const Vec3& point, const Vec3& normal) = 0;
+        virtual void SetupCollisionRamp(const Vec3& halfExtents)  = 0;
         virtual void Build() = 0;
 
         virtual void SetTransform(const Transform& transform) = 0;

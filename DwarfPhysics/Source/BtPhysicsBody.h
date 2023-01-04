@@ -21,6 +21,7 @@ namespace df {
 		void SetupCollisionCapsule(float radius, float height) override;
 		void SetupCollisionCone(float radius, float height) override;
 		void SetupCollisionPlane(const Vec3& point, const Vec3& normal) override;
+		void SetupCollisionRamp(const Vec3& halfExtents) override;
 		void Build() override;
 
 		void SetTransform(const Transform& transform) override;

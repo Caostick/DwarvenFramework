@@ -86,6 +86,20 @@ void df::BtPhysicsBody::SetupCollisionPlane(const Vec3& point, const Vec3& norma
 	m_Shape = new btStaticPlaneShape(DfToBt(plane.N), plane.D);
 }
 
+void df::BtPhysicsBody::SetupCollisionRamp(const Vec3& halfExtents) {
+	DFAssert(m_Shape == nullptr, "Collision shape is already created!");
+
+	auto shape = new btConvexHullShape();
+	m_Shape = shape;
+
+	shape->addPoint(btVector3(-halfExtents.X, -halfExtents.Y, -halfExtents.Z));
+	shape->addPoint(btVector3(halfExtents.X, -halfExtents.Y, -halfExtents.Z));
+	shape->addPoint(btVector3(-halfExtents.X, -halfExtents.Y, halfExtents.Z));
+	shape->addPoint(btVector3(halfExtents.X, -halfExtents.Y, halfExtents.Z));
+	shape->addPoint(btVector3(-halfExtents.X, halfExtents.Y, halfExtents.Z));
+	shape->addPoint(btVector3(halfExtents.X, halfExtents.Y, halfExtents.Z));
+}
+
 void df::BtPhysicsBody::Build() {
 	DFAssert(m_Body == nullptr, "PhysicsBody is alerady built!");
 	DFAssert(m_Shape != nullptr, "Collision shape wasn't created!");
@@ -99,6 +113,8 @@ void df::BtPhysicsBody::Build() {
 
 	const auto rbInfo = btRigidBody::btRigidBodyConstructionInfo(m_Mass, &m_MotionState, m_Shape, localInertia);
 	m_Body = new btRigidBody(rbInfo);
+	m_Body->setFriction(0.5f);
+	m_Body->setRestitution(0.0f);
 
 	m_World.addRigidBody(m_Body);
 }
