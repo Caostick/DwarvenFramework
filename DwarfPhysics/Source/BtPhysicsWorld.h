@@ -4,6 +4,7 @@
 
 #include "BtPhysicsBody.h"
 #include "BtPhysicsShape.h"
+#include "BtPhysicsCharacter.h"
 
 #include <DwarvenCore/ObjectPool.h>
 
@@ -26,6 +27,9 @@ namespace df {
 		auto CreateBody()->PhysicsBody* override;
 		void DestroyBody(PhysicsBody* body) override;
 
+		auto CreateCharacter()->PhysicsCharacter* override;
+		void DestroyCharacter(PhysicsCharacter* character) override;
+
 		auto GetBroadphaseInterface() -> btBroadphaseInterface*;
 
 	private:
@@ -36,7 +40,8 @@ namespace df {
 		btSequentialImpulseConstraintSolver* m_Solver = nullptr;
 		btDiscreteDynamicsWorld* m_World;
 
-		ObjectPool<BtPhysicsBody> m_Bodies;
 		ObjectPool<BtPhysicsShape> m_Shapes;
+		ObjectPool<BtPhysicsBody> m_Bodies;
+		ObjectPool<BtPhysicsCharacter> m_Characters;
 	};
 }

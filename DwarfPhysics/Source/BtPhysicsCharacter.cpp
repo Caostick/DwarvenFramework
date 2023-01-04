@@ -12,11 +12,12 @@ df::BtPhysicsCharacter::BtPhysicsCharacter(btDiscreteDynamicsWorld& world)
 
 df::BtPhysicsCharacter::~BtPhysicsCharacter() {
 	if(m_Body) {
-		m_World.removeCharacter(m_Body);
+		m_World.removeAction(m_Body);
 		delete m_Body;
 	}
 
 	if(m_GhostObject) {
+		m_World.removeCollisionObject(m_GhostObject);
 		delete m_GhostObject;
 	}
 }
@@ -25,24 +26,22 @@ void df::BtPhysicsCharacter::SetupPosition(const Vec3& position) {
 	DFAssert(m_Body == nullptr, "PhysicsBody is alerady built!");
 
 	const auto pos = DfToBt(position);
-	m_MotionState.m_startWorldTrans.setOrigin(pos);
-	m_MotionState.m_graphicsWorldTrans.setOrigin(pos);
+	m_Transform.setOrigin(pos);
 }
 
 void df::BtPhysicsCharacter::SetupOrienattion(const Quat& rotation) {
 	DFAssert(m_Body == nullptr, "PhysicsBody is alerady built!");
 
 	const auto rot = DfToBt(rotation);
-	m_MotionState.m_startWorldTrans.setRotation(rot);
-	m_MotionState.m_graphicsWorldTrans.setRotation(rot);
+	m_Transform.setRotation(rot);
 }
 
 void df::BtPhysicsCharacter::SetupOrienattion(const Mat3& rotation) {
 	DFAssert(m_Body == nullptr, "PhysicsBody is alerady built!");
 
 	const auto rot = DfToBt(rotation);
-	m_MotionState.m_startWorldTrans.setBasis(rot);
-	m_MotionState.m_graphicsWorldTrans.setBasis(rot);
+	m_Transform.setBasis(rot);
+	m_Transform.setBasis(rot);
 }
 
 void df::BtPhysicsCharacter::SetupTransform(const Transform& transform) {
@@ -60,36 +59,29 @@ void df::BtPhysicsCharacter::Build(const PhysicsShape* shape) {
 
 	btVector3 localInertia(0.0f, 0.0f, 0.0f);
 
-	const float mass = 0.5f;
-	const bool isDynamic = (mass != 0.f);
-	if(isDynamic) {
-		btShape->calculateLocalInertia(mass, localInertia);
-	}
-
 	m_GhostObject = new btPairCachingGhostObject;
 	m_GhostObject->setWorldTransform(m_Transform);
 	m_GhostObject->setCollisionShape(btShape);
 	m_GhostObject->setCollisionFlags(btCollisionObject::CF_CHARACTER_OBJECT);
 	const btScalar stepHeight = btScalar(0.35);
 
-	m_Body = new btKinematicCharacterController(m_GhostObject, btShape, stepHeight, btVector3(0.0f, 1.0f, 0.0f));
+	m_Body = new btKinematicCharacterController(m_GhostObject, btShape, stepHeight, btVector3(1.0f, 0.0f, 0.0f));
+	m_Body->setGravity(btVector3(0.0f, -9.8f, 0.0f));
 
-	m_World.addCharacter(m_Body);
+	m_World.addCollisionObject(m_GhostObject, btBroadphaseProxy::CharacterFilter, btBroadphaseProxy::StaticFilter | btBroadphaseProxy::DefaultFilter);
+	m_World.addAction(m_Body);
 }
 
-void df::BtPhysicsCharacter::SetTransform(const Transform& /*transform*/) {
+void df::BtPhysicsCharacter::SetTransform(const Transform& transform) {
 	DFAssert(m_Body != nullptr, "PhysicsBody wasn't built!");
 
-	//m_Body->set  setWorldTransform(DfToBt(transform));
+	m_GhostObject->setWorldTransform(DfToBt(transform));
 }
 
 auto df::BtPhysicsCharacter::GetTransform()->Transform {
 	DFAssert(m_Body != nullptr, "PhysicsBody wasn't built!");
 
-	btTransform transform;
-	m_MotionState.getWorldTransform(transform);
-
-	return BtToDf(transform);
+	return BtToDf(m_GhostObject->getWorldTransform());
 }
 
 void df::BtPhysicsCharacter::SetVelocity(const Vec3& velocity) {

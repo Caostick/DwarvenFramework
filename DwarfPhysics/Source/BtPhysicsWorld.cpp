@@ -29,6 +29,7 @@ df::BtPhysicsWorld::BtPhysicsWorld() {
 	);
 
 	m_World->setGravity(btVector3(0.0f, -9.8f, 0.0f));
+	m_World->getDispatchInfo().m_allowedCcdPenetration = 0.0001f;
 }
 
 df::BtPhysicsWorld::~BtPhysicsWorld() {
@@ -62,6 +63,14 @@ auto df::BtPhysicsWorld::CreateBody()->PhysicsBody* {
 
 void df::BtPhysicsWorld::DestroyBody(PhysicsBody* body) {
 	m_Bodies.Destroy(static_cast<BtPhysicsBody*>(body));
+}
+
+auto df::BtPhysicsWorld::CreateCharacter()->PhysicsCharacter* {
+	return m_Characters.Create(*m_World);
+}
+
+void df::BtPhysicsWorld::DestroyCharacter(PhysicsCharacter* character) {
+	m_Characters.Destroy(static_cast<BtPhysicsCharacter*>(character));
 }
 
 auto df::BtPhysicsWorld::GetBroadphaseInterface()->btBroadphaseInterface* {

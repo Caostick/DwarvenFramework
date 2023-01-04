@@ -2,6 +2,7 @@
 
 #include <DwarfPhysics/PhysicsBody.h>
 #include <DwarfPhysics/PhysicsShape.h>
+#include <DwarfPhysics/PhysicsCharacter.h>
 
 #include <DwarvenCore/ObjectPool.h>
 
@@ -19,5 +20,8 @@ namespace df {
 
 		virtual auto CreateBody()->PhysicsBody* = 0;
 		virtual void DestroyBody(PhysicsBody* body) = 0;
+
+		virtual auto CreateCharacter()->PhysicsCharacter* = 0 ;
+		virtual void DestroyCharacter(PhysicsCharacter* character) = 0;
 	};
 }

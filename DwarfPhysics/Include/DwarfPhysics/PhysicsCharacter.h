@@ -7,9 +7,9 @@ namespace df {
 }
 
 namespace df {
-    class PhysicsCharcter {
+    class PhysicsCharacter {
     public:
-        virtual ~PhysicsCharcter() {}
+        virtual ~PhysicsCharacter() {}
 
         virtual void SetupPosition(const Vec3& position) = 0;
         virtual void SetupOrienattion(const Quat& rotation) = 0;

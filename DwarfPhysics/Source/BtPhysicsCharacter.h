@@ -7,7 +7,7 @@
 #include <bullet/BulletCollision/CollisionDispatch/btGhostObject.h>
 
 namespace df {
-    class BtPhysicsCharacter : public PhysicsCharcter {
+    class BtPhysicsCharacter : public PhysicsCharacter {
     public:
         BtPhysicsCharacter(btDiscreteDynamicsWorld& world);
         ~BtPhysicsCharacter() override;
@@ -27,7 +27,6 @@ namespace df {
         btDiscreteDynamicsWorld& m_World;
 
         btTransform m_Transform;
-        btDefaultMotionState m_MotionState;
 
         btPairCachingGhostObject* m_GhostObject;
         btKinematicCharacterController* m_Body;
