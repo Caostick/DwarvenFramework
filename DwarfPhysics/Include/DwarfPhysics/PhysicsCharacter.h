@@ -7,11 +7,10 @@ namespace df {
 }
 
 namespace df {
-    class PhysicsBody {
+    class PhysicsCharcter {
     public:
-        virtual ~PhysicsBody() {}
+        virtual ~PhysicsCharcter() {}
 
-        virtual void SetupMass(float mass) = 0;
         virtual void SetupPosition(const Vec3& position) = 0;
         virtual void SetupOrienattion(const Quat& rotation) = 0;
         virtual void SetupOrienattion(const Mat3& rotation) = 0;
@@ -20,5 +19,7 @@ namespace df {
 
         virtual void SetTransform(const Transform& transform) = 0;
         virtual auto GetTransform()->Transform = 0;
+
+        virtual void SetVelocity(const Vec3& velocity)  = 0;
     };
 }

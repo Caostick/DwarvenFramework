@@ -1,4 +1,5 @@
 #include "BtPhysicsBody.h"
+#include "BtPhysicsShape.h"
 #include "TypeConversions.h"
 
 #include <DwarvenCore/New.h>
@@ -7,7 +8,6 @@
 df::BtPhysicsBody::BtPhysicsBody(btDiscreteDynamicsWorld& world)
 	: m_World(world)
 	, m_Mass(0.0f)
-	, m_Shape(nullptr)
 	, m_Body(nullptr) {
 }
 
@@ -16,102 +16,59 @@ df::BtPhysicsBody::~BtPhysicsBody() {
 		m_World.removeRigidBody(m_Body);
 		delete m_Body;
 	}
-
-	if(m_Shape) {
-		delete m_Shape;
-	}
 }
 
 void df::BtPhysicsBody::SetupMass(float mass) {
+	DFAssert(m_Body == nullptr, "PhysicsBody is alerady built!");
+
 	m_Mass = mass;
 }
 
 void df::BtPhysicsBody::SetupPosition(const Vec3& position) {
+	DFAssert(m_Body == nullptr, "PhysicsBody is alerady built!");
+
 	const auto pos = DfToBt(position);
 	m_MotionState.m_startWorldTrans.setOrigin(pos);
 	m_MotionState.m_graphicsWorldTrans.setOrigin(pos);
 }
 
 void df::BtPhysicsBody::SetupOrienattion(const Quat& rotation) {
+	DFAssert(m_Body == nullptr, "PhysicsBody is alerady built!");
+
 	const auto rot = DfToBt(rotation);
 	m_MotionState.m_startWorldTrans.setRotation(rot);
 	m_MotionState.m_graphicsWorldTrans.setRotation(rot);
 }
 
 void df::BtPhysicsBody::SetupOrienattion(const Mat3& rotation) {
+	DFAssert(m_Body == nullptr, "PhysicsBody is alerady built!");
+
 	const auto rot = DfToBt(rotation);
 	m_MotionState.m_startWorldTrans.setBasis(rot);
 	m_MotionState.m_graphicsWorldTrans.setBasis(rot);
 }
 
 void df::BtPhysicsBody::SetupTransform(const Transform& transform) {
+	DFAssert(m_Body == nullptr, "PhysicsBody is alerady built!");
+
 	SetupPosition(transform.GetPosition());
 	SetupOrienattion(transform.GetOrientation());
 }
 
-void df::BtPhysicsBody::SetupCollisionSphere(float radius) {
-	DFAssert(m_Shape == nullptr, "Collision shape is already created!");
-
-	m_Shape = new btSphereShape(radius);
-}
-
-void df::BtPhysicsBody::SetupCollisionBox(const Vec3& halfExtents) {
-	DFAssert(m_Shape == nullptr, "Collision shape is already created!");
-
-	m_Shape = new btBoxShape(DfToBt(halfExtents));
-}
-
-void df::BtPhysicsBody::SetupCollisionCylinder(const Vec3& halfExtents) {
-	DFAssert(m_Shape == nullptr, "Collision shape is already created!");
-
-	m_Shape = new btCylinderShape(DfToBt(halfExtents));
-}
-
-void df::BtPhysicsBody::SetupCollisionCapsule(float radius, float height) {
-	DFAssert(m_Shape == nullptr, "Collision shape is already created!");
-
-	m_Shape = new btCapsuleShape(radius, height);
-}
-
-void df::BtPhysicsBody::SetupCollisionCone(float radius, float height) {
-	DFAssert(m_Shape == nullptr, "Collision shape is already created!");
-
-	m_Shape = new btConeShape(radius, height);
-}
-
-void df::BtPhysicsBody::SetupCollisionPlane(const Vec3& point, const Vec3& normal) {
-	DFAssert(m_Shape == nullptr, "Collision shape is already created!");
-
-	Plane plane(normal, point);
-	m_Shape = new btStaticPlaneShape(DfToBt(plane.N), plane.D);
-}
-
-void df::BtPhysicsBody::SetupCollisionRamp(const Vec3& halfExtents) {
-	DFAssert(m_Shape == nullptr, "Collision shape is already created!");
-
-	auto shape = new btConvexHullShape();
-	m_Shape = shape;
-
-	shape->addPoint(btVector3(-halfExtents.X, -halfExtents.Y, -halfExtents.Z));
-	shape->addPoint(btVector3(halfExtents.X, -halfExtents.Y, -halfExtents.Z));
-	shape->addPoint(btVector3(-halfExtents.X, -halfExtents.Y, halfExtents.Z));
-	shape->addPoint(btVector3(halfExtents.X, -halfExtents.Y, halfExtents.Z));
-	shape->addPoint(btVector3(-halfExtents.X, halfExtents.Y, halfExtents.Z));
-	shape->addPoint(btVector3(halfExtents.X, halfExtents.Y, halfExtents.Z));
-}
-
-void df::BtPhysicsBody::Build() {
+void df::BtPhysicsBody::Build(const PhysicsShape* shape) {
 	DFAssert(m_Body == nullptr, "PhysicsBody is alerady built!");
-	DFAssert(m_Shape != nullptr, "Collision shape wasn't created!");
+	DFAssert(shape != nullptr, "Collision shape wasn't created!");
+
+	btConvexShape* btShape = static_cast<const BtPhysicsShape*>(shape)->GetShape();
 
 	btVector3 localInertia(0.0f, 0.0f, 0.0f);
 
 	const bool isDynamic = (m_Mass != 0.f);
 	if(isDynamic) {
-		m_Shape->calculateLocalInertia(m_Mass, localInertia);
+		btShape->calculateLocalInertia(m_Mass, localInertia);
 	}
 
-	const auto rbInfo = btRigidBody::btRigidBodyConstructionInfo(m_Mass, &m_MotionState, m_Shape, localInertia);
+	const auto rbInfo = btRigidBody::btRigidBodyConstructionInfo(m_Mass, &m_MotionState, btShape, localInertia);
 	m_Body = new btRigidBody(rbInfo);
 	m_Body->setFriction(0.5f);
 	m_Body->setRestitution(0.0f);

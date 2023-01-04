@@ -15,14 +15,7 @@ namespace df {
 		void SetupOrienattion(const Quat& rotation) override;
 		void SetupOrienattion(const Mat3& rotation) override;
 		void SetupTransform(const Transform& transform) override;
-		void SetupCollisionSphere(float radius) override;
-		void SetupCollisionBox(const Vec3& halfExtents) override;
-		void SetupCollisionCylinder(const Vec3& halfExtents) override;
-		void SetupCollisionCapsule(float radius, float height) override;
-		void SetupCollisionCone(float radius, float height) override;
-		void SetupCollisionPlane(const Vec3& point, const Vec3& normal) override;
-		void SetupCollisionRamp(const Vec3& halfExtents) override;
-		void Build() override;
+		void Build(const PhysicsShape* shape) override;
 
 		void SetTransform(const Transform& transform) override;
 		auto GetTransform()->Transform override;
@@ -34,7 +27,6 @@ namespace df {
 		btTransform m_Transform;
 		btDefaultMotionState m_MotionState;
 
-		btCollisionShape* m_Shape;
 		btRigidBody* m_Body;
 	};
 }
