@@ -175,7 +175,7 @@ void vk::RenderCore::SetWindowSource(df::Window* window, vk::Texture* texture) {
 	//presentation->DestroySurface(m_VkInstance);
 	
 	if (!presentation->CreateSwapchain(
-		m_VkDevice, m_VkPhysicalDevice, true,
+		m_VkDevice, m_VkPhysicalDevice, false,
 		m_GraphicsFamilyIndex, m_PresentFamilyIndex)) {
 		DFAssert(false, "Can't create swapchain!");
 	}

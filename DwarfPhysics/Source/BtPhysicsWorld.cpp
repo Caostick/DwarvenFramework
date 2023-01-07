@@ -42,7 +42,7 @@ df::BtPhysicsWorld::~BtPhysicsWorld() {
 }
 
 void df::BtPhysicsWorld::Update(float deltaTime) {
-	m_World->stepSimulation(deltaTime, 10);
+	m_World->stepSimulation(deltaTime, 0);
 }
 
 void df::BtPhysicsWorld::SetGravity(float gravity) {

@@ -65,8 +65,8 @@ void df::BtPhysicsCharacter::Build(const PhysicsShape* shape) {
 	m_GhostObject->setCollisionFlags(btCollisionObject::CF_CHARACTER_OBJECT);
 	const btScalar stepHeight = btScalar(0.35);
 
-	m_Body = new btKinematicCharacterController(m_GhostObject, btShape, stepHeight, btVector3(1.0f, 0.0f, 0.0f));
-	m_Body->setGravity(btVector3(0.0f, -9.8f, 0.0f));
+	m_Body = new btKinematicCharacterController(m_GhostObject, btShape, stepHeight);
+	m_Body->setGravity(btVector3(0.0f, -900.8f, 0.0f));
 
 	m_World.addCollisionObject(m_GhostObject, btBroadphaseProxy::CharacterFilter, btBroadphaseProxy::StaticFilter | btBroadphaseProxy::DefaultFilter);
 	m_World.addAction(m_Body);
@@ -87,5 +87,5 @@ auto df::BtPhysicsCharacter::GetTransform()->Transform {
 void df::BtPhysicsCharacter::SetVelocity(const Vec3& velocity) {
 	DFAssert(m_Body != nullptr, "PhysicsBody wasn't built!");
 
-	m_Body->setLinearVelocity(DfToBt(velocity));
+	m_Body->setWalkDirection(DfToBt(velocity));
 }

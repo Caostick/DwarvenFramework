@@ -9,6 +9,7 @@ vulkan-memory-allocator/3.0.1
 optick/master
 rapidjson/cci.20220822
 bullet3/3.24
+stb/cci.20220909
 
 [generators]
 cmake
